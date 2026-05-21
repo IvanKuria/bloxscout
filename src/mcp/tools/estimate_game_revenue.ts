@@ -5,7 +5,6 @@
  * no network calls. Wraps `estimateGameRevenue` from `src/core/calculators.ts`.
  */
 
-import { zodToJsonSchema } from "zod-to-json-schema";
 import { REVENUE_ESTIMATE_DISCLAIMER, estimateGameRevenue } from "../../core/calculators.js";
 import {
   type EstimateGameRevenueInput,
@@ -13,6 +12,7 @@ import {
   type EstimateGameRevenueOutput,
   EstimateGameRevenueOutputSchema,
 } from "../../shared/schemas.js";
+import type { ToolContext, ToolDefinition } from "./types.js";
 
 const TOOL_NAME = "estimate_game_revenue";
 
@@ -38,31 +38,34 @@ const TOOL_DESCRIPTION = [
   "All-time `visits` is required but currently informational only — the formula uses live `playing`.",
 ].join("\n");
 
-export type EstimateGameRevenueToolDeps = Record<string, never>;
-
 export async function estimateGameRevenueHandler(
   input: EstimateGameRevenueInput,
-  _deps: EstimateGameRevenueToolDeps = {},
+  _ctx: ToolContext,
 ): Promise<EstimateGameRevenueOutput> {
-  const parsed = EstimateGameRevenueInputSchema.parse(input);
   const result = estimateGameRevenue(
-    { playing: parsed.playing, visits: parsed.visits },
+    { playing: input.playing, visits: input.visits },
     {
-      ...(parsed.conversionRate !== undefined ? { conversionRate: parsed.conversionRate } : {}),
-      ...(parsed.averageRobuxPerPayingUser !== undefined
-        ? { averageRobuxPerPayingUser: parsed.averageRobuxPerPayingUser }
+      ...(input.conversionRate !== undefined ? { conversionRate: input.conversionRate } : {}),
+      ...(input.averageRobuxPerPayingUser !== undefined
+        ? { averageRobuxPerPayingUser: input.averageRobuxPerPayingUser }
         : {}),
-      ...(parsed.daysActive !== undefined ? { daysActive: parsed.daysActive } : {}),
-      ...(parsed.rateUsdPerRobux !== undefined ? { rateUsdPerRobux: parsed.rateUsdPerRobux } : {}),
+      ...(input.daysActive !== undefined ? { daysActive: input.daysActive } : {}),
+      ...(input.rateUsdPerRobux !== undefined ? { rateUsdPerRobux: input.rateUsdPerRobux } : {}),
     },
   );
   return EstimateGameRevenueOutputSchema.parse(result);
 }
 
-export const estimateGameRevenueTool = {
+export const estimateGameRevenueInfo: ToolDefinition<
+  typeof EstimateGameRevenueInputSchema,
+  typeof EstimateGameRevenueOutputSchema
+> = {
   name: TOOL_NAME,
   description: TOOL_DESCRIPTION,
-  inputSchema: zodToJsonSchema(EstimateGameRevenueInputSchema, { target: "jsonSchema7" }),
-  outputSchema: zodToJsonSchema(EstimateGameRevenueOutputSchema, { target: "jsonSchema7" }),
+  inputSchema: EstimateGameRevenueInputSchema,
+  outputSchema: EstimateGameRevenueOutputSchema,
   handler: estimateGameRevenueHandler,
-} as const;
+};
+
+/** @deprecated Legacy export retained for the estimate_game_revenue test suite. */
+export const estimateGameRevenueTool = estimateGameRevenueInfo;

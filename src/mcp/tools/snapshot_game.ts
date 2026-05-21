@@ -8,9 +8,8 @@
  */
 
 import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
-import type { RobloxClient } from "../../core/roblox-client.js";
-import type { SnapshotStore } from "../../core/snapshots.js";
+import { BloxscoutError } from "../../shared/errors.js";
+import type { ToolContext, ToolDefinition } from "./types.js";
 
 export const snapshotGameInputSchema = z.object({
   universeIds: z
@@ -20,25 +19,27 @@ export const snapshotGameInputSchema = z.object({
     .describe("Universe IDs to snapshot. Capped at 100 (Roblox's per-request batch limit)."),
 });
 
+export const snapshotGameOutputSchema = z.object({
+  recorded: z.number().int().nonnegative(),
+  takenAt: z.string(),
+  universeIds: z.array(z.number().int().positive()),
+});
+
 export type SnapshotGameInput = z.infer<typeof snapshotGameInputSchema>;
+export type SnapshotGameOutput = z.infer<typeof snapshotGameOutputSchema>;
 
-export interface SnapshotGameOutput {
-  recorded: number;
-  takenAt: string;
-  universeIds: number[];
-}
-
-export interface SnapshotGameDeps {
-  client: RobloxClient;
-  store: SnapshotStore;
-}
-
-export async function snapshotGame(
+export async function snapshotGameHandler(
   input: SnapshotGameInput,
-  deps: SnapshotGameDeps,
+  ctx: ToolContext,
 ): Promise<SnapshotGameOutput> {
-  const games = await deps.client.getGames(input.universeIds);
-  const { recorded, takenAt } = deps.store.recordSnapshot(games);
+  if (ctx.store === undefined) {
+    throw new BloxscoutError(
+      "snapshot_game requires a SnapshotStore in context.",
+      "INTERNAL_ERROR",
+    );
+  }
+  const games = await ctx.client.getGames(input.universeIds);
+  const { recorded, takenAt } = ctx.store.recordSnapshot(games);
   return {
     recorded,
     takenAt,
@@ -46,10 +47,17 @@ export async function snapshotGame(
   };
 }
 
-export const snapshotGameTool = {
+export const snapshotGame: ToolDefinition<
+  typeof snapshotGameInputSchema,
+  typeof snapshotGameOutputSchema
+> = {
   name: "snapshot_game",
   description:
-    "Capture a point-in-time snapshot of one or more Roblox games (playing, visits, favoritedCount) into the local store. Re-run periodically to build a time-series the rankings tools can mine.",
-  inputSchema: zodToJsonSchema(snapshotGameInputSchema, { $refStrategy: "none" }),
-  handler: snapshotGame,
-} as const;
+    "Capture a point-in-time snapshot of one or more Roblox games (playing, visits, favoritedCount) into the local store. Re-run periodically (manually or via `bloxscout snapshot --cron`) to build a time-series the rankings tools can mine.",
+  inputSchema: snapshotGameInputSchema,
+  outputSchema: snapshotGameOutputSchema,
+  handler: snapshotGameHandler,
+};
+
+/** @deprecated Legacy export retained for the snapshot_game test suite. */
+export const snapshotGameTool = snapshotGame;

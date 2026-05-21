@@ -6,7 +6,6 @@
  * other tool files in this directory.
  */
 
-import { zodToJsonSchema } from "zod-to-json-schema";
 import {
   DEFAULT_DEVEX_RATE_USD_PER_ROBUX,
   DEVEX_PAYOUT_MINIMUM_ROBUX,
@@ -18,6 +17,7 @@ import {
   type CalculateDevexOutput,
   CalculateDevexOutputSchema,
 } from "../../shared/schemas.js";
+import type { ToolContext, ToolDefinition } from "./types.js";
 
 const TOOL_NAME = "calculate_devex";
 
@@ -35,23 +35,26 @@ const TOOL_DESCRIPTION = [
   "Pure function — deterministic, no network calls, no side effects.",
 ].join("\n");
 
-export type CalculateDevexToolDeps = Record<string, never>;
-
 export async function calculateDevexHandler(
   input: CalculateDevexInput,
-  _deps: CalculateDevexToolDeps = {},
+  _ctx: ToolContext,
 ): Promise<CalculateDevexOutput> {
-  const parsed = CalculateDevexInputSchema.parse(input);
-  const result = calculateDevex(parsed.robux, {
-    ...(parsed.rateUsdPerRobux !== undefined ? { rateUsdPerRobux: parsed.rateUsdPerRobux } : {}),
+  const result = calculateDevex(input.robux, {
+    ...(input.rateUsdPerRobux !== undefined ? { rateUsdPerRobux: input.rateUsdPerRobux } : {}),
   });
   return CalculateDevexOutputSchema.parse(result);
 }
 
-export const calculateDevexTool = {
+export const calculateDevexInfo: ToolDefinition<
+  typeof CalculateDevexInputSchema,
+  typeof CalculateDevexOutputSchema
+> = {
   name: TOOL_NAME,
   description: TOOL_DESCRIPTION,
-  inputSchema: zodToJsonSchema(CalculateDevexInputSchema, { target: "jsonSchema7" }),
-  outputSchema: zodToJsonSchema(CalculateDevexOutputSchema, { target: "jsonSchema7" }),
+  inputSchema: CalculateDevexInputSchema,
+  outputSchema: CalculateDevexOutputSchema,
   handler: calculateDevexHandler,
-} as const;
+};
+
+/** @deprecated Legacy export retained for the calculate_devex test suite. */
+export const calculateDevexTool = calculateDevexInfo;

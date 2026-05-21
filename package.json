@@ -39,8 +39,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest run --exclude 'test/integration/**'",
+    "test:watch": "vitest --exclude 'test/integration/**'",
     "test:integration": "INTEGRATION=1 vitest run test/integration",
     "lint": "biome check .",
     "format": "biome format --write .",
