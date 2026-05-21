@@ -51,4 +51,18 @@ d("RobloxClient (integration)", () => {
     expect(icons.length).toBeGreaterThan(0);
     for (const i of icons) GameIconSchema.parse(i);
   }, 30_000);
+
+  // v0.1.2 regression (#36): Roblox tightened the per-request universe-id
+  // cap on `/v1/games`. Batches of 100 now fail with
+  // `{"code":9,"message":"Too many universe IDs"}`. A 75-id batch must
+  // succeed by chunking transparently into 50 + 25.
+  it("getGames handles a 75-id batch by chunking (#36)", async () => {
+    // Seed with one known-good id (Blox Fruits); pad with sequential ids
+    // that may or may not resolve — `getGames` simply omits missing ones,
+    // so the call must still succeed end-to-end without an API rejection.
+    const ids = [994732206, ...Array.from({ length: 74 }, (_, i) => 100_000_000 + i)];
+    const games = await client.getGames(ids);
+    expect(games.length).toBeGreaterThan(0);
+    expect(games.some((g) => g.id === 994732206)).toBe(true);
+  }, 60_000);
 });

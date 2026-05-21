@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { getTopByGenre } from "../../../src/mcp/tools/get-top-by-genre.js";
-import { BloxscoutError } from "../../../src/shared/errors.js";
 import { gameFixture, makeCtx } from "./_helpers.js";
 
 /** Build a GameSummary stand-in for `searchGames` mocks. */
@@ -55,20 +54,44 @@ describe("get_top_by_genre tool", () => {
     expect(out.games[0]?.id).toBe(2);
   });
 
-  it("resolves alias `rpg` to role-playing", async () => {
+  it("resolves alias `rpg` to the canonical role-playing search query", async () => {
     const { ctx, client } = makeCtx();
     client.searchGames.mockResolvedValue([summaryFixture(1, 1)]);
     client.getGames.mockResolvedValue([gameFixture(1, { playing: 1 })]);
     const input = getTopByGenre.inputSchema.parse({ genre: "rpg" });
     await getTopByGenre.handler(input, ctx);
-    expect(client.searchGames).toHaveBeenCalled();
+    // `rpg` alias must map to the canonical role-playing entry's searchQuery
+    // ("rpg") so omni-search returns the curated query rather than the raw
+    // user input — preserved across the v0.1.2 allowlist removal (#40).
+    expect(client.searchGames).toHaveBeenCalledWith("rpg", expect.any(Object));
     expect(client.getGames).toHaveBeenCalled();
   });
 
-  it("throws VALIDATION_ERROR on an unknown genre", async () => {
-    const { ctx } = makeCtx();
-    const input = getTopByGenre.inputSchema.parse({ genre: "bogus-genre-zzz" });
-    await expect(getTopByGenre.handler(input, ctx)).rejects.toBeInstanceOf(BloxscoutError);
+  // v0.1.2 regression (#40): the old behaviour rejected any genre not in
+  // SUPPORTED_GENRES with a VALIDATION_ERROR. Real Roblox has a long tail of
+  // popular genres (tower-defense, anime, racing, tycoon, battlegrounds, ...)
+  // that the curated list never covered, so the rejection was an adoption
+  // blocker. Arbitrary keywords must now pass through to omni-search.
+  it.each(["tower-defense", "anime", "racing", "battlegrounds", "bogus-genre-zzz"])(
+    "passes arbitrary keyword %s through to omni-search (no allowlist rejection)",
+    async (genre) => {
+      const { ctx, client } = makeCtx();
+      client.searchGames.mockResolvedValue([summaryFixture(1, 999)]);
+      client.getGames.mockResolvedValue([gameFixture(1, { playing: 999 })]);
+      const input = getTopByGenre.inputSchema.parse({ genre });
+      await expect(getTopByGenre.handler(input, ctx)).resolves.toBeDefined();
+      // Unaliased keyword passes through verbatim (after lower/hyphen norm).
+      expect(client.searchGames).toHaveBeenCalledWith(genre, expect.any(Object));
+    },
+  );
+
+  it("preserves alias mapping for `tycoon` (-> simulator search query)", async () => {
+    const { ctx, client } = makeCtx();
+    client.searchGames.mockResolvedValue([summaryFixture(1, 1)]);
+    client.getGames.mockResolvedValue([gameFixture(1, { playing: 1 })]);
+    const input = getTopByGenre.inputSchema.parse({ genre: "tycoon" });
+    await getTopByGenre.handler(input, ctx);
+    expect(client.searchGames).toHaveBeenCalledWith("simulator", expect.any(Object));
   });
 
   it("returns an empty list when omni-search returns nothing", async () => {
