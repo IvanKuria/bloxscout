@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-05-21
+
+### Added
+
+- `bloxscout trending` — CLI wrapper for `get_trending_games`; lists trending games optionally filtered by genre.
+- `bloxscout top` — CLI wrapper for `get_top_by_genre`; ranks top genre games by `playing`, `visits`, or `favoritedCount`.
+- `bloxscout report` — CLI wrapper for `generate_market_report`; prints the rendered markdown report (or full structured JSON via `--json`).
+- `bloxscout devex <robux>` — CLI wrapper for `calculate_devex`; warns on stderr when below the 30,000-Robux payout minimum.
+- `bloxscout revenue --ccu <n>` — CLI wrapper for `estimate_game_revenue`; pretty-prints inputs, outputs, and the disclaimer.
+- `bloxscout up-and-coming` — CLI wrapper for `get_up_and_coming`; prints a helpful stderr hint when the local snapshot store is empty.
+- `bloxscout creators --genre <g>` — CLI wrapper for `get_top_creators_by_genre`.
+- `bloxscout snapshot <universeIds...>` — CLI wrapper for `snapshot_game`; supports `--watch <intervalSec>` for a long-running scheduler driven by `SnapshotScheduler`.
+- `runCli` gains a `storeFactory` injection point so snapshot-aware commands can be unit-tested without touching the real SQLite file.
+- Shared `printText` formatter for commands whose pretty output is pre-rendered prose (used by `report`).
+
+### Fixed
+
+- README CLI quickstart examples now match real commands; the v0.1.0 snippets (`--history 30d`, `--format json`) referred to flags that were never implemented.
+- `docs/CLI-Reference.md` updated to document every shipped command and remove the "planned" sections for v0.1.1-shipped tools.
+
 ## [0.1.0] - 2026-05-21
 
 Initial public release of Bloxscout: an open-source TypeScript MCP server + CLI that gives Roblox developers and their AI agents programmatic access to Roblox game analytics.
@@ -77,5 +97,6 @@ Initial public release of Bloxscout: an open-source TypeScript MCP server + CLI 
 **Test coverage**
 - 190 tests across 26 files (unit + integration). Integration tests gated by `INTEGRATION=1` and run nightly against real Roblox endpoints.
 
-[Unreleased]: https://github.com/IvanKuria/bloxscout/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/IvanKuria/bloxscout/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/IvanKuria/bloxscout/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/IvanKuria/bloxscout/releases/tag/v0.1.0
