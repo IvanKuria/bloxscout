@@ -3,9 +3,32 @@ import { getTopByGenre } from "../../../src/mcp/tools/get-top-by-genre.js";
 import { BloxscoutError } from "../../../src/shared/errors.js";
 import { gameFixture, makeCtx } from "./_helpers.js";
 
+/** Build a GameSummary stand-in for `searchGames` mocks. */
+function summaryFixture(id: number, playerCount: number) {
+  return {
+    universeId: id,
+    rootPlaceId: id * 10,
+    name: `Game ${id}`,
+    description: "",
+    playerCount,
+    totalUpVotes: 0,
+    totalDownVotes: 0,
+    creatorId: 1,
+    creatorName: "creator",
+    creatorHasVerifiedBadge: false,
+    contentId: id,
+    contentType: "Game",
+  };
+}
+
 describe("get_top_by_genre tool", () => {
   it("ranks by `playing` by default and trims to limit", async () => {
     const { ctx, client } = makeCtx();
+    client.searchGames.mockResolvedValue([
+      summaryFixture(1, 50),
+      summaryFixture(2, 500),
+      summaryFixture(3, 100),
+    ]);
     client.getGames.mockResolvedValue([
       gameFixture(1, { playing: 50 }),
       gameFixture(2, { playing: 500 }),
@@ -18,6 +41,7 @@ describe("get_top_by_genre tool", () => {
 
   it("ranks by `visits` when requested", async () => {
     const { ctx, client } = makeCtx();
+    client.searchGames.mockResolvedValue([summaryFixture(1, 1), summaryFixture(2, 1)]);
     client.getGames.mockResolvedValue([
       gameFixture(1, { visits: 10 }),
       gameFixture(2, { visits: 50 }),
@@ -33,9 +57,11 @@ describe("get_top_by_genre tool", () => {
 
   it("resolves alias `rpg` to role-playing", async () => {
     const { ctx, client } = makeCtx();
+    client.searchGames.mockResolvedValue([summaryFixture(1, 1)]);
     client.getGames.mockResolvedValue([gameFixture(1, { playing: 1 })]);
     const input = getTopByGenre.inputSchema.parse({ genre: "rpg" });
     await getTopByGenre.handler(input, ctx);
+    expect(client.searchGames).toHaveBeenCalled();
     expect(client.getGames).toHaveBeenCalled();
   });
 
@@ -43,5 +69,14 @@ describe("get_top_by_genre tool", () => {
     const { ctx } = makeCtx();
     const input = getTopByGenre.inputSchema.parse({ genre: "bogus-genre-zzz" });
     await expect(getTopByGenre.handler(input, ctx)).rejects.toBeInstanceOf(BloxscoutError);
+  });
+
+  it("returns an empty list when omni-search returns nothing", async () => {
+    const { ctx, client } = makeCtx();
+    client.searchGames.mockResolvedValue([]);
+    const input = getTopByGenre.inputSchema.parse({ genre: "simulator" });
+    const out = await getTopByGenre.handler(input, ctx);
+    expect(out.games).toEqual([]);
+    expect(client.getGames).not.toHaveBeenCalled();
   });
 });

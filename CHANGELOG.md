@@ -45,6 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- get_top_by_genre, get_top_creators_by_genre, and generate_market_report now use live Roblox omni-search instead of hardcoded universe IDs. The previous seed lists contained wrong IDs that returned template games with 0 CCU. (#34)
 - test:integration script no longer silently exits 0 with no tests run. (#29)
 
 [Unreleased]: https://github.com/IvanKuria/bloxscout/compare/HEAD

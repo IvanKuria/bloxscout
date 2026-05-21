@@ -3,9 +3,28 @@ import { analyzeGameVsGenre } from "../../../src/mcp/tools/analyze-game-vs-genre
 import { BloxscoutError, RobloxNotFoundError } from "../../../src/shared/errors.js";
 import { gameFixture, makeCtx } from "./_helpers.js";
 
+function summaryFixture(id: number, playerCount: number) {
+  return {
+    universeId: id,
+    rootPlaceId: id * 10,
+    name: `Game ${id}`,
+    description: "",
+    playerCount,
+    totalUpVotes: 0,
+    totalDownVotes: 0,
+    creatorId: 1,
+    creatorName: "creator",
+    creatorHasVerifiedBadge: false,
+    contentId: id,
+    contentType: "Game",
+  };
+}
+
 describe("analyze_game_vs_genre tool", () => {
   it("returns target, cohort stats, and per-metric percentiles", async () => {
     const { ctx, client } = makeCtx();
+    // First getGames call: target lookup.
+    // Second getGames call: cohort lookup (driven by searchGames result).
     client.getGames
       .mockResolvedValueOnce([
         gameFixture(100, {
@@ -22,6 +41,11 @@ describe("analyze_game_vs_genre tool", () => {
         gameFixture(2, { playing: 150, visits: 3_000, favoritedCount: 50, maxPlayers: 10 }),
         gameFixture(3, { playing: 1_000, visits: 100_000, favoritedCount: 9_999, maxPlayers: 20 }),
       ]);
+    client.searchGames.mockResolvedValue([
+      summaryFixture(1, 50),
+      summaryFixture(2, 150),
+      summaryFixture(3, 1_000),
+    ]);
 
     const out = await analyzeGameVsGenre.handler(
       { universeId: 100, genre: "simulator", cohortLimit: 20 },
@@ -45,6 +69,7 @@ describe("analyze_game_vs_genre tool", () => {
     client.getGames
       .mockResolvedValueOnce([gameFixture(100, { genre_l1: "Simulator", playing: 1 })])
       .mockResolvedValueOnce([gameFixture(1, { playing: 1 })]);
+    client.searchGames.mockResolvedValue([summaryFixture(1, 1)]);
 
     const out = await analyzeGameVsGenre.handler({ universeId: 100, cohortLimit: 20 }, ctx);
     expect(out.genre).toBe("Simulator");
