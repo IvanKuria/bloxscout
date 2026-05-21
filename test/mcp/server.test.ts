@@ -35,24 +35,30 @@ function stubClient(overrides: Partial<Record<keyof RobloxClient, unknown>> = {}
 }
 
 describe("createMcpServer — tools/list", () => {
-  it("returns metadata for all 10 Phase 2 tools", async () => {
+  it("returns metadata for all 16 v0.1 tools", async () => {
     const server = createMcpServer({ client: stubClient() });
     const res = (await dispatch(server, ListToolsRequestSchema, {})) as {
       tools: Array<{ name: string; description: string; inputSchema: unknown }>;
     };
-    expect(res.tools).toHaveLength(10);
+    expect(res.tools).toHaveLength(16);
     const names = res.tools.map((t) => t.name).sort();
     expect(names).toEqual([
       "analyze_game_vs_genre",
+      "calculate_devex",
       "compare_games",
+      "estimate_game_revenue",
       "get_creator",
       "get_game",
+      "get_game_history",
       "get_game_icons",
       "get_game_player_count",
       "get_group",
       "get_top_by_genre",
+      "get_top_creators_by_genre",
       "get_trending_games",
+      "get_up_and_coming",
       "search_games",
+      "snapshot_game",
     ]);
     for (const tool of res.tools) {
       expect(tool.description.length).toBeGreaterThan(40);
@@ -63,15 +69,21 @@ describe("createMcpServer — tools/list", () => {
   it("registry matches the exported `allTools` array", () => {
     expect(allTools.map((t) => t.name).sort()).toEqual([
       "analyze_game_vs_genre",
+      "calculate_devex",
       "compare_games",
+      "estimate_game_revenue",
       "get_creator",
       "get_game",
+      "get_game_history",
       "get_game_icons",
       "get_game_player_count",
       "get_group",
       "get_top_by_genre",
+      "get_top_creators_by_genre",
       "get_trending_games",
+      "get_up_and_coming",
       "search_games",
+      "snapshot_game",
     ]);
   });
 });
