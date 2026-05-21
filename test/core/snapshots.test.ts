@@ -141,12 +141,13 @@ describe("SnapshotStore", () => {
   });
 
   it("defaults to 100 rows when limit is unspecified", async () => {
+    // PK is (universe_id, taken_at), so two inserts in the same millisecond
+    // collide and one is dropped. On fast machines (macOS arm64) setTimeout(1)
+    // gets coalesced and the loop runs faster than ms resolution. Sleep 3ms
+    // to give the kernel scheduler real headroom.
     for (let i = 0; i < 110; i++) {
       store.recordSnapshot([makeGame({ id: 1, playing: i })]);
-      // Don't sleep — INSERT OR REPLACE handles same-ms collisions because
-      // we step the playing count, but PK is (universe_id, taken_at) so
-      // identical timestamps overwrite. Sleep briefly to keep them distinct.
-      await new Promise((r) => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 3));
     }
     const history = store.getGameHistory(1);
     expect(history).toHaveLength(100);
