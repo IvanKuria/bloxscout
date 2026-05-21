@@ -20,8 +20,12 @@ export interface TableSpec<T> {
   head: string[];
   /** Map each row to a cell array matching `head`. */
   rows: T[];
-  /** Cell mapper, returns one string per `head` column. */
-  toRow: (row: T) => Array<string | number>;
+  /**
+   * Cell mapper, returns one string per `head` column. Receives the row index
+   * as the second argument so commands can emit a leading `#` column without
+   * pre-decorating their row data.
+   */
+  toRow: (row: T, index: number) => Array<string | number>;
   /** Per-column horizontal alignment; defaults to `left` for all columns. */
   alignments?: Array<"left" | "right" | "center">;
 }
@@ -53,6 +57,21 @@ export function print<T>(
   }
 }
 
+/**
+ * Render a pre-formatted block of text (e.g. a Markdown document) in pretty
+ * mode, or fall back to the structured JSON payload in `--json` mode. Used by
+ * commands like `report` whose pretty output is already-rendered prose rather
+ * than a table.
+ */
+export function printText(data: unknown, text: string, opts: FormatOptions): void {
+  if (opts.json) {
+    process.stdout.write(`${opts.pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data)}\n`);
+    return;
+  }
+  // Ensure a trailing newline so callers don't have to think about it.
+  process.stdout.write(text.endsWith("\n") ? text : `${text}\n`);
+}
+
 /** Pretty-printed JSON error doc / human-readable stderr line. */
 export function printError(
   payload: { code: string; message: string; data?: Record<string, unknown> },
@@ -73,8 +92,8 @@ function renderTable<T>(spec: TableSpec<T>): void {
   const head = spec.head.map((h) => chalk.cyan.bold(h));
   const colAligns = spec.alignments ?? spec.head.map(() => "left" as const);
   const table = new Table({ head, colAligns, style: { head: [], border: [] } });
-  for (const row of spec.rows) {
-    const cells = spec.toRow(row).map((c) => formatCell(c));
+  for (const [idx, row] of spec.rows.entries()) {
+    const cells = spec.toRow(row, idx).map((c) => formatCell(c));
     table.push(cells);
   }
   process.stdout.write(`${table.toString()}\n`);
