@@ -17,14 +17,32 @@ describe("cli snapshot", () => {
   let stdoutSpy: ReturnType<typeof vi.spyOn>;
   let stderrSpy: ReturnType<typeof vi.spyOn>;
   let tmp: string;
+  // Track every store opened during a test so we can close all SQLite handles
+  // before unlinking the tmp dir. Windows can't delete files with an open
+  // handle (EBUSY) — POSIX silently tolerates it. Closing is harmless on both.
+  const openStores: SnapshotStore[] = [];
+
+  function makeStore(): SnapshotStore {
+    const s = new SnapshotStore({ dbPath: join(tmp, "data.db") });
+    openStores.push(s);
+    return s;
+  }
 
   beforeEach(() => {
     stdoutSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
     tmp = mkdtempSync(join(tmpdir(), "bloxscout-snap-"));
+    openStores.length = 0;
   });
 
   afterEach(() => {
+    for (const s of openStores) {
+      try {
+        s.close();
+      } catch {
+        // already closed — fine
+      }
+    }
     stdoutSpy.mockRestore();
     stderrSpy.mockRestore();
     rmSync(tmp, { recursive: true, force: true });
@@ -45,7 +63,7 @@ describe("cli snapshot", () => {
   }
 
   it("captures a one-shot snapshot and reports the recorded count (JSON)", async () => {
-    const store = new SnapshotStore({ dbPath: join(tmp, "data.db") });
+    const store = makeStore();
     const getGames = vi.fn().mockResolvedValue([gameFixture(11), gameFixture(22), gameFixture(33)]);
     const run = makeRunner(store, { getGames });
     const exit = await run(["--json", "snapshot", "11", "22", "33"]);
@@ -59,7 +77,7 @@ describe("cli snapshot", () => {
   });
 
   it("prints a pretty confirmation block in non-JSON mode", async () => {
-    const store = new SnapshotStore({ dbPath: join(tmp, "data.db") });
+    const store = makeStore();
     const getGames = vi.fn().mockResolvedValue([gameFixture(11)]);
     const run = makeRunner(store, { getGames });
     await run(["--no-color", "snapshot", "11"]);
@@ -71,7 +89,7 @@ describe("cli snapshot", () => {
   it("rejects an out-of-range --watch interval with exit 1 (vi.useFakeTimers so the loop never starts)", async () => {
     vi.useFakeTimers();
     try {
-      const store = new SnapshotStore({ dbPath: join(tmp, "data.db") });
+      const store = makeStore();
       const getGames = vi.fn();
       const run = makeRunner(store, { getGames });
       const exit = await run(["snapshot", "11", "--watch", "5"]);
@@ -83,7 +101,7 @@ describe("cli snapshot", () => {
   });
 
   it("rejects a non-integer universeId with exit 1", async () => {
-    const store = new SnapshotStore({ dbPath: join(tmp, "data.db") });
+    const store = makeStore();
     const run = makeRunner(store, {});
     const exit = await run(["snapshot", "notanumber"]);
     expect(exit).toHaveBeenCalledWith(1);

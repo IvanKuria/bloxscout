@@ -17,14 +17,31 @@ describe("cli up-and-coming", () => {
   let stdoutSpy: ReturnType<typeof vi.spyOn>;
   let stderrSpy: ReturnType<typeof vi.spyOn>;
   let tmp: string;
+  // Same Windows-EBUSY guard as snapshot.test.ts — close SQLite handles
+  // before unlinking the tmp dir.
+  const openStores: SnapshotStore[] = [];
+
+  function makeStore(): SnapshotStore {
+    const s = new SnapshotStore({ dbPath: join(tmp, "data.db") });
+    openStores.push(s);
+    return s;
+  }
 
   beforeEach(() => {
     stdoutSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
     tmp = mkdtempSync(join(tmpdir(), "bloxscout-uac-"));
+    openStores.length = 0;
   });
 
   afterEach(() => {
+    for (const s of openStores) {
+      try {
+        s.close();
+      } catch {
+        // already closed — fine
+      }
+    }
     stdoutSpy.mockRestore();
     stderrSpy.mockRestore();
     rmSync(tmp, { recursive: true, force: true });
@@ -46,7 +63,7 @@ describe("cli up-and-coming", () => {
   }
 
   it("prints a stderr hint and exits 0 when the snapshot store is empty", async () => {
-    const store = new SnapshotStore({ dbPath: join(tmp, "data.db") });
+    const store = makeStore();
     const run = makeRunner(store);
     const exit = await run(["up-and-coming"]);
     expect(exit).not.toHaveBeenCalled();
@@ -55,7 +72,7 @@ describe("cli up-and-coming", () => {
   });
 
   it("emits { entries: [] } in --json mode without the stderr hint", async () => {
-    const store = new SnapshotStore({ dbPath: join(tmp, "data.db") });
+    const store = makeStore();
     const run = makeRunner(store);
     await run(["--json", "up-and-coming"]);
     const out = JSON.parse(stdoutText()) as { entries: unknown[] };
@@ -64,7 +81,7 @@ describe("cli up-and-coming", () => {
   });
 
   it("ranks recorded growth in --json mode", async () => {
-    const store = new SnapshotStore({ dbPath: join(tmp, "data.db") });
+    const store = makeStore();
     // Two snapshots ~5ms apart so `taken_at` differs — same pattern the
     // `rankings` core tests use.
     store.recordSnapshot([gameFixture(42, { name: "Climber", playing: 100 })]);
@@ -81,7 +98,7 @@ describe("cli up-and-coming", () => {
   });
 
   it("rejects --limit > 500 with exit 1", async () => {
-    const store = new SnapshotStore({ dbPath: join(tmp, "data.db") });
+    const store = makeStore();
     const run = makeRunner(store);
     const exit = await run(["up-and-coming", "--limit", "9999"]);
     expect(exit).toHaveBeenCalledWith(1);
