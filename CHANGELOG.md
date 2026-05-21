@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- All 16 MCP tools (10 from Phase 2 + 6 from Phase 4/5a) are now registered in the server's tool router. Previously, snapshot_game, get_game_history, get_up_and_coming, calculate_devex, estimate_game_revenue, and get_top_creators_by_genre were defined but unwired.
+- MCP server constructs a default SnapshotStore at startup (overridable via the `store` option) and passes it to handlers via ToolContext.
 - MCP stdio server entry point (`bloxscout-mcp`) now boots a real `@modelcontextprotocol/sdk` v1 server with `tools/list` + `tools/call` handlers, JSON Schema generated from the Zod input schemas, and a single shared `RobloxClient` instance per process.
 - First 10 MCP tools, each with an LLM-targeted description and structured JSON output:
   - `search_games` — keyword search via Roblox's omni-search.
@@ -40,5 +42,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - `watch_games` — non-blocking background watch that spawns an in-process `SnapshotScheduler` per call and returns a `watchId`. Supports `action: "start" | "stop" | "status"`. Watches live only as long as the MCP server process; use the `bloxscout snapshot --cron` CLI for durable scheduled snapshots.
   - `generate_market_report` — synthesis tool that internally calls `get_top_by_genre` (and optionally `analyze_game_vs_genre`) and returns both a rendered markdown report and a structured JSON payload (top games, aggregates, optional focus comparison, notable creators).
 - `ToolContext` now carries an optional `store?: SnapshotStore` so tools that read or write the local snapshot DB can be injected with a shared store.
+
+### Fixed
+
+- test:integration script no longer silently exits 0 with no tests run. (#29)
 
 [Unreleased]: https://github.com/IvanKuria/bloxscout/compare/HEAD
