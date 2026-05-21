@@ -3,6 +3,7 @@ import type { RobloxClient } from "../../core/roblox-client.js";
 import type { SnapshotStore } from "../../core/snapshots.js";
 import { buildCompareCommand } from "./compare.js";
 import { buildCreatorCommand } from "./creator.js";
+import { buildCreatorsCommand } from "./creators.js";
 import { buildDevexCommand } from "./devex.js";
 import { buildGameCommand } from "./game.js";
 import { buildGroupCommand } from "./group.js";
@@ -11,8 +12,10 @@ import { buildPlayersCommand } from "./players.js";
 import { buildReportCommand } from "./report.js";
 import { buildRevenueCommand } from "./revenue.js";
 import { buildSearchCommand } from "./search.js";
+import { buildSnapshotCommand } from "./snapshot.js";
 import { buildTopCommand } from "./top.js";
 import { buildTrendingCommand } from "./trending.js";
+import { buildUpAndComingCommand } from "./up-and-coming.js";
 
 /**
  * Register every Phase 3 + v0.1.1 subcommand against `program`.
@@ -24,7 +27,7 @@ import { buildTrendingCommand } from "./trending.js";
 export function registerCommands(
   program: Command,
   getClient: () => RobloxClient,
-  _getStore: () => SnapshotStore,
+  getStore: () => SnapshotStore,
 ): void {
   program.addCommand(buildSearchCommand(getClient));
   program.addCommand(buildGameCommand(getClient));
@@ -39,4 +42,7 @@ export function registerCommands(
   program.addCommand(buildReportCommand(getClient));
   program.addCommand(buildDevexCommand(getClient));
   program.addCommand(buildRevenueCommand(getClient));
+  program.addCommand(buildUpAndComingCommand(getClient, getStore));
+  program.addCommand(buildCreatorsCommand(getClient));
+  program.addCommand(buildSnapshotCommand(getClient, getStore));
 }
