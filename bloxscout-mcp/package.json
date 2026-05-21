@@ -1,0 +1,39 @@
+{
+  "name": "bloxscout-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for bloxscout — live Roblox analytics for AI agents (Claude, ChatGPT, Cursor, Zed). Thin launcher that re-exports the MCP entrypoint from the bloxscout package.",
+  "author": "Ivan Kuria <ivankuria7@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/IvanKuria/bloxscout",
+  "bugs": {
+    "url": "https://github.com/IvanKuria/bloxscout/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IvanKuria/bloxscout.git"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "roblox",
+    "roblox-api",
+    "analytics",
+    "game-analytics",
+    "claude",
+    "cursor",
+    "llm",
+    "agent"
+  ],
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "bloxscout-mcp": "bin/mcp.js"
+  },
+  "files": ["bin", "README.md", "LICENSE"],
+  "dependencies": {
+    "bloxscout": "^0.1.2"
+  }
+}
