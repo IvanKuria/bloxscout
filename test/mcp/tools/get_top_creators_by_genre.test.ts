@@ -41,14 +41,31 @@ function makeGame(id: number, playing: number, creatorId: number, creatorName: s
 }
 
 function stub(games: Game[]): RobloxClient {
-  return { getGames: vi.fn(async () => games) } as unknown as RobloxClient;
+  const summaries = games.map((g) => ({
+    universeId: g.id,
+    rootPlaceId: g.rootPlaceId,
+    name: g.name,
+    description: g.description ?? "",
+    playerCount: g.playing,
+    totalUpVotes: 0,
+    totalDownVotes: 0,
+    creatorId: g.creator.id,
+    creatorName: g.creator.name,
+    creatorHasVerifiedBadge: false,
+    contentId: g.id,
+    contentType: "Game",
+  }));
+  return {
+    searchGames: vi.fn(async () => summaries),
+    getGames: vi.fn(async () => games),
+  } as unknown as RobloxClient;
 }
 
 describe("get_top_creators_by_genre tool", () => {
-  it("has a stable name and an LLM-ready description naming v0.1 seed limits", () => {
+  it("has a stable name and an LLM-ready description naming the omni-search source", () => {
     expect(getTopCreatorsByGenreTool.name).toBe("get_top_creators_by_genre");
     expect(getTopCreatorsByGenreTool.description).toContain("genre");
-    expect(getTopCreatorsByGenreTool.description).toContain("seed list");
+    expect(getTopCreatorsByGenreTool.description).toContain("omni-search");
     expect(getTopCreatorsByGenreTool.description).toContain("simulator");
   });
 

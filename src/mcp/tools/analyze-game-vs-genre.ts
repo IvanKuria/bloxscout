@@ -41,9 +41,10 @@ export const AnalyzeGameVsGenreOutputSchema = z.object({
  * Game-intelligence tool: benchmark one game against the cohort median +
  * 75th percentile + max of its genre.
  *
- * Composes `get_game` (for the target) with `get_top_by_genre`'s curated
- * seed list (for the cohort) so it inherits the same v0.1 limitations as
- * those tools.
+ * Composes `get_game` (for the target) with a cohort sourced from Roblox's
+ * omni-search ranking for the genre keyword — the same source
+ * `get_top_by_genre` uses. Pre-v0.1.0 this used a hand-curated universe-id
+ * seed list that drifted into Studio templates with 0 CCU (#34).
  */
 export const analyzeGameVsGenre: ToolDefinition<
   typeof AnalyzeGameVsGenreInputSchema,
@@ -65,9 +66,9 @@ export const analyzeGameVsGenre: ToolDefinition<
     "simulator, role-playing, adventure, fighting, obby, social, horror,",
     "shooter, plus aliases like 'rpg' / 'fps').",
     "",
-    "v0.1 limitation: the cohort is the same hand-curated seed list used",
-    "by `get_top_by_genre`, ranked by `playing`. Real discovery-feed",
-    "cohorts ship in v0.2 once the snapshot store lands.",
+    "Cohort source: the live omni-search top results for the genre keyword,",
+    "ranked by `playing`. Real growth-aware cohorts ship in v0.2 once the",
+    "snapshot store lands.",
   ].join(" "),
   inputSchema: AnalyzeGameVsGenreInputSchema,
   outputSchema: AnalyzeGameVsGenreOutputSchema,
@@ -91,8 +92,16 @@ export const analyzeGameVsGenre: ToolDefinition<
       );
     }
 
-    const cohortIds = entry.universeIds.filter((id) => id !== input.universeId);
-    const cohortGames = await ctx.client.getGames([...cohortIds]);
+    // Cohort comes from omni-search (live ranking for the genre keyword)
+    // so it tracks current top games rather than a stale hand-curated list.
+    // We pull a wider pool than cohortLimit so that filtering the target
+    // out and sorting by playing still leaves enough cohort members.
+    const candidatePoolSize = Math.min(50, Math.max(input.cohortLimit * 3, 25));
+    const summaries = await ctx.client.searchGames(entry.searchQuery, {
+      limit: candidatePoolSize,
+    });
+    const cohortIds = summaries.map((s) => s.universeId).filter((id) => id !== input.universeId);
+    const cohortGames = cohortIds.length > 0 ? await ctx.client.getGames(cohortIds) : [];
     // Rank by playing, trim to cohortLimit, but always include the target
     // in the metric distribution so its own percentile is computed against
     // the same set the cohort stats report.

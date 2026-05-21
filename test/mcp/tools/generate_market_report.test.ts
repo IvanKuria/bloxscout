@@ -3,9 +3,31 @@ import { generateMarketReport } from "../../../src/mcp/tools/generate_market_rep
 import { BloxscoutError } from "../../../src/shared/errors.js";
 import { gameFixture, makeCtx } from "./_helpers.js";
 
+function summaryFixture(id: number, playerCount: number) {
+  return {
+    universeId: id,
+    rootPlaceId: id * 10,
+    name: `Game ${id}`,
+    description: "",
+    playerCount,
+    totalUpVotes: 0,
+    totalDownVotes: 0,
+    creatorId: 1,
+    creatorName: "creator",
+    creatorHasVerifiedBadge: false,
+    contentId: id,
+    contentType: "Game",
+  };
+}
+
 describe("generate_market_report tool", () => {
   it("calls get_top_by_genre and assembles a report with top games + aggregates", async () => {
     const { ctx, client } = makeCtx();
+    client.searchGames.mockResolvedValue([
+      summaryFixture(1, 100),
+      summaryFixture(2, 200),
+      summaryFixture(3, 300),
+    ]);
     client.getGames.mockResolvedValue([
       gameFixture(1, { playing: 100, visits: 1_000, favoritedCount: 50 }),
       gameFixture(2, { playing: 200, visits: 2_000, favoritedCount: 80 }),
@@ -26,9 +48,14 @@ describe("generate_market_report tool", () => {
 
   it("includes a focusComparison section when focusUniverseId is set", async () => {
     const { ctx, client } = makeCtx();
-    // First call: get_top_by_genre (3 games)
-    // Second call: analyze_game_vs_genre fetches the target game
-    // Third call: analyze_game_vs_genre fetches the cohort
+    // searchGames is called twice: once by get_top_by_genre, once by
+    // analyze_game_vs_genre. Both want the same cohort (excluding the focus).
+    client.searchGames.mockResolvedValue([
+      summaryFixture(1, 100),
+      summaryFixture(2, 200),
+      summaryFixture(3, 300),
+    ]);
+    // get_top_by_genre's getGames, then analyze's target fetch, then cohort fetch.
     client.getGames
       .mockResolvedValueOnce([
         gameFixture(1, { playing: 100 }),
@@ -61,6 +88,7 @@ describe("generate_market_report tool", () => {
 
   it("markdown contains the expected H2 section headers", async () => {
     const { ctx, client } = makeCtx();
+    client.searchGames.mockResolvedValue([summaryFixture(1, 100), summaryFixture(2, 200)]);
     client.getGames.mockResolvedValue([
       gameFixture(1, { playing: 100 }),
       gameFixture(2, { playing: 200 }),
@@ -77,6 +105,7 @@ describe("generate_market_report tool", () => {
 
   it("structured.aggregates totals match what the markdown displays", async () => {
     const { ctx, client } = makeCtx();
+    client.searchGames.mockResolvedValue([summaryFixture(1, 1_234), summaryFixture(2, 5_678)]);
     client.getGames.mockResolvedValue([
       gameFixture(1, { playing: 1_234, visits: 10_000, favoritedCount: 500 }),
       gameFixture(2, { playing: 5_678, visits: 20_000, favoritedCount: 700 }),
@@ -103,6 +132,11 @@ describe("generate_market_report tool", () => {
     const g1 = { ...gameFixture(1, { playing: 500 }), ...sharedCreator };
     const g2 = { ...gameFixture(2, { playing: 300 }), ...sharedCreator };
     const g3 = gameFixture(3, { playing: 100 }); // default creator id 1
+    client.searchGames.mockResolvedValue([
+      summaryFixture(1, 500),
+      summaryFixture(2, 300),
+      summaryFixture(3, 100),
+    ]);
     client.getGames.mockResolvedValue([g1, g2, g3]);
 
     const out = await generateMarketReport.handler({ genre: "simulator", limit: 10 }, ctx);
@@ -113,6 +147,7 @@ describe("generate_market_report tool", () => {
 
   it("surfaces upstream errors cleanly (unknown genre)", async () => {
     const { ctx, client } = makeCtx();
+    client.searchGames.mockResolvedValue([]);
     client.getGames.mockResolvedValue([]);
     await expect(
       generateMarketReport.handler({ genre: "definitely-not-a-real-genre", limit: 5 }, ctx),
@@ -121,6 +156,13 @@ describe("generate_market_report tool", () => {
 
   it("respects the `limit` parameter", async () => {
     const { ctx, client } = makeCtx();
+    client.searchGames.mockResolvedValue([
+      summaryFixture(1, 100),
+      summaryFixture(2, 200),
+      summaryFixture(3, 300),
+      summaryFixture(4, 400),
+      summaryFixture(5, 500),
+    ]);
     client.getGames.mockResolvedValue([
       gameFixture(1, { playing: 100 }),
       gameFixture(2, { playing: 200 }),

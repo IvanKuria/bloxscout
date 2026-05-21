@@ -1,28 +1,35 @@
 /**
- * Aggregate "top creators by genre" from the curated seed list in
- * {@link ./seed-data.ts}.
+ * Aggregate "top creators by genre" from Roblox's live omni-search ranking.
  *
- * v0.1 (Phase 5a): Roblox does not expose a public "top creators by genre"
- * endpoint. We approximate it by:
+ * v0.1.0+: Roblox does not expose a public "top creators by genre" endpoint.
+ * We approximate it by:
  *
- *   1. Looking up a curated 10-20 game seed list for the requested genre.
- *   2. Fetching live `Game` metadata via `RobloxClient.getGames` (one batched
- *      request, cached).
- *   3. Grouping by `creator.id`, summing `playing` (CCU) across each
- *      creator's seed-list games.
- *   4. Returning the top-N creators by total CCU, with the most-played game
- *      surfaced as an example.
+ *   1. Resolving the genre alias to a search keyword (see
+ *      `src/mcp/data/genre-seeds.ts`).
+ *   2. Calling `RobloxClient.searchGames` (the omni-search endpoint) to
+ *      enumerate the live top games for that keyword. This replaces the
+ *      hand-curated universe-id seed list that previously drifted into
+ *      Studio templates with 0 CCU — see #34.
+ *   3. Fetching full `Game` metadata via `RobloxClient.getGames` so we
+ *      have creator records.
+ *   4. Grouping by `creator.id`, summing `playing` (CCU) across each
+ *      creator's games in the result set.
+ *   5. Returning the top-N creators by total CCU, with the most-played
+ *      game surfaced as an example.
  *
  * v0.2 (post-Phase 4 snapshot store): the same tool shape will switch to
  * scanning the local snapshot store, giving a real-time leaderboard with
- * day-over-day deltas. The MCP tool signature is designed to be stable
- * across that swap.
+ * day-over-day deltas. The signature is designed to be stable across that
+ * swap.
  */
 
+import { SUPPORTED_GENRES, lookupGenre } from "../mcp/data/genre-seeds.js";
 import { BloxscoutError } from "../shared/errors.js";
 import type { RobloxClient } from "./roblox-client.js";
-import { SUPPORTED_SEED_GENRES, getSeedUniverseIds } from "./seed-data.js";
 import type { Game, RobloxUniverseId } from "./types.js";
+
+/** Wider than `limit` so creators with multiple top games can still aggregate. */
+const CANDIDATE_POOL_SIZE = 50;
 
 export interface GetTopCreatorsByGenreOptions {
   /** Max creators to return. Default 10. */
@@ -32,15 +39,19 @@ export interface GetTopCreatorsByGenreOptions {
 export interface TopCreatorEntry {
   /** Roblox creator id (user id if `creatorType === "User"`, group id otherwise). */
   creatorId: number;
-  /** `"User"` or `"Group"`, as reported by Roblox on the seed games. */
+  /** `"User"` or `"Group"`, as reported by Roblox on the source games. */
   creatorType: "User" | "Group";
-  /** Display name as it appeared on one of the creator's seed-list games. */
+  /** Display name as it appeared on one of the creator's games. */
   creatorName: string;
-  /** Sum of `playing` (live CCU) across this creator's games in the seed list. */
+  /**
+   * Sum of `playing` (live CCU) across this creator's games in the
+   * omni-search top results for the genre. (Field name preserved for
+   * backwards compatibility with the v0.0.x seed-list shape.)
+   */
   totalPlayingAcrossSeedGames: number;
-  /** How many of the creator's games appeared in the seed list. */
+  /** How many of the creator's games appeared in the genre's top results. */
   gameCount: number;
-  /** The creator's most-played seed-list game (by CCU). */
+  /** The creator's most-played game from the result set (by CCU). */
   topGame: {
     universeId: RobloxUniverseId;
     name: string;
@@ -59,7 +70,7 @@ interface CreatorAccumulator {
 
 /**
  * Identify the top creators within a genre by summing live CCU across the
- * curated seed list. See module-level docstring for the v0.1 / v0.2 plan.
+ * omni-search top games for that genre.
  *
  * Throws `VALIDATION_ERROR` for unknown genres or non-positive `limit`.
  */
@@ -82,17 +93,21 @@ export async function getTopCreatorsByGenre(
     );
   }
 
-  const seedIds = getSeedUniverseIds(genre);
-  if (seedIds === undefined) {
+  const entry = lookupGenre(genre);
+  if (entry === undefined) {
     throw new BloxscoutError(
-      `getTopCreatorsByGenre: unknown genre '${genre}'. Supported genres: ${SUPPORTED_SEED_GENRES.join(", ")}`,
+      `getTopCreatorsByGenre: unknown genre '${genre}'. Supported genres: ${SUPPORTED_GENRES.join(", ")}`,
       "VALIDATION_ERROR",
     );
   }
 
-  const games = await client.getGames([...seedIds]);
-  const byCreator = new Map<number, CreatorAccumulator>();
+  const summaries = await client.searchGames(entry.searchQuery, { limit: CANDIDATE_POOL_SIZE });
+  if (summaries.length === 0) return [];
 
+  const ids = summaries.map((s) => s.universeId);
+  const games = await client.getGames(ids);
+
+  const byCreator = new Map<number, CreatorAccumulator>();
   for (const game of games) {
     aggregate(byCreator, game);
   }

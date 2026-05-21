@@ -47,7 +47,24 @@ function makeGame(opts: {
 }
 
 function makeStubClient(games: Game[]): RobloxClient {
+  // Mirror the live flow: searchGames returns summaries with the universe
+  // ids, then getGames returns full game records for those ids.
+  const summaries = games.map((g) => ({
+    universeId: g.id,
+    rootPlaceId: g.rootPlaceId,
+    name: g.name,
+    description: g.description ?? "",
+    playerCount: g.playing,
+    totalUpVotes: 0,
+    totalDownVotes: 0,
+    creatorId: g.creator.id,
+    creatorName: g.creator.name,
+    creatorHasVerifiedBadge: false,
+    contentId: g.id,
+    contentType: "Game",
+  }));
   return {
+    searchGames: vi.fn(async (_q: string, _opts?: { limit?: number }) => summaries),
     getGames: vi.fn(async (_ids: number[]) => games),
   } as unknown as RobloxClient;
 }

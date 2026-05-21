@@ -6,22 +6,22 @@ import type { ToolDefinition } from "./types.js";
 /**
  * Discovery tool: top games within a genre.
  *
- * v0.1 implementation strategy
- * ----------------------------
- * Roblox's discovery feed (the source rotrends uses) is not exposed via a
- * stable public endpoint. To ship something useful in Phase 2 we hand-curate
- * a per-genre seed list of well-known top games, look each one up via
- * `getGames`, then rank the resolved set by the requested metric.
+ * Implementation strategy (v0.1.0+)
+ * ---------------------------------
+ * Roblox's discovery feed is not exposed via a stable public endpoint, but
+ * the omni-search endpoint (`apis.roblox.com/search-api/omni-search`) does
+ * return a CCU-sorted live ranking of games for any keyword. We use that
+ * to enumerate candidates, then re-fetch the top N via `/v1/games` to get
+ * the full `Game` shape (visits, favorites, genre fields, etc.) and rank
+ * by the requested metric.
  *
- * Trade-offs:
- * - + Deterministic, cacheable, no rate-limit risk.
- * - + Catches the long-tail leaders agents are most often asked about.
- * - - Will not surface a brand-new breakout hit until the seed list is updated.
- * - - Limited to the genres in `genre-seeds.ts`; unknown genres throw
- *     VALIDATION_ERROR with the list of supported slugs.
+ * The previous implementation used a hand-curated per-genre list of
+ * universe ids. That list drifted — many ids resolved to abandoned Studio
+ * template games with 0 CCU — and produced misleading rankings. See #34.
  *
- * v0.2 will replace the seed list with a rolling snapshot of the actual
- * discovery feed stored in `~/.bloxscout/data.db` (Phase 4).
+ * Cache: `searchGames` and `getGames` are both LRU-cached in
+ * `RobloxClient` with `CACHE_TTL.DEFAULT` (300s) — repeat calls for the
+ * same genre are effectively free.
  */
 export const getTopByGenre: ToolDefinition<
   typeof GetTopByGenreInputSchema,
@@ -35,16 +35,14 @@ export const getTopByGenre: ToolDefinition<
     "fighting, obby, social, horror, shooter. Common aliases (e.g. 'rpg'",
     "for role-playing, 'fps' for shooter) are accepted.",
     "",
-    "v0.1 implementation: the candidate set is a hand-curated list of",
-    "10-20 well-known leaders per genre, looked up live via",
-    "`games.roblox.com/v1/games` and sorted by the chosen metric. This",
-    "captures established hits very well but will not surface brand-new",
-    "breakouts until the seed list is refreshed. v0.2 (Phase 4) will use",
-    "the local snapshot store instead.",
+    "Implementation: candidates come from Roblox's live omni-search ranking",
+    "for the genre keyword (self-correcting as popularity shifts), then the",
+    "top results are re-fetched via `games.roblox.com/v1/games` to populate",
+    "the full metric set and re-ranked by the chosen `rankBy` field.",
     "",
     "Use this when the user asks 'what are the top Simulator games right",
     "now?' or 'which RPGs are the biggest by visits?'. For week-over-week",
-    "growth or true 'trending', use `get_trending_games` (also v0.1).",
+    "growth or true 'trending', use `get_trending_games`.",
   ].join(" "),
   inputSchema: GetTopByGenreInputSchema,
   outputSchema: GetTopByGenreOutputSchema,
@@ -58,7 +56,25 @@ export const getTopByGenre: ToolDefinition<
         "VALIDATION_ERROR",
       );
     }
-    const games = await ctx.client.getGames([...entry.universeIds]);
+    // Pull a wider candidate pool than `limit` so the post-fetch re-rank by
+    // visits / favorites still has something to reorder. Capped at 50: the
+    // omni-search response is paginated and pulling deeper rarely surfaces
+    // games anyone cares about.
+    const candidatePoolSize = Math.min(50, Math.max(input.limit * 3, 25));
+    const summaries = await ctx.client.searchGames(entry.searchQuery, {
+      limit: candidatePoolSize,
+    });
+    if (summaries.length === 0) {
+      return { games: [] };
+    }
+    // Pre-rank summaries by their (search-side) playerCount so when we
+    // fetch full Game records we hit the top games first — important when
+    // omni-search returned more candidates than we will ultimately keep.
+    const topUniverseIds = summaries
+      .slice()
+      .sort((a, b) => b.playerCount - a.playerCount)
+      .map((s) => s.universeId);
+    const games = await ctx.client.getGames(topUniverseIds);
     const metric = input.rankBy;
     const ranked = games.slice().sort((a, b) => b[metric] - a[metric]);
     return { games: ranked.slice(0, input.limit) };
