@@ -21,7 +21,16 @@ import type {
 } from "./types.js";
 
 const DEFAULT_USER_AGENT = "bloxscout/0.0.1 (+https://github.com/IvanKuria/bloxscout)";
-const GAMES_BATCH_SIZE = 100;
+/**
+ * Per-request cap for `games.roblox.com/v1/games?universeIds=...`.
+ *
+ * Roblox tightened the per-request universe-id limit some time after the
+ * v0.1.0 cut — requests with 100 ids now fail with
+ * `{"code":9,"message":"Too many universe IDs"}`. 50 is the empirically
+ * observed safe ceiling and matches what Roblox's own discovery endpoints
+ * batch with. See issue #36.
+ */
+const GAMES_BATCH_SIZE = 50;
 const DEFAULT_TIMEOUT_MS = 15_000;
 const DEFAULT_MAX_RETRIES = 3;
 
