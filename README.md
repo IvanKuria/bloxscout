@@ -71,9 +71,11 @@ Once registered, ask your agent things like *"Use bloxscout to find the top 10 t
 The CLI is a thin Commander wrapper over the same core, useful for shell scripts and one-offs.
 
 ```sh
-npx bloxscout trending --genre Simulator --limit 10
-npx bloxscout game 920587237 --history 30d
-npx bloxscout devex 100000 --format json
+npx bloxscout search "tower defense" --limit 5
+npx bloxscout trending --genre simulator --limit 10
+npx bloxscout report --genre rpg --limit 5
+npx bloxscout devex 100000
+npx bloxscout revenue --ccu 250000
 ```
 
 ## What can it do?

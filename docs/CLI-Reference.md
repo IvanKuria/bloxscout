@@ -60,7 +60,7 @@ Fetch full metadata for a single game.
 npx bloxscout game 920587237 --json
 ```
 
-Flags: `--history <duration>` (planned, reads snapshots), `--json`.
+Flags: `--json`.
 
 ### `players <universeId>`
 
@@ -114,100 +114,103 @@ Flags: `--size <WxH>` (default `512x512`).
 
 ### `trending`
 
-Top games right now, optionally scoped by genre.
+Top games right now, optionally scoped by genre. v0.1 ranks the live
+omni-search top results by current `playing` CCU — true week-over-week
+growth requires the v0.2 snapshot store.
 
 ```sh
-npx bloxscout trending --genre Simulator --limit 10
+npx bloxscout trending --genre simulator --limit 10
 ```
 
-Flags: `--genre <name>`, `--limit <n>` (default 20), `--json`.
-
-> Status: depends on the snapshot store (planned v0.2). Until then this
-> command short-circuits to a clear `NOT_IMPLEMENTED` error explaining
-> what's missing.
+Flags: `--genre <name>`, `--limit <n>` (default 25), `--json`.
 
 ### `top`
 
 Top games by genre, ranked by a chosen metric.
 
 ```sh
-npx bloxscout top --genre Adventure --rank-by visits --limit 20
+npx bloxscout top --genre adventure --rank-by visits --limit 20
 ```
 
 Flags: `--genre <name>` (required), `--rank-by <playing|visits|favoritedCount>`
-(default `playing`), `--limit <n>`, `--json`.
+(default `playing`), `--limit <n>` (default 10), `--json`.
+
+### `creators`
+
+Top creators in a genre, ranked by summed CCU across their live top games.
+
+```sh
+npx bloxscout creators --genre simulator --limit 10
+```
+
+Flags: `--genre <name>` (required), `--limit <n>` (default 10), `--json`.
 
 ### `up-and-coming`
 
 Smaller games with unusually strong recent growth. Reads the local snapshot
-store.
+store — populate it first with `bloxscout snapshot --watch ...`.
 
 ```sh
-npx bloxscout up-and-coming --genre RPG --window 7d
+npx bloxscout up-and-coming --min-baseline 1000 --limit 10
 ```
 
-Flags: `--genre`, `--window <duration>`, `--limit <n>`, `--json`.
+Flags: `--since <iso>`, `--min-baseline <n>` (default 5000), `--limit <n>`
+(default 25), `--json`.
 
 ### `devex <robux>`
 
 Convert Robux to USD via the current DevEx rate.
 
 ```sh
-npx bloxscout devex 100000 --format json
+npx bloxscout devex 100000
+npx bloxscout devex 30000 --rate 0.0035 --json
 ```
 
-Flags: `--format <text|json>` (alias for `--json`).
-
-Sample output:
-
-```
-100,000 Robux → $350.00 USD (rate: 0.0035 USD/Robux, retrieved 2026-05-21)
-```
+Flags: `--rate <r>` (USD/Robux override), `--json`. Warns on stderr when
+below the 30,000-Robux DevEx payout minimum.
 
 ### `revenue`
 
-Estimate gross Robux revenue from visits, CCU, and monetization assumptions.
+Estimate monthly Robux + USD revenue from live CCU. All knobs overridable;
+the disclaimer is always surfaced alongside the estimate.
 
 ```sh
-npx bloxscout revenue --visits 1000000 --avg-ccu 800 --conversion 0.04 --arpu 50
+npx bloxscout revenue --ccu 250000
+npx bloxscout revenue --ccu 10000 --conversion-rate 0.03 --avg-robux 120 --json
 ```
 
-Flags: `--visits`, `--avg-ccu`, `--conversion <0..1>`, `--arpu <robux>`,
-`--json`.
+Flags: `--ccu <n>` (required), `--visits <n>`, `--conversion-rate <0..1>`,
+`--avg-robux <n>`, `--days <n>`, `--rate <r>`, `--json`.
 
-### `snapshot <universeId>`
+### `snapshot <universeIds...>`
 
-Capture a point-in-time snapshot of a game into the local SQLite store.
+Capture a point-in-time snapshot of one or more games into the local SQLite
+store. With `--watch`, stays in the foreground and re-snapshots on a fixed
+interval until Ctrl-C.
 
 ```sh
 npx bloxscout snapshot 920587237
+npx bloxscout snapshot 920587237 142823291 --watch 300
 ```
 
-Stored under `$BLOXSCOUT_DATA_DIR/data.db` (default `~/.bloxscout/data.db`).
-See [Snapshots and History](./Snapshots-and-History.md).
-
-### `watch`
-
-Schedule recurring snapshots for a set of games.
-
-```sh
-npx bloxscout watch add 920587237 4974551500 --every 1h
-npx bloxscout watch list
-npx bloxscout watch remove 920587237
-```
-
-> Status: planned for v0.2.
+Flags: `--watch <intervalSec>` (60-3600), `--json`. Stored under
+`$BLOXSCOUT_DATA_DIR/data.db` (default `~/.bloxscout/data.db`). See
+[Snapshots and History](./Snapshots-and-History.md).
 
 ### `report`
 
-Generate a structured market report (Markdown + JSON) for a genre or
-watchlist.
+Generate a market report (Markdown body + structured JSON) for a Roblox
+genre. Pretty mode prints the rendered Markdown as-is for piping into
+`glow` / screenshots; JSON mode emits the full structured payload with top
+games, aggregates, optional focus comparison, and notable creators.
 
 ```sh
-npx bloxscout report --genre Simulator --out ./simulator-2026-05.md
+npx bloxscout report --genre simulator
+npx bloxscout report --genre rpg --focus 920587237 --limit 5 --json
 ```
 
-Flags: `--genre`, `--watchlist <name>`, `--out <path>`, `--format <md|json>`.
+Flags: `--genre <name>` (required), `--focus <universeId>`, `--limit <n>`
+(1-20, default 10), `--json`.
 
 ## See also
 
