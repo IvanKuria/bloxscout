@@ -1,0 +1,19 @@
+{
+  "projectName": "bloxscout",
+  "projectOwner": "IvanKuria",
+  "files": [
+    "README.md",
+    "CONTRIBUTORS.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "repoType": "github",
+  "hosts": {
+    "github": {
+      "apiURL": "https://api.github.com"
+    }
+  },
+  "contributorsPerLine": 7,
+  "contributorsSortAlphabetically": false,
+  "contributors": []
+}
