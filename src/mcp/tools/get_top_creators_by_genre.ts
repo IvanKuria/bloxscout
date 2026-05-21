@@ -13,7 +13,6 @@ import {
   type GetTopCreatorsByGenreOutput,
   GetTopCreatorsByGenreOutputSchema,
 } from "../../shared/schemas.js";
-import { SUPPORTED_GENRES } from "../data/genre-seeds.js";
 import type { ToolContext, ToolDefinition } from "./types.js";
 
 const TOOL_NAME = "get_top_creators_by_genre";
@@ -27,8 +26,10 @@ const TOOL_DESCRIPTION = [
   "(User or Group), display name, summed CCU, game count, and the creator's",
   "most-played game from the result set.",
   "",
-  `Supported genres (case-insensitive): ${SUPPORTED_GENRES.join(", ")}.`,
-  "Unknown genres raise a VALIDATION_ERROR with the supported list.",
+  "Accepts any genre keyword — common aliases (rpg, fps, anime, tower-defense,",
+  "racing, tycoon, battlegrounds, fighting, obby, simulator, etc.) are normalized",
+  "to canonical Roblox search terms; unknown keywords pass through to Roblox's",
+  "omni-search verbatim.",
   "",
   "Implementation note: Roblox does not expose a public 'top creators by genre'",
   "endpoint, so this tool ranks against the live omni-search top results for the",
