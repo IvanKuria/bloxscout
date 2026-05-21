@@ -3,11 +3,13 @@ import type { RobloxClient } from "../../core/roblox-client.js";
 import type { SnapshotStore } from "../../core/snapshots.js";
 import { buildCompareCommand } from "./compare.js";
 import { buildCreatorCommand } from "./creator.js";
+import { buildDevexCommand } from "./devex.js";
 import { buildGameCommand } from "./game.js";
 import { buildGroupCommand } from "./group.js";
 import { buildIconCommand } from "./icon.js";
 import { buildPlayersCommand } from "./players.js";
 import { buildReportCommand } from "./report.js";
+import { buildRevenueCommand } from "./revenue.js";
 import { buildSearchCommand } from "./search.js";
 import { buildTopCommand } from "./top.js";
 import { buildTrendingCommand } from "./trending.js";
@@ -35,4 +37,6 @@ export function registerCommands(
   program.addCommand(buildTrendingCommand(getClient));
   program.addCommand(buildTopCommand(getClient));
   program.addCommand(buildReportCommand(getClient));
+  program.addCommand(buildDevexCommand(getClient));
+  program.addCommand(buildRevenueCommand(getClient));
 }
