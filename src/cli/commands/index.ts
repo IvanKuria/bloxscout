@@ -8,6 +8,7 @@ import { buildGroupCommand } from "./group.js";
 import { buildIconCommand } from "./icon.js";
 import { buildPlayersCommand } from "./players.js";
 import { buildSearchCommand } from "./search.js";
+import { buildTopCommand } from "./top.js";
 import { buildTrendingCommand } from "./trending.js";
 
 /**
@@ -31,4 +32,5 @@ export function registerCommands(
   program.addCommand(buildIconCommand(getClient));
   // v0.1.1 — non-ID-driven CLI surface.
   program.addCommand(buildTrendingCommand(getClient));
+  program.addCommand(buildTopCommand(getClient));
 }
