@@ -89,10 +89,32 @@ describe("get_top_creators_by_genre tool", () => {
     expect(result.creators[0]?.creatorName).toBe("Alice");
   });
 
-  it("propagates validation errors for unknown genres", async () => {
+  // v0.1.2 regression (#40): the previous allowlist gate rejected any genre
+  // outside SUPPORTED_GENRES with a VALIDATION_ERROR. Roblox's omni-search
+  // handles the long tail of popular genres natively, so arbitrary keywords
+  // must now pass through.
+  it.each(["tower-defense", "anime", "racing", "battlegrounds"])(
+    "accepts arbitrary genre keyword %s without rejecting",
+    async (genre) => {
+      const client = stub([makeGame(1, 250, 50, "Studio")]);
+      const result = await getTopCreatorsByGenreTool.handler({ genre, limit: 10 }, { client });
+      expect(result.genre).toBe(genre);
+      // Unaliased keyword passes through verbatim to omni-search.
+      expect(client.searchGames).toHaveBeenCalledWith(genre, expect.any(Object));
+      expect(result.creators).toHaveLength(1);
+    },
+  );
+
+  it("preserves alias mapping for `rpg` (-> role-playing search query)", async () => {
+    const client = stub([makeGame(1, 250, 50, "Studio")]);
+    await getTopCreatorsByGenreTool.handler({ genre: "rpg", limit: 10 }, { client });
+    expect(client.searchGames).toHaveBeenCalledWith("rpg", expect.any(Object));
+  });
+
+  it("still rejects empty-string genres with VALIDATION_ERROR", async () => {
     const client = stub([]);
     await expect(
-      getTopCreatorsByGenreTool.handler({ genre: "not-a-genre", limit: 10 }, { client }),
+      getTopCreatorsByGenreTool.handler({ genre: "   ", limit: 10 }, { client }),
     ).rejects.toThrow();
   });
 });

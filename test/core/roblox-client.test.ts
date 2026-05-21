@@ -116,7 +116,11 @@ describe("RobloxClient.getGames", () => {
     expect(games.map((g) => g.id)).toEqual([1, 2]);
   });
 
-  it("chunks calls when more than 100 ids are requested", async () => {
+  it("chunks calls at the GAMES_BATCH_SIZE limit (#36: now 50 per request)", async () => {
+    // Roblox tightened the per-request universe-id cap on
+    // games.roblox.com/v1/games — 100 ids now returns
+    // {"code":9,"message":"Too many universe IDs"}. The client batches at 50.
+    // 150 ids should split into 3 requests of 50.
     const pool = agent.get("https://games.roblox.com");
     let calls = 0;
     pool
@@ -125,11 +129,32 @@ describe("RobloxClient.getGames", () => {
         calls++;
         return { data: [gameFixture(1, "x")] };
       })
-      .times(2);
+      .times(3);
 
     const ids = Array.from({ length: 150 }, (_, i) => i + 1);
     await client.getGames(ids);
-    expect(calls).toBe(2);
+    expect(calls).toBe(3);
+  });
+
+  it("chunks an odd-size batch (75 ids -> 50 + 25, #36)", async () => {
+    // Regression for #36: an external caller passing 75 ids should succeed
+    // with two requests (50 + 25), not one request of 75 that Roblox would
+    // reject with "Too many universe IDs".
+    const pool = agent.get("https://games.roblox.com");
+    const seenIdCounts: number[] = [];
+    pool
+      .intercept({ path: (p) => p.startsWith("/v1/games") })
+      .reply(200, ({ path }) => {
+        const url = new URL(path, "https://games.roblox.com");
+        const ids = url.searchParams.get("universeIds")?.split(",") ?? [];
+        seenIdCounts.push(ids.length);
+        return { data: [gameFixture(Number(ids[0]), "x")] };
+      })
+      .times(2);
+
+    const ids = Array.from({ length: 75 }, (_, i) => i + 1);
+    await client.getGames(ids);
+    expect(seenIdCounts).toEqual([50, 25]);
   });
 
   it("getPlayerCounts projects to {universeId, playing, visits}", async () => {

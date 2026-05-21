@@ -1,6 +1,5 @@
-import { BloxscoutError } from "../../shared/errors.js";
 import { GetTopByGenreInputSchema, GetTopByGenreOutputSchema } from "../../shared/schemas.js";
-import { SUPPORTED_GENRES, lookupGenre } from "../data/genre-seeds.js";
+import { resolveGenreSearchQuery } from "../data/genre-seeds.js";
 import type { ToolDefinition } from "./types.js";
 
 /**
@@ -31,9 +30,10 @@ export const getTopByGenre: ToolDefinition<
   description: [
     "Return the top games in a given Roblox genre, ranked by `playing`",
     "(default), `visits`, or `favoritedCount`. Default `limit` is 20",
-    "(max 100). Supported genre slugs: simulator, role-playing, adventure,",
-    "fighting, obby, social, horror, shooter. Common aliases (e.g. 'rpg'",
-    "for role-playing, 'fps' for shooter) are accepted.",
+    "(max 100). Accepts any genre keyword — common aliases (rpg, fps,",
+    "anime, tower-defense, racing, tycoon, battlegrounds, fighting, obby,",
+    "etc.) are normalized to canonical Roblox search terms; unknown",
+    "keywords pass through to Roblox's omni-search verbatim.",
     "",
     "Implementation: candidates come from Roblox's live omni-search ranking",
     "for the genre keyword (self-correcting as popularity shifts), then the",
@@ -47,21 +47,18 @@ export const getTopByGenre: ToolDefinition<
   inputSchema: GetTopByGenreInputSchema,
   outputSchema: GetTopByGenreOutputSchema,
   handler: async (input, ctx) => {
-    const entry = lookupGenre(input.genre);
-    if (entry === undefined) {
-      throw new BloxscoutError(
-        `get_top_by_genre: unsupported genre "${input.genre}". Supported: ${SUPPORTED_GENRES.join(
-          ", ",
-        )}.`,
-        "VALIDATION_ERROR",
-      );
-    }
+    // v0.1.2 (#40): removed the SUPPORTED_GENRES allowlist gate. Known
+    // aliases (e.g. "rpg" -> "role-playing") still resolve to their canonical
+    // search query; unknown keywords pass through verbatim to omni-search,
+    // which natively handles popular long-tail genres (tower-defense, anime,
+    // racing, tycoon, battlegrounds, ...) the curated table never covered.
+    const searchQuery = resolveGenreSearchQuery(input.genre);
     // Pull a wider candidate pool than `limit` so the post-fetch re-rank by
     // visits / favorites still has something to reorder. Capped at 50: the
     // omni-search response is paginated and pulling deeper rarely surfaces
     // games anyone cares about.
     const candidatePoolSize = Math.min(50, Math.max(input.limit * 3, 25));
-    const summaries = await ctx.client.searchGames(entry.searchQuery, {
+    const summaries = await ctx.client.searchGames(searchQuery, {
       limit: candidatePoolSize,
     });
     if (summaries.length === 0) {

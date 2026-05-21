@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-05-21
+
+### Fixed
+
+- `get_top_by_genre`, `get_top_creators_by_genre`, and (via composition) `generate_market_report` no longer reject genres outside an 8-item allowlist (#40). Real Roblox has a long tail of popular genres — tower-defense, anime, racing, tycoon, battlegrounds, etc. — that omni-search handles natively but the curated `SUPPORTED_GENRES` list never covered. The leftover allowlist gate was an adoption blocker.
+- `RobloxClient.getGames` now batches at 50 universe ids per request instead of 100 (#36). Roblox tightened the per-request cap on `games.roblox.com/v1/games?universeIds=...` some time after v0.1.0 — 100-id batches now fail with `{"code":9,"message":"Too many universe IDs"}`. Any external caller passing more than 50 ids hit the same failure.
+
+### Changed
+
+- **Behavior change for `get_top_by_genre` and `get_top_creators_by_genre`**: these tools now accept any non-empty genre keyword. Known aliases (`rpg` → `role-playing`, `fps` → `shooter`, `tycoon` → `simulator`, etc.) still resolve to their canonical search query; unknown keywords pass through verbatim (after lower/hyphen normalization) to Roblox's omni-search. Tool descriptions updated to reflect the new contract.
+
 ## [0.1.1] - 2026-05-21
 
 ### Added
@@ -97,6 +108,7 @@ Initial public release of Bloxscout: an open-source TypeScript MCP server + CLI 
 **Test coverage**
 - 190 tests across 26 files (unit + integration). Integration tests gated by `INTEGRATION=1` and run nightly against real Roblox endpoints.
 
-[Unreleased]: https://github.com/IvanKuria/bloxscout/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/IvanKuria/bloxscout/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/IvanKuria/bloxscout/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/IvanKuria/bloxscout/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/IvanKuria/bloxscout/releases/tag/v0.1.0

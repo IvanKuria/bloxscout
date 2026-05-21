@@ -114,15 +114,16 @@ describe("getTopCreatorsByGenre", () => {
     expect(result).toHaveLength(1);
   });
 
-  it("throws VALIDATION_ERROR for unknown genres and lists supported ones", async () => {
-    const client = makeStubClient([]);
-    await expect(getTopCreatorsByGenre(client, "metaverse-xtreme")).rejects.toThrow(BloxscoutError);
-    try {
-      await getTopCreatorsByGenre(client, "metaverse-xtreme");
-    } catch (err) {
-      expect((err as BloxscoutError).code).toBe("VALIDATION_ERROR");
-      expect((err as BloxscoutError).message).toContain("simulator");
-    }
+  it("accepts unknown / long-tail genres and forwards them to omni-search (#40)", async () => {
+    // v0.1.2: the prior allowlist gate rejected anything not in
+    // SUPPORTED_GENRES with a VALIDATION_ERROR. Real Roblox has a long tail
+    // of popular genres (tower-defense, anime, racing, ...) that omni-search
+    // handles natively, so unknown keywords must pass through verbatim.
+    const games = [makeGame({ id: 1, playing: 250, creator: { id: 10, name: "Studio" } })];
+    const client = makeStubClient(games);
+    const result = await getTopCreatorsByGenre(client, "tower-defense");
+    expect(result).toHaveLength(1);
+    expect(client.searchGames).toHaveBeenCalledWith("tower-defense", expect.any(Object));
   });
 
   it("rejects empty genre and bad limit", async () => {

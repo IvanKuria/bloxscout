@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { generateMarketReport } from "../../../src/mcp/tools/generate_market_report.js";
-import { BloxscoutError } from "../../../src/shared/errors.js";
 import { gameFixture, makeCtx } from "./_helpers.js";
 
 function summaryFixture(id: number, playerCount: number) {
@@ -145,13 +144,16 @@ describe("generate_market_report tool", () => {
     expect(out.structured.aggregates.topCreator?.gameCount).toBe(2);
   });
 
-  it("surfaces upstream errors cleanly (unknown genre)", async () => {
+  it("accepts arbitrary genre keywords post-#40 (no allowlist gate)", async () => {
+    // v0.1.2 (#40): generate_market_report -> get_top_by_genre no longer
+    // rejects unknown genres. Empty omni-search results just yield an empty
+    // top-games list rather than a VALIDATION_ERROR.
     const { ctx, client } = makeCtx();
     client.searchGames.mockResolvedValue([]);
     client.getGames.mockResolvedValue([]);
-    await expect(
-      generateMarketReport.handler({ genre: "definitely-not-a-real-genre", limit: 5 }, ctx),
-    ).rejects.toBeInstanceOf(BloxscoutError);
+    const out = await generateMarketReport.handler({ genre: "tower-defense", limit: 5 }, ctx);
+    expect(out.genre).toBe("tower-defense");
+    expect(out.structured.topGames).toEqual([]);
   });
 
   it("respects the `limit` parameter", async () => {

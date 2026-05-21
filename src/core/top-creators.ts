@@ -23,7 +23,7 @@
  * swap.
  */
 
-import { SUPPORTED_GENRES, lookupGenre } from "../mcp/data/genre-seeds.js";
+import { resolveGenreSearchQuery } from "../mcp/data/genre-seeds.js";
 import { BloxscoutError } from "../shared/errors.js";
 import type { RobloxClient } from "./roblox-client.js";
 import type { Game, RobloxUniverseId } from "./types.js";
@@ -93,15 +93,14 @@ export async function getTopCreatorsByGenre(
     );
   }
 
-  const entry = lookupGenre(genre);
-  if (entry === undefined) {
-    throw new BloxscoutError(
-      `getTopCreatorsByGenre: unknown genre '${genre}'. Supported genres: ${SUPPORTED_GENRES.join(", ")}`,
-      "VALIDATION_ERROR",
-    );
-  }
+  // v0.1.2 (#40): removed the SUPPORTED_GENRES allowlist gate. Known aliases
+  // (e.g. "rpg" -> "role-playing") still resolve to a canonical search query;
+  // unknown keywords pass through verbatim to omni-search so the long tail of
+  // popular Roblox genres (tower-defense, anime, racing, tycoon, ...) just
+  // works.
+  const searchQuery = resolveGenreSearchQuery(genre);
 
-  const summaries = await client.searchGames(entry.searchQuery, { limit: CANDIDATE_POOL_SIZE });
+  const summaries = await client.searchGames(searchQuery, { limit: CANDIDATE_POOL_SIZE });
   if (summaries.length === 0) return [];
 
   const ids = summaries.map((s) => s.universeId);

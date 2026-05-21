@@ -48,4 +48,15 @@ d("Genre ranking tools (integration, #34 regression)", () => {
     // (A stale-seed-list regression would render all zeros.)
     expect(out.structured.aggregates.totalCcu).toBeGreaterThan(MIN_CCU);
   }, 60_000);
+
+  // v0.1.2 regression (#40): tower-defense is one of the biggest Roblox
+  // genres and was previously rejected at the tool boundary. This guards
+  // against re-introducing any allowlist gate.
+  it("generate_market_report tower-defense returns real games (#40)", async () => {
+    const out = await generateMarketReport.handler({ genre: "tower-defense", limit: 5 }, ctx);
+    expect(out.structured.topGames.length).toBeGreaterThan(0);
+    const maxCcu = Math.max(...out.structured.topGames.map((g) => g.playing));
+    expect(maxCcu).toBeGreaterThan(MIN_CCU);
+    expect(out.markdown).toContain("# Market report: tower-defense");
+  }, 60_000);
 });

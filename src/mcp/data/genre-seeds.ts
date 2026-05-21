@@ -97,6 +97,25 @@ export function lookupGenre(genre: string): GenreSeedEntry | undefined {
   return undefined;
 }
 
+/**
+ * Resolve any user-provided genre keyword into a search query suitable for
+ * `RobloxClient.searchGames`. Known aliases (e.g. `rpg` -> `role-playing`)
+ * are normalized to their canonical entry's `searchQuery`; unknown keywords
+ * pass through verbatim (normalized for case/whitespace) so omni-search can
+ * resolve them directly.
+ *
+ * v0.1.2: replaces the previous allowlist gate (#40). Real Roblox has a
+ * long tail of popular genres (tower-defense, anime, racing, tycoon,
+ * battlegrounds, ...) that omni-search handles natively but the curated
+ * `GENRE_SEEDS` table does not — rejecting them at the tool boundary was an
+ * adoption blocker.
+ */
+export function resolveGenreSearchQuery(genre: string): string {
+  const entry = lookupGenre(genre);
+  if (entry !== undefined) return entry.searchQuery;
+  return genre.trim().toLowerCase().replace(/\s+/g, "-");
+}
+
 /** List of supported genre slugs, for diagnostics / error messages. */
 export const SUPPORTED_GENRES: readonly string[] = Object.freeze(Object.keys(GENRE_SEEDS));
 
