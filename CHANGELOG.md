@@ -8,6 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- MCP stdio server entry point (`bloxscout-mcp`) now boots a real `@modelcontextprotocol/sdk` v1 server with `tools/list` + `tools/call` handlers, JSON Schema generated from the Zod input schemas, and a single shared `RobloxClient` instance per process.
+- First 10 MCP tools, each with an LLM-targeted description and structured JSON output:
+  - `search_games` — keyword search via Roblox's omni-search.
+  - `get_trending_games` — v0.1 CCU-ranked fallback over a curated seed list (true trending lands in v0.2 with the snapshot store).
+  - `get_top_by_genre` — curated per-genre seed list, ranked by `playing` / `visits` / `favoritedCount`.
+  - `get_game` — full metadata for one universe id.
+  - `get_game_player_count` — live CCU + lifetime visits.
+  - `compare_games` — side-by-side detail for 2-10 games with min/max/median summary.
+  - `analyze_game_vs_genre` — target game vs cohort median / 75th percentile / max with per-metric percentile.
+  - `get_creator` — user-style creator profile.
+  - `get_group` — group metadata.
+  - `get_game_icons` — thumbnails for up to 100 games at a chosen size.
+- Tool registry (`src/mcp/tools/index.ts`) and per-genre seed data (`src/mcp/data/genre-seeds.ts`).
 - Initial project scaffold: TypeScript ESM package, MCP stdio server bin (`bloxscout-mcp`), CLI bin (`bloxscout`).
 - Repository infrastructure: README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, issue and PR templates, Dependabot, GitHub Actions CI / release / nightly integration workflows.
 - CLI commands wrapping the Phase 1 Roblox client 1:1: `search`, `game`, `players`, `compare`, `creator`, `group`, `icon`.
