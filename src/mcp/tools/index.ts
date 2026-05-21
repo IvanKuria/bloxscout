@@ -2,6 +2,7 @@ import { analyzeGameVsGenre } from "./analyze-game-vs-genre.js";
 import { calculateDevexInfo } from "./calculate_devex.js";
 import { compareGames } from "./compare-games.js";
 import { estimateGameRevenueInfo } from "./estimate_game_revenue.js";
+import { generateMarketReport } from "./generate_market_report.js";
 import { getCreator } from "./get-creator.js";
 import { getGameIcons } from "./get-game-icons.js";
 import { getGamePlayerCount } from "./get-game-player-count.js";
@@ -15,6 +16,7 @@ import { getUpAndComing } from "./get_up_and_coming.js";
 import { searchGames } from "./search-games.js";
 import { snapshotGame } from "./snapshot_game.js";
 import type { ToolDefinition } from "./types.js";
+import { watchGames } from "./watch_games.js";
 
 /**
  * The full set of tools shipped in Phase 2. Order matches the README's tool
@@ -47,6 +49,9 @@ export const allTools: ReadonlyArray<ToolDefinition<any, any>> = Object.freeze([
   snapshotGame,
   getGameHistory,
   getUpAndComing,
+  watchGames,
+  // Synthesis
+  generateMarketReport,
 ]);
 
 export {
@@ -54,6 +59,7 @@ export {
   calculateDevexInfo,
   compareGames,
   estimateGameRevenueInfo,
+  generateMarketReport,
   getCreator,
   getGame,
   getGameHistory,
@@ -66,4 +72,5 @@ export {
   getUpAndComing,
   searchGames,
   snapshotGame,
+  watchGames,
 };
