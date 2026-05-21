@@ -1,5 +1,6 @@
 import type { z } from "zod";
 import type { RobloxClient } from "../../core/roblox-client.js";
+import type { SnapshotStore } from "../../core/snapshots.js";
 
 /**
  * Generic shape every MCP tool module exports. Inputs/outputs are typed via
@@ -16,6 +17,8 @@ import type { RobloxClient } from "../../core/roblox-client.js";
  */
 export interface ToolContext {
   client: RobloxClient;
+  /** Optional snapshot store; required only by tools that read/write the local time-series DB (e.g. `watch_games`). */
+  store?: SnapshotStore;
 }
 
 export interface ToolDefinition<

@@ -36,5 +36,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `getTopCreatorsByGenre` aggregation in `src/core/top-creators.ts`: ranks creators by summed CCU across the seed list for a given genre.
 - MCP tools `calculate_devex`, `estimate_game_revenue`, and `get_top_creators_by_genre` in `src/mcp/tools/`, each with LLM-ready descriptions and Zod-derived JSON input/output schemas.
 - Zod schemas for the three new tools, appended to `src/shared/schemas.ts`.
+- Phase 5b MCP tools:
+  - `watch_games` — non-blocking background watch that spawns an in-process `SnapshotScheduler` per call and returns a `watchId`. Supports `action: "start" | "stop" | "status"`. Watches live only as long as the MCP server process; use the `bloxscout snapshot --cron` CLI for durable scheduled snapshots.
+  - `generate_market_report` — synthesis tool that internally calls `get_top_by_genre` (and optionally `analyze_game_vs_genre`) and returns both a rendered markdown report and a structured JSON payload (top games, aggregates, optional focus comparison, notable creators).
+- `ToolContext` now carries an optional `store?: SnapshotStore` so tools that read or write the local snapshot DB can be injected with a shared store.
 
 [Unreleased]: https://github.com/IvanKuria/bloxscout/compare/HEAD
