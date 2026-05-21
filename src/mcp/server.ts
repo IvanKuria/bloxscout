@@ -4,6 +4,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { RobloxClient } from "../core/roblox-client.js";
+import { SnapshotStore } from "../core/snapshots.js";
 import { BloxscoutError, mapToMcpError } from "../shared/errors.js";
 import { allTools } from "./tools/index.js";
 import type { ToolContext, ToolDefinition } from "./tools/types.js";
@@ -19,9 +20,17 @@ export interface CreateMcpServerOptions {
    */
   client?: RobloxClient;
   /**
-   * Optional registry override. Defaults to the full Phase 2 tool set
-   * (`allTools`). Mainly an extension hook for downstream forks; tests
-   * use it to scope to a single tool.
+   * Inject a pre-configured `SnapshotStore`. Used by the time-series tools
+   * (`snapshot_game`, `get_game_history`, `get_up_and_coming`). Tests can
+   * pass a tempfile-backed store; production builds open the default
+   * `~/.bloxscout/data.db` (overridable via `BLOXSCOUT_DATA_DIR`).
+   * Pass `null` to disable storage tools — they'll error if called.
+   */
+  store?: SnapshotStore | null;
+  /**
+   * Optional registry override. Defaults to the full tool set (`allTools`).
+   * Mainly an extension hook for downstream forks; tests use it to scope
+   * to a single tool.
    */
   // biome-ignore lint/suspicious/noExplicitAny: heterogeneous tool definitions
   tools?: ReadonlyArray<ToolDefinition<any, any>>;
@@ -47,7 +56,8 @@ export function createMcpServer(options: CreateMcpServerOptions = {}): Server {
   );
 
   const client = options.client ?? new RobloxClient();
-  const ctx: ToolContext = { client };
+  const store = options.store === null ? undefined : (options.store ?? new SnapshotStore());
+  const ctx: ToolContext = store === undefined ? { client } : { client, store };
   const tools = options.tools ?? allTools;
   // biome-ignore lint/suspicious/noExplicitAny: heterogeneous tool definitions
   const byName = new Map<string, ToolDefinition<any, any>>(tools.map((t) => [t.name, t]));

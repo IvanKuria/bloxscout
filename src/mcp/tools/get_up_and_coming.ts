@@ -8,9 +8,9 @@
  */
 
 import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
-import { type TrendingEntry, computeUpAndComing } from "../../core/rankings.js";
-import type { SnapshotStore } from "../../core/snapshots.js";
+import { computeUpAndComing } from "../../core/rankings.js";
+import { BloxscoutError } from "../../shared/errors.js";
+import type { ToolContext, ToolDefinition } from "./types.js";
 
 export const getUpAndComingInputSchema = z.object({
   since: z
@@ -35,22 +35,33 @@ export const getUpAndComingInputSchema = z.object({
     .describe("Maximum rows returned. Default 25."),
 });
 
+const trendingEntrySchema = z.object({
+  universeId: z.number(),
+  name: z.string().nullable(),
+  currentPlaying: z.number(),
+  deltaPct: z.number(),
+  snapshotCount: z.number().int().nonnegative(),
+});
+
+export const getUpAndComingOutputSchema = z.object({
+  entries: z.array(trendingEntrySchema),
+});
+
 export type GetUpAndComingInput = z.infer<typeof getUpAndComingInputSchema>;
+export type GetUpAndComingOutput = z.infer<typeof getUpAndComingOutputSchema>;
 
-export interface GetUpAndComingOutput {
-  entries: TrendingEntry[];
-}
-
-export interface GetUpAndComingDeps {
-  store: SnapshotStore;
-}
-
-export function getUpAndComing(
+export async function getUpAndComingHandler(
   input: GetUpAndComingInput,
-  deps: GetUpAndComingDeps,
-): GetUpAndComingOutput {
+  ctx: ToolContext,
+): Promise<GetUpAndComingOutput> {
+  if (ctx.store === undefined) {
+    throw new BloxscoutError(
+      "get_up_and_coming requires a SnapshotStore in context.",
+      "INTERNAL_ERROR",
+    );
+  }
   const since = input.since ? new Date(input.since) : undefined;
-  const entries = computeUpAndComing(deps.store, {
+  const entries = computeUpAndComing(ctx.store, {
     since,
     minBaselinePlayers: input.minBaselinePlayers,
     limit: input.limit,
@@ -58,10 +69,17 @@ export function getUpAndComing(
   return { entries };
 }
 
-export const getUpAndComingTool = {
+export const getUpAndComing: ToolDefinition<
+  typeof getUpAndComingInputSchema,
+  typeof getUpAndComingOutputSchema
+> = {
   name: "get_up_and_coming",
   description:
-    "Rank small-baseline games (default <5,000 baseline players) by `playing`-count growth-rate over the snapshot window. Catches breakout titles before they hit the global trending list.",
-  inputSchema: zodToJsonSchema(getUpAndComingInputSchema, { $refStrategy: "none" }),
-  handler: getUpAndComing,
-} as const;
+    "Rank small-baseline games (default <5,000 baseline players) by `playing`-count growth-rate over the snapshot window. Catches breakout titles before they hit the global trending list. Requires a populated snapshot store — call `snapshot_game` for the universes you care about first, ideally on a recurring schedule via `bloxscout snapshot --cron`.",
+  inputSchema: getUpAndComingInputSchema,
+  outputSchema: getUpAndComingOutputSchema,
+  handler: getUpAndComingHandler,
+};
+
+/** @deprecated Legacy export retained for the get_up_and_coming test suite. */
+export const getUpAndComingTool = getUpAndComing;

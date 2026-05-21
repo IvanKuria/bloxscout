@@ -52,12 +52,13 @@ describe("get_top_creators_by_genre tool", () => {
     expect(getTopCreatorsByGenreTool.description).toContain("simulator");
   });
 
-  it("exposes JSON input/output schemas", () => {
-    const input = getTopCreatorsByGenreTool.inputSchema as {
-      properties: Record<string, unknown>;
-    };
-    expect(input.properties.genre).toBeDefined();
-    expect(input.properties.limit).toBeDefined();
+  it("exposes Zod input/output schemas", () => {
+    expect(
+      getTopCreatorsByGenreTool.inputSchema.safeParse({ genre: "simulator", limit: 10 }).success,
+    ).toBe(true);
+    expect(getTopCreatorsByGenreTool.inputSchema.safeParse({ genre: "simulator" }).success).toBe(
+      true,
+    );
   });
 
   it("returns a wrapped { genre, creators } payload", async () => {

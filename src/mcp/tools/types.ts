@@ -9,7 +9,8 @@ import type { SnapshotStore } from "../../core/snapshots.js";
  *
  * `handler` is async and receives:
  *  - `input`: already parsed + validated against `inputSchema`
- *  - `ctx`: shared dependencies (currently only the `RobloxClient`)
+ *  - `ctx`: shared dependencies — the Roblox client and (optionally) the
+ *           local snapshot store
  *
  * Handlers must NOT swallow errors — let them bubble. The server-level
  * dispatcher catches them and runs them through `mapToMcpError` so the
@@ -17,7 +18,12 @@ import type { SnapshotStore } from "../../core/snapshots.js";
  */
 export interface ToolContext {
   client: RobloxClient;
-  /** Optional snapshot store; required only by tools that read/write the local time-series DB (e.g. `watch_games`). */
+  /**
+   * Local SQLite snapshot store. Required by the time-series tools
+   * (`snapshot_game`, `get_game_history`, `get_up_and_coming`, `watch_games`);
+   * ignored by everything else. Optional so unit tests for non-storage tools
+   * don't need to construct one.
+   */
   store?: SnapshotStore;
 }
 

@@ -6,8 +6,6 @@
  * for the curated per-genre seed games.
  */
 
-import { zodToJsonSchema } from "zod-to-json-schema";
-import type { RobloxClient } from "../../core/roblox-client.js";
 import { SUPPORTED_SEED_GENRES } from "../../core/seed-data.js";
 import { getTopCreatorsByGenre } from "../../core/top-creators.js";
 import {
@@ -16,6 +14,7 @@ import {
   type GetTopCreatorsByGenreOutput,
   GetTopCreatorsByGenreOutputSchema,
 } from "../../shared/schemas.js";
+import type { ToolContext, ToolDefinition } from "./types.js";
 
 const TOOL_NAME = "get_top_creators_by_genre";
 
@@ -36,28 +35,29 @@ const TOOL_DESCRIPTION = [
   "computed from local snapshots, without changing this tool's input or output shape.",
 ].join("\n");
 
-export interface GetTopCreatorsByGenreToolDeps {
-  client: RobloxClient;
-}
-
 export async function getTopCreatorsByGenreHandler(
   input: GetTopCreatorsByGenreInput,
-  deps: GetTopCreatorsByGenreToolDeps,
+  ctx: ToolContext,
 ): Promise<GetTopCreatorsByGenreOutput> {
-  const parsed = GetTopCreatorsByGenreInputSchema.parse(input);
-  const creators = await getTopCreatorsByGenre(deps.client, parsed.genre, {
-    limit: parsed.limit,
+  const creators = await getTopCreatorsByGenre(ctx.client, input.genre, {
+    limit: input.limit,
   });
   return GetTopCreatorsByGenreOutputSchema.parse({
-    genre: parsed.genre,
+    genre: input.genre,
     creators,
   });
 }
 
-export const getTopCreatorsByGenreTool = {
+export const getTopCreatorsByGenreInfo: ToolDefinition<
+  typeof GetTopCreatorsByGenreInputSchema,
+  typeof GetTopCreatorsByGenreOutputSchema
+> = {
   name: TOOL_NAME,
   description: TOOL_DESCRIPTION,
-  inputSchema: zodToJsonSchema(GetTopCreatorsByGenreInputSchema, { target: "jsonSchema7" }),
-  outputSchema: zodToJsonSchema(GetTopCreatorsByGenreOutputSchema, { target: "jsonSchema7" }),
+  inputSchema: GetTopCreatorsByGenreInputSchema,
+  outputSchema: GetTopCreatorsByGenreOutputSchema,
   handler: getTopCreatorsByGenreHandler,
-} as const;
+};
+
+/** @deprecated Legacy export retained for the get_top_creators_by_genre test suite. */
+export const getTopCreatorsByGenreTool = getTopCreatorsByGenreInfo;
