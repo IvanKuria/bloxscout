@@ -1,0 +1,35 @@
+# Source
+src/
+test/
+
+# Config
+tsconfig.json
+tsconfig.test.json
+biome.json
+vitest.config.ts
+
+# CI/repo metadata
+.github/
+docs/
+.gitignore
+.npmignore
+.editorconfig
+.prettierrc*
+.eslintrc*
+
+# Dotfiles
+.env*
+.DS_Store
+.idea/
+.vscode/
+
+# Build artifacts that shouldn't ship
+coverage/
+*.tsbuildinfo
+*.log
+
+# Markdown except README
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+SECURITY.md
+CHANGELOG.md

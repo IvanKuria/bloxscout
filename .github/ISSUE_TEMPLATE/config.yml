@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and discussion
+    url: https://github.com/IvanKuria/bloxscout/discussions
+    about: For usage questions, ideas, and general discussion, please open a discussion instead of an issue.
+  - name: Report a security vulnerability
+    url: https://github.com/IvanKuria/bloxscout/security/advisories/new
+    about: Security reports must be filed privately. Please do not open a public issue.

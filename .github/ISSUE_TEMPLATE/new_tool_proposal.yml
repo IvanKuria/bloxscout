@@ -1,0 +1,92 @@
+name: New MCP tool proposal
+description: Propose a new MCP tool to add to Bloxscout.
+title: "[tool]: "
+labels: [enhancement, mcp-tool, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        New MCP tools are the highest-leverage contributions to Bloxscout. Filling this template fully lets a maintainer sign off on the design before implementation begins.
+  - type: input
+    id: name
+    attributes:
+      label: Proposed tool name (snake_case)
+      placeholder: get_top_games_in_region
+    validations:
+      required: true
+  - type: input
+    id: one-liner
+    attributes:
+      label: One-line tool description
+      description: This text appears verbatim as the MCP tool description shown to the LLM. Be precise — it drives whether the agent picks the right tool.
+      placeholder: Return the top games by current CCU within a specific region.
+    validations:
+      required: true
+  - type: textarea
+    id: inputs
+    attributes:
+      label: Inputs
+      description: List each parameter, its type, and whether it is required. JSON-schema-flavored is fine.
+      placeholder: |
+        - region: string, required, ISO-3166-1 alpha-2
+        - limit: integer, optional, default 25, max 100
+    validations:
+      required: true
+  - type: textarea
+    id: outputs
+    attributes:
+      label: Outputs
+      description: The JSON shape returned to the agent.
+      render: json
+      placeholder: |
+        {
+          "items": [
+            { "gameId": 123, "name": "...", "playing": 4500, "rank": 1 }
+          ]
+        }
+    validations:
+      required: true
+  - type: textarea
+    id: example-prompt
+    attributes:
+      label: Example agent prompt that would invoke this tool
+      placeholder: "What are the top 10 trending games in Japan right now?"
+    validations:
+      required: true
+  - type: input
+    id: example-cli
+    attributes:
+      label: Example CLI invocation
+      description: Optional but recommended.
+      placeholder: bloxscout top --region JP --limit 10
+    validations:
+      required: false
+  - type: checkboxes
+    id: data-sources
+    attributes:
+      label: Roblox data sources needed
+      options:
+        - label: games.roblox.com
+        - label: presence.roblox.com
+        - label: groups.roblox.com
+        - label: users.roblox.com
+        - label: thumbnails.roblox.com
+        - label: Roblox Open Cloud (authenticated)
+        - label: Local snapshot store (~/.bloxscout/data.db)
+        - label: Something else (describe below)
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Why would a human or agent use this?
+      description: The concrete user benefit. Skip the obvious; explain why this is worth shipping.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Implementation notes (optional)
+      description: Edge cases, rate-limit concerns, caching strategy, anything an implementer should know.
+    validations:
+      required: false

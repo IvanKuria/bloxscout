@@ -1,0 +1,110 @@
+name: integration
+
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  integration:
+    name: nightly integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm build
+
+      - name: Run integration tests
+        id: integration
+        run: pnpm test:integration 2>&1 | tee integration-output.log
+        shell: bash
+
+      - name: Capture failing test names
+        if: failure()
+        id: failing
+        run: |
+          {
+            echo "tests<<EOF"
+            grep -E "^\s*(FAIL|×)\s" integration-output.log || echo "(no parsed failures — see run log)"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: Open or update tracking issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        env:
+          FAILING_TESTS: ${{ steps.failing.outputs.tests }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          script: |
+            const today = new Date().toISOString().slice(0, 10);
+            const titlePrefix = "Nightly integration test failed";
+            const title = `${titlePrefix} (${today})`;
+            const runUrl = process.env.RUN_URL;
+            const failingTests = process.env.FAILING_TESTS || "(unavailable)";
+
+            // Dedupe: look for an open issue with same prefix from the last 7 days.
+            const sevenDaysAgoMs = Date.now() - 7 * 24 * 60 * 60 * 1000;
+            const existing = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: "roblox-api-change",
+              per_page: 100,
+            });
+
+            const recent = existing.find((i) =>
+              i.title.startsWith(titlePrefix) &&
+              new Date(i.created_at).getTime() >= sevenDaysAgoMs
+            );
+
+            const body = [
+              "Nightly integration suite failed.",
+              "",
+              `Run: ${runUrl}`,
+              "",
+              "Failing tests:",
+              "```",
+              failingTests,
+              "```",
+            ].join("\n");
+
+            if (recent) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: recent.number,
+                body,
+              });
+              core.info(`Commented on existing issue #${recent.number}`);
+            } else {
+              const created = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ["bug", "roblox-api-change"],
+              });
+              core.info(`Opened new issue #${created.data.number}`);
+            }
