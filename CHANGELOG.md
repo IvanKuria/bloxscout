@@ -18,5 +18,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Rankings module (`src/core/rankings.ts`): `computeTrending`, `computeUpAndComing`, and `computeGrowthSeries` derive growth metrics from snapshot history.
 - `SnapshotScheduler` (`src/core/scheduler.ts`): in-process `setInterval` poller that periodically writes snapshots — backs `bloxscout snapshot --cron` and the MCP `watch_games` flow.
 - MCP tool descriptors: `snapshot_game`, `get_game_history`, `get_up_and_coming` under `src/mcp/tools/` (awaiting wiring in `src/mcp/server.ts` by Phase 2).
+- Pure-function DevEx and revenue calculators in `src/core/calculators.ts`: `calculateDevex` (default rate 0.0038 USD per Robux, payout-minimum flag at 30,000 Robux) and `estimateGameRevenue` (heuristic monthly revenue from CCU with explicit assumptions and a prominent disclaimer).
+- Curated per-genre game seed map in `src/core/seed-data.ts`, shared by Phase 5a's `get_top_creators_by_genre` and reusable by Phase 2's `get_top_by_genre`.
+- `getTopCreatorsByGenre` aggregation in `src/core/top-creators.ts`: ranks creators by summed CCU across the seed list for a given genre.
+- MCP tools `calculate_devex`, `estimate_game_revenue`, and `get_top_creators_by_genre` in `src/mcp/tools/`, each with LLM-ready descriptions and Zod-derived JSON input/output schemas.
+- Zod schemas for the three new tools, appended to `src/shared/schemas.ts`.
 
 [Unreleased]: https://github.com/IvanKuria/bloxscout/compare/HEAD

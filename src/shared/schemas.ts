@@ -217,3 +217,79 @@ export const GetGroupOutputSchema = z.object({
   group: GroupSchema,
 });
 export type GetGroupOutput = z.infer<typeof GetGroupOutputSchema>;
+
+// =============================================================================
+// Phase 5a — calculators + top creators
+// =============================================================================
+//
+// Schemas for `calculate_devex`, `estimate_game_revenue`, and
+// `get_top_creators_by_genre`. Appended at the end of the file to minimize
+// merge conflicts with Phase 2 (which also appends its tool schemas here).
+
+export const CalculateDevexInputSchema = z.object({
+  robux: z.number().nonnegative(),
+  rateUsdPerRobux: z.number().positive().optional(),
+});
+export type CalculateDevexInput = z.infer<typeof CalculateDevexInputSchema>;
+
+export const CalculateDevexOutputSchema = z.object({
+  robux: z.number().nonnegative(),
+  usd: z.number().nonnegative(),
+  rateUsdPerRobux: z.number().positive(),
+  payoutMinimumNotMet: z.boolean().optional(),
+});
+export type CalculateDevexOutput = z.infer<typeof CalculateDevexOutputSchema>;
+
+export const EstimateGameRevenueInputSchema = z.object({
+  playing: z.number().int().nonnegative(),
+  visits: z.number().int().nonnegative(),
+  conversionRate: z.number().min(0).max(1).optional(),
+  averageRobuxPerPayingUser: z.number().nonnegative().optional(),
+  daysActive: z.number().positive().optional(),
+  rateUsdPerRobux: z.number().positive().optional(),
+});
+export type EstimateGameRevenueInput = z.infer<typeof EstimateGameRevenueInputSchema>;
+
+export const EstimateGameRevenueOutputSchema = z.object({
+  inputs: z.object({
+    playing: z.number().int().nonnegative(),
+    visits: z.number().int().nonnegative(),
+    conversionRate: z.number().min(0).max(1),
+    averageRobuxPerPayingUser: z.number().nonnegative(),
+    daysActive: z.number().positive(),
+    rateUsdPerRobux: z.number().positive(),
+  }),
+  estimatedDailyRobux: z.number().nonnegative(),
+  estimatedMonthlyRobux: z.number().nonnegative(),
+  estimatedMonthlyUsd: z.number().nonnegative(),
+  confidence: z.enum(["low", "medium", "high"]),
+  assumptions: z.array(z.string()),
+  disclaimer: z.string(),
+});
+export type EstimateGameRevenueOutput = z.infer<typeof EstimateGameRevenueOutputSchema>;
+
+export const GetTopCreatorsByGenreInputSchema = z.object({
+  genre: z.string().min(1),
+  limit: z.number().int().positive().max(100).default(10),
+});
+export type GetTopCreatorsByGenreInput = z.infer<typeof GetTopCreatorsByGenreInputSchema>;
+
+export const TopCreatorEntrySchema = z.object({
+  creatorId: z.number().int().nonnegative(),
+  creatorType: z.enum(["User", "Group"]),
+  creatorName: z.string(),
+  totalPlayingAcrossSeedGames: z.number().int().nonnegative(),
+  gameCount: z.number().int().nonnegative(),
+  topGame: z.object({
+    universeId: z.number().int().positive(),
+    name: z.string(),
+    playing: z.number().int().nonnegative(),
+  }),
+});
+export type TopCreatorEntry = z.infer<typeof TopCreatorEntrySchema>;
+
+export const GetTopCreatorsByGenreOutputSchema = z.object({
+  genre: z.string(),
+  creators: z.array(TopCreatorEntrySchema),
+});
+export type GetTopCreatorsByGenreOutput = z.infer<typeof GetTopCreatorsByGenreOutputSchema>;
