@@ -81,15 +81,43 @@ universe ID at once).
 
 Three TTL buckets from `src/core/cache.ts`:
 
-| Bucket | Seconds | Used for |
+| Bucket | Seconds | Typical caller |
 | --- | --- | --- |
-| `LIVE` | 60 | CCU / presence projection. |
-| `DEFAULT` | 300 | Search results. |
+| `LIVE` | 60 | CCU / presence projection, player-count tools. |
+| `DEFAULT` | 300 | Search results, catalog listings. |
 | `SLOW` | 600 | Game metadata, group info, user profiles, thumbnails. |
 
-Default cache size is 1,000 entries (LRU). Persistent on-disk caching is
-intentionally out of scope for v0.1 — the snapshot store handles long-lived
-data.
+### How to pick a TTL
+
+When adding a new RobloxClient method, choose a bucket based on **how quickly
+the underlying Roblox data changes**:
+
+- **`LIVE`** — data that can change between user interactions (player counts,
+  online status). Stale data misleads the user within seconds.
+- **`DEFAULT`** — data that changes on a timescale of minutes (search rankings,
+  game listings). Acceptable to serve slightly stale results for a few minutes.
+- **`SLOW`** — data that rarely changes (game descriptions, group info, profile
+  pictures). Safe to cache for 10 minutes or more.
+
+When in doubt, prefer `DEFAULT`. It is the safest middle ground — fresh enough
+to avoid misleading users, conservative enough to keep Roblox request rates low.
+
+### In-flight de-duplication
+
+`BloxscoutCache` maintains a per-key `Map<string, Promise>` that tracks
+ongoing loader calls. When multiple concurrent calls request the same key:
+
+1. The first call starts the loader and stores the resulting `Promise` in the
+   `inflight` map.
+2. Subsequent calls with the same key **return the same `Promise`** — the
+   loader function is never invoked a second time.
+3. Once the loader resolves (or rejects), the entry is cached in the LRU store
+   and removed from `inflight`.
+
+This means that even if 10 MCP tools all need the same game's metadata at
+exactly the same moment, only **one** HTTP request is sent to Roblox. The
+`inflight` map is process-local (not shared across processes) — each process
+maintains its own de-duplication.
 
 ## Retry strategy
 
