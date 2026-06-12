@@ -6,6 +6,7 @@
  * the single source of truth; nothing here mutates it.
  */
 
+import { growthRate } from "./growth.js";
 import type { GameSnapshot, SnapshotStore } from "./snapshots.js";
 import type { RobloxUniverseId } from "./types.js";
 
@@ -183,13 +184,6 @@ function oldestInWindow(
   const history = store.getGameHistory(universeId, { since, limit: 100_000 });
   if (history.length === 0) return null;
   return history[history.length - 1] ?? null;
-}
-
-function growthRate(baseline: number, current: number): number {
-  if (baseline === 0) {
-    return current === 0 ? 0 : Number.POSITIVE_INFINITY;
-  }
-  return (current - baseline) / baseline;
 }
 
 function windowToMs(window: GrowthWindow): number {
