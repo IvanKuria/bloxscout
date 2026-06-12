@@ -34,13 +34,11 @@ export function validateRunOutputs(input: ValidateRunInput): string[] {
     errors.push(`raw run file fails schema: ${rawParse.error.message.slice(0, 300)}`);
   }
 
-  if (requestedCount > 0) {
-    const rate = run.games.length / requestedCount;
-    if (run.games.length < MIN_ABSOLUTE_GAMES || rate < MIN_FETCH_SUCCESS_RATE) {
-      errors.push(
-        `fetched ${run.games.length}/${requestedCount} games (${Math.round(rate * 100)}%) — below publish threshold`,
-      );
-    }
+  const rate = requestedCount > 0 ? run.games.length / requestedCount : 0;
+  if (run.games.length < MIN_ABSOLUTE_GAMES || rate < MIN_FETCH_SUCCESS_RATE) {
+    errors.push(
+      `fetched ${run.games.length}/${requestedCount} games (${Math.round(rate * 100)}%) — below publish threshold`,
+    );
   }
 
   for (const [name, view] of [

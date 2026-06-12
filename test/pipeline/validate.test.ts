@@ -33,6 +33,11 @@ describe("validateRunOutputs", () => {
     expect(errors[0]).toMatch(/10%/);
   });
 
+  it("fails an empty run even when nothing was requested (misconfigured registry)", () => {
+    const errors = validateRunOutputs({ run: run(0), requestedCount: 0, views });
+    expect(errors.length).toBeGreaterThan(0);
+  });
+
   it("fails when a view does not conform to its schema", () => {
     const badViews = {
       ...views,
