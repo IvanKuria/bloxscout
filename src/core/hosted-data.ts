@@ -108,11 +108,7 @@ export class HostedDataClient {
     ttlSeconds: number,
   ): Promise<T | null> {
     try {
-      const raw = await this.cache.get(
-        `hosted:${path}`,
-        () => this.fetchRaw(path),
-        ttlSeconds,
-      );
+      const raw = await this.cache.get(`hosted:${path}`, () => this.fetchRaw(path), ttlSeconds);
       const parsed = schema.safeParse(raw);
       return parsed.success ? (parsed.data as T) : null;
     } catch {

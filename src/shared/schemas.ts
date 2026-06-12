@@ -141,8 +141,25 @@ export const GetTrendingGamesInputSchema = z.object({
 });
 export type GetTrendingGamesInput = z.infer<typeof GetTrendingGamesInputSchema>;
 
+/**
+ * `Game` enriched with hosted growth metrics. All additions are optional so
+ * the live-fallback path (no hosted data) keeps emitting plain games.
+ */
+export const GameWithTrendSchema = GameSchema.extend({
+  /** 24h relative CCU growth from the hosted dataset (capped at 1000). */
+  growth24hPct: z.number().nullable().optional(),
+  growth7dPct: z.number().nullable().optional(),
+  /** Anomaly score of the trailing 24h vs the game's own prior days (±10). */
+  zScore24h: z.number().nullable().optional(),
+});
+export type GameWithTrend = z.infer<typeof GameWithTrendSchema>;
+
 export const GetTrendingGamesOutputSchema = z.object({
-  games: z.array(GameSchema),
+  games: z.array(GameWithTrendSchema),
+  /** `hosted` = real growth ranking; `live` = current-CCU approximation. */
+  source: z.enum(["hosted", "live"]).optional(),
+  /** When the hosted dataset was generated (hosted source only). */
+  dataGeneratedAt: z.string().optional(),
 });
 export type GetTrendingGamesOutput = z.infer<typeof GetTrendingGamesOutputSchema>;
 

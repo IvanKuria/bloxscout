@@ -34,6 +34,12 @@ export interface GenreSeedEntry {
    * more search-friendly term ("simulator", not "sim") yields better hits.
    */
   searchQuery: string;
+  /**
+   * Roblox `genre_l1` taxonomy values this seed corresponds to — used to
+   * filter hosted-dataset entries (whose `genre` field is `genre_l1`) when
+   * the user passes a seed slug or alias.
+   */
+  genreL1: string[];
 }
 
 /**
@@ -45,43 +51,69 @@ export const GENRE_SEEDS: Readonly<Record<string, GenreSeedEntry>> = Object.free
     label: "RPG",
     aliases: ["rpg", "roleplay", "role-play", "role play", "roleplaying", "role-playing"],
     searchQuery: "rpg",
+    genreL1: ["RPG", "Roleplay & Avatar Sim"],
   },
   adventure: {
     label: "Adventure",
     aliases: ["adventure", "exploration"],
     searchQuery: "adventure",
+    genreL1: ["Adventure"],
   },
   fighting: {
     label: "Fighting",
     aliases: ["fighting", "combat", "fighter"],
     searchQuery: "fighting",
+    genreL1: ["Action"],
   },
   obby: {
     label: "Obby",
     aliases: ["obby", "obstacle", "platformer"],
     searchQuery: "obby",
+    genreL1: ["Obby & Platformer"],
   },
   simulator: {
     label: "Simulator",
     aliases: ["simulator", "sim", "tycoon"],
     searchQuery: "simulator",
+    genreL1: ["Simulation"],
   },
   social: {
     label: "Social",
     aliases: ["social", "town", "hangout", "roleplay-social"],
     searchQuery: "roleplay",
+    genreL1: ["Social", "Party & Casual"],
   },
   horror: {
     label: "Horror",
     aliases: ["horror", "scary", "survival-horror"],
     searchQuery: "horror",
+    genreL1: ["Horror"],
   },
   shooter: {
     label: "Shooter",
     aliases: ["shooter", "fps", "shooting"],
     searchQuery: "shooter",
+    genreL1: ["Shooter"],
   },
 });
+
+/**
+ * Does a hosted-dataset genre (`genre_l1` taxonomy, e.g. "Roleplay & Avatar
+ * Sim") match a user-provided genre keyword? Seed slugs/aliases resolve via
+ * their `genreL1` mapping; unknown keywords fall back to a case-insensitive
+ * substring match in either direction so long-tail inputs ("survival",
+ * "sports") still work against taxonomy names.
+ */
+export function matchesHostedGenre(userGenre: string, hostedGenre: string | null): boolean {
+  if (hostedGenre === null || hostedGenre.length === 0) return false;
+  const entry = lookupGenre(userGenre);
+  const hostedNorm = hostedGenre.trim().toLowerCase();
+  if (entry !== undefined) {
+    return entry.genreL1.some((g) => g.toLowerCase() === hostedNorm);
+  }
+  const userNorm = userGenre.trim().toLowerCase();
+  return hostedNorm.includes(userNorm) || userNorm.includes(hostedNorm);
+}
 
 /**
  * Normalize a user-provided genre string (case + whitespace insensitive) and

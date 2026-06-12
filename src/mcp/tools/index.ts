@@ -10,7 +10,9 @@ import { getGame } from "./get-game.js";
 import { getGroup } from "./get-group.js";
 import { getTopByGenre } from "./get-top-by-genre.js";
 import { getTrendingGames } from "./get-trending-games.js";
+import { getBreakoutGames } from "./get_breakout_games.js";
 import { getGameHistory } from "./get_game_history.js";
+import { getGenreMomentum } from "./get_genre_momentum.js";
 import { getTopCreatorsByGenreInfo } from "./get_top_creators_by_genre.js";
 import { getUpAndComing } from "./get_up_and_coming.js";
 import { searchGames } from "./search-games.js";
@@ -32,6 +34,8 @@ export const allTools: ReadonlyArray<ToolDefinition<any, any>> = Object.freeze([
   searchGames,
   getTrendingGames,
   getTopByGenre,
+  getBreakoutGames,
+  getGenreMomentum,
   // Game intelligence
   getGame,
   getGamePlayerCount,
@@ -60,9 +64,11 @@ export {
   compareGames,
   estimateGameRevenueInfo,
   generateMarketReport,
+  getBreakoutGames,
   getCreator,
   getGame,
   getGameHistory,
+  getGenreMomentum,
   getGameIcons,
   getGamePlayerCount,
   getGroup,
