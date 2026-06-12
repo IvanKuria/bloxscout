@@ -1,6 +1,6 @@
 {
   "name": "bloxscout",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Reconnaissance for Roblox game devs and their agents — open-source MCP server + CLI for Roblox game analytics.",
   "author": "Ivan Kuria <ivankuria7@gmail.com>",
   "license": "MIT",

@@ -1,8 +1,13 @@
 # Snapshots and History
 
-> **Status: planned for v0.2.** The local snapshot store is being built in
-> parallel right now and is not yet wired into `main`. Track progress on the
-> [v0.2 milestone](https://github.com/IvanKuria/bloxscout/milestones).
+> **v0.2 update:** you no longer *need* the local store to get history.
+> Bloxscout now ships a hosted dataset of historical metrics for thousands
+> of popular games, refreshed every ~30 minutes, that `get_game_history`,
+> `get_trending_games`, `get_up_and_coming`, `get_breakout_games`, and
+> `get_genre_momentum` read automatically. The local snapshot store
+> described below remains the right tool for niche games the pipeline
+> doesn't track and for finer-than-hourly windows. See
+> [Hosted-Data](./Hosted-Data.md).
 
 ## What the snapshot store is
 

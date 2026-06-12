@@ -30,6 +30,7 @@ import {
   RegistryFileSchema,
 } from "../src/shared/hosted-format.js";
 import { discoverGames } from "./discover.js";
+import { snapshotInBatches } from "./ingest.js";
 import {
   listDailyDates,
   listRawDates,
@@ -156,8 +157,8 @@ async function main(): Promise<void> {
     log(`tracking capped at ${maxGames} games (registry has more)`);
   }
 
-  log(`snapshotting ${ids.length} games (${Math.ceil(ids.length / 50)} batched requests)…`);
-  const games: Game[] = await client.getGames(ids);
+  log(`snapshotting ${ids.length} games (${Math.ceil(ids.length / 50)} paced batched requests)…`);
+  const games: Game[] = await snapshotInBatches(client, ids, { log });
   const run: RawRunFile = {
     schemaVersion: HOSTED_SCHEMA_VERSION,
     runId,
