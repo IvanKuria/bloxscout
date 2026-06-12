@@ -26,6 +26,7 @@ function makeRunner(stub: ClientStub) {
   return async (argv: string[]) => {
     await runCli(["node", "bloxscout", ...argv], {
       clientFactory: () => stub as unknown as RobloxClient,
+      hostedFactory: () => undefined,
       exit: exit as unknown as (code: number) => void,
     });
     return exit;
