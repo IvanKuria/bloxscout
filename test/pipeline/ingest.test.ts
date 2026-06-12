@@ -22,11 +22,7 @@ describe("snapshotInBatches", () => {
         sleeps.push(ms);
       },
     });
-    expect(calls).toEqual([
-      [1, 2],
-      [3, 4],
-      [5],
-    ]);
+    expect(calls).toEqual([[1, 2], [3, 4], [5]]);
     expect(games.map((g) => g.id)).toEqual([1, 2, 3, 4, 5]);
     // No sleep after the final chunk.
     expect(sleeps).toEqual([400, 400]);
