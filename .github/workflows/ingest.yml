@@ -1,0 +1,166 @@
+name: ingest
+
+# Hosted-data ingestion worker. Every ~30 minutes: discover games, snapshot
+# them, roll up, recompute views, validate, and push the result to the
+# public bloxscout-data repo (which clients read via raw.githubusercontent).
+#
+# Requires the DATA_REPO_TOKEN secret: a fine-grained PAT with contents:write
+# scoped to IvanKuria/bloxscout-data only.
+
+on:
+  schedule:
+    - cron: "*/30 * * * *" # ingest (GH cron jitters; rows carry true capture times)
+    - cron: "17 3 * * 1" # weekly data-repo history squash
+    - cron: "23 4 1 * *" # monthly keepalive (re-enable if auto-disabled)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    name: snapshot and publish
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '*/30 * * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout bloxscout
+        uses: actions/checkout@v4
+
+      - name: Checkout bloxscout-data
+        uses: actions/checkout@v4
+        with:
+          repository: IvanKuria/bloxscout-data
+          token: ${{ secrets.DATA_REPO_TOKEN }}
+          path: data
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Check dataset freshness
+        id: freshness
+        shell: bash
+        run: |
+          generated=$(python3 -c "import json;print(json.load(open('data/v1/meta.json'))['generatedAt'] or '')" 2>/dev/null || echo "")
+          if [ -n "$generated" ]; then
+            age=$(( $(date +%s) - $(date -d "$generated" +%s) ))
+            echo "ageSeconds=$age" >> "$GITHUB_OUTPUT"
+            if [ "$age" -gt 7200 ]; then
+              echo "stale=true" >> "$GITHUB_OUTPUT"
+              echo "::warning::dataset is ${age}s stale (last run gap)"
+            fi
+          fi
+
+      - name: Run ingestion pipeline
+        run: pnpm exec tsx pipeline/run.ts --data-dir data 2>&1 | tee ingest-output.log
+        shell: bash
+
+      - name: Commit and push dataset
+        shell: bash
+        run: |
+          cd data
+          git config user.name "bloxscout-ingest[bot]"
+          git config user.email "ingest@bloxscout.invalid"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "no changes to publish"
+            exit 0
+          fi
+          git commit -m "ingest: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push
+
+      - name: Open or update tracking issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          script: |
+            const titlePrefix = "Ingestion pipeline failed";
+            const today = new Date().toISOString().slice(0, 10);
+            const runUrl = process.env.RUN_URL;
+            const sevenDaysAgoMs = Date.now() - 7 * 24 * 60 * 60 * 1000;
+            const existing = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: "ingest-failure",
+              per_page: 100,
+            });
+            const recent = existing.find((i) =>
+              i.title.startsWith(titlePrefix) &&
+              new Date(i.created_at).getTime() >= sevenDaysAgoMs
+            );
+            const body = `Ingestion run failed.\n\nRun: ${runUrl}`;
+            if (recent) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: recent.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `${titlePrefix} (${today})`,
+                body,
+                labels: ["bug", "ingest-failure"],
+              });
+            }
+
+  squash-data-history:
+    name: weekly data-repo history squash
+    if: github.event.schedule == '17 3 * * 1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout bloxscout-data (full)
+        uses: actions/checkout@v4
+        with:
+          repository: IvanKuria/bloxscout-data
+          token: ${{ secrets.DATA_REPO_TOKEN }}
+          path: data
+          fetch-depth: 0
+
+      - name: Squash history to a single commit
+        shell: bash
+        run: |
+          cd data
+          git config user.name "bloxscout-ingest[bot]"
+          git config user.email "ingest@bloxscout.invalid"
+          git checkout --orphan squashed
+          git add -A
+          git commit -m "dataset snapshot $(date -u +%Y-%m-%d) (history squashed weekly)"
+          git branch -M squashed main
+          git push --force origin main
+
+  keepalive:
+    name: monthly workflow keepalive
+    if: github.event.schedule == '23 4 1 * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Scheduled workflows are auto-disabled after 60 days without activity
+      # in THIS repo (data pushes go to bloxscout-data, which doesn't count).
+      # Re-enabling explicitly resets that clock.
+      - name: Re-enable this workflow
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/ingest.yml/enable"
+        env:
+          GH_TOKEN: ${{ github.token }}
