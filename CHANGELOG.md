@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-12
+
+The hosted-data release: real trend detection with zero cold-start. A centrally-operated pipeline (GitHub Actions, every ~30 minutes) snapshots thousands of popular Roblox games into the public [bloxscout-data](https://github.com/IvanKuria/bloxscout-data) repo as static JSON, and the MCP/CLI tools read it over plain HTTPS — no API keys, no signup, no local history required.
+
+### Added
+
+- **Hosted dataset + ingestion pipeline** (`pipeline/`, `.github/workflows/ingest.yml`): discovery via Roblox's explore-api sorts across a device/country matrix plus periodic omni-search keyword sweeps; batched snapshotting; tiered rollups (raw 48h → hourly 30d → daily forever); per-game history shards; pre-ranked hot views (trending, up-and-coming, breakouts, genres); validate-before-publish gate that aborts without committing on a broken run.
+- **`HostedDataClient`** (`src/core/hosted-data.ts`): null-on-failure reads of the hosted dataset with LRU caching. Env knobs: `BLOXSCOUT_HOSTED_BASE_URL` (mirror), `BLOXSCOUT_NO_HOSTED=1` (opt out).
+- **`get_breakout_games`** (new MCP tool + `bloxscout breakouts`): games whose trailing-24h CCU is statistically anomalous vs their own prior week (z-score, capped ±10).
+- **`get_genre_momentum`** (new MCP tool + `bloxscout momentum`): genre-level summed CCU with 24h/7d growth of the genre as a whole — "which niches are heating up".
+- **`RobloxClient.getExploreSorts`**: Roblox home-page discovery sorts (unauthenticated explore-api).
+- **`src/core/growth.ts`**: shared pure growth/z-score math used by both the pipeline and the local rankings module.
+
+### Changed
+
+- **`get_trending_games` now returns real trending.** Primary path is the hosted 24h-growth ranking (each game enriched with `growth24hPct`, `growth7dPct`, `zScore24h`; response carries `source: "hosted"` and `dataGeneratedAt`). The v0.1 live current-CCU approximation remains as the fallback (`source: "live"`). `bloxscout trending` shows 24h/7d growth columns on hosted data.
+- **`get_game_history` no longer requires local snapshots.** It merges hosted history (hourly ~7 days back + daily rollups) with the local store; local raw points win within an hour bucket; rows carry a `source` field and the response a `coverage` summary.
+- **`get_up_and_coming`** serves the hosted view for default inputs (`source: "hosted"`); custom `since`/`minBaselinePlayers` route to the local store as before. `snapshotCount` is now optional (absent on hosted rows).
+- Genre seeds now map to Roblox's `genre_l1` taxonomy (`matchesHostedGenre`) so seed slugs like `simulator` filter hosted entries correctly.
+
+### Notes
+
+- The npm package is 20 MCP tools / 17 CLI commands. All hosted features degrade gracefully offline to exact v0.1 behavior.
+
 ## [0.1.2] - 2026-05-21
 
 ### Fixed

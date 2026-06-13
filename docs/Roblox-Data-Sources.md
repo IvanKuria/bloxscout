@@ -10,7 +10,8 @@ just as importantly — what we deliberately do not touch.
 | URL | What we read | Auth required? | Our cache TTL |
 | --- | --- | --- | --- |
 | `https://apis.roblox.com/search-api/omni-search` | Keyword search for games. | No | 300s (`DEFAULT`) |
-| `https://games.roblox.com/v1/games?universeIds=…` | Full game metadata (name, creator, CCU, visits, genre, favorites, dates). Batched up to 100 IDs per request. | No | 600s (`SLOW`) |
+| `https://apis.roblox.com/explore-api/v1/get-sorts` | Home-page discovery sorts (Top Trending, Up-and-Coming, Top Playing Now, …) with live `playerCount` inline. Undocumented but unauthenticated; used by `RobloxClient.getExploreSorts` and the ingestion pipeline's discovery sweep. | No | uncached |
+| `https://games.roblox.com/v1/games?universeIds=…` | Full game metadata (name, creator, CCU, visits, genre, favorites, dates). Batched up to 50 IDs per request (see issue #36). | No | 600s (`SLOW`) |
 | `https://games.roblox.com/v2/users/{userId}/games` | Games published by a user (first page only in Phase 1). | No | 600s (`SLOW`) |
 | `https://groups.roblox.com/v1/groups/{groupId}` | Group metadata, owner, member count. | No | 600s (`SLOW`) |
 | `https://users.roblox.com/v1/users/{userId}` | User profile, bio, verification badge, ban state. | No | 600s (`SLOW`) |
@@ -20,6 +21,11 @@ The presence/CCU projection used by `get_game_player_count` reads from the
 same `games.roblox.com/v1/games` endpoint but caches the projection
 separately with a `LIVE` (60s) TTL so callers asking only about CCU don't get
 stale numbers pinned by a longer-lived metadata cache.
+
+Beyond Roblox itself, v0.2 tools also read the open
+[bloxscout-data](https://github.com/IvanKuria/bloxscout-data) dataset —
+historical rollups published by our own ingestion pipeline as static JSON on
+GitHub's CDN. See [Hosted-Data](./Hosted-Data.md).
 
 ## A note on `games.roblox.com/v1/games/list`
 

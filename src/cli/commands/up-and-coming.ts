@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import type { HostedDataClient } from "../../core/hosted-data.js";
 import type { RobloxClient } from "../../core/roblox-client.js";
 import type { SnapshotStore } from "../../core/snapshots.js";
 import { getUpAndComingHandler } from "../../mcp/tools/get_up_and_coming.js";
@@ -22,9 +23,12 @@ interface UpAndComingOpts {
 export function buildUpAndComingCommand(
   getClient: () => RobloxClient,
   getStore: () => SnapshotStore,
+  getHosted: () => HostedDataClient | undefined = () => undefined,
 ): Command {
   return new Command("up-and-coming")
-    .description("Rank small-baseline games by recent growth-rate from local snapshots")
+    .description(
+      "Rank small-baseline games by recent growth-rate (hosted dataset, or local snapshots for custom windows)",
+    )
     .option("--since <iso>", "lower bound on the snapshot window (ISO-8601 datetime)")
     .option(
       "--min-baseline <n>",
@@ -46,16 +50,19 @@ export function buildUpAndComingCommand(
       const store = getStore();
       // Use the same client the rest of the CLI does — keeps the ctx shape
       // honest even though `get_up_and_coming` only reads from the store.
+      const hosted = getHosted();
       const result = await getUpAndComingHandler(
         {
           ...(since !== undefined ? { since } : {}),
           ...(minBaselinePlayers !== undefined ? { minBaselinePlayers } : {}),
           limit,
         },
-        { client: getClient(), store },
+        hosted !== undefined
+          ? { client: getClient(), store, hosted }
+          : { client: getClient(), store },
       );
 
-      if (result.entries.length === 0 && !fmt.json) {
+      if (result.entries.length === 0 && result.source !== "hosted" && !fmt.json) {
         process.stderr.write(
           "No snapshots recorded yet. Run `bloxscout snapshot --watch <universeIds>` first.\n",
         );
@@ -74,7 +81,7 @@ export function buildUpAndComingCommand(
               e.name ?? `universe ${e.universeId}`,
               e.currentPlaying,
               `${(e.deltaPct * 100).toFixed(1)}%`,
-              e.snapshotCount,
+              e.snapshotCount ?? "—",
             ],
             alignments: ["right", "left", "right", "right", "right"],
           },

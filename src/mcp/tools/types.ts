@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import type { HostedDataClient } from "../../core/hosted-data.js";
 import type { RobloxClient } from "../../core/roblox-client.js";
 import type { SnapshotStore } from "../../core/snapshots.js";
 
@@ -25,6 +26,13 @@ export interface ToolContext {
    * don't need to construct one.
    */
   store?: SnapshotStore;
+  /**
+   * Read client for the hosted `bloxscout-data` dataset. Strictly additive:
+   * tools must degrade to their live/local behavior when it's absent or any
+   * of its methods return `null`. Optional so unit tests and
+   * `BLOXSCOUT_NO_HOSTED=1` builds simply don't construct one.
+   */
+  hosted?: HostedDataClient;
 }
 
 export interface ToolDefinition<

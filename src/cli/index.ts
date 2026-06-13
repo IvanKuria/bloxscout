@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import chalk from "chalk";
 import { Command } from "commander";
+import { HostedDataClient, hostedDataEnabled } from "../core/hosted-data.js";
 import { RobloxClient } from "../core/roblox-client.js";
 import { SnapshotStore } from "../core/snapshots.js";
 import { registerCommands } from "./commands/index.js";
@@ -23,6 +24,12 @@ export interface RunCliOptions {
    * stub or an in-memory store.
    */
   storeFactory?: () => SnapshotStore;
+  /**
+   * Override the `HostedDataClient` factory. Return `undefined` to disable
+   * hosted reads (what tests do). Defaults to constructing one unless the
+   * user set `BLOXSCOUT_NO_HOSTED=1`.
+   */
+  hostedFactory?: () => HostedDataClient | undefined;
   /**
    * Override the exit handler. Defaults to `process.exit`. Tests can swap
    * this for a recording function so a failing command doesn't tear down
@@ -96,7 +103,19 @@ function buildProgram(options: RunCliOptions): Command {
     return cachedStore;
   };
 
-  registerCommands(program, getClient, getStore);
+  const hostedFactory =
+    options.hostedFactory ?? (() => (hostedDataEnabled() ? new HostedDataClient() : undefined));
+  let cachedHosted: HostedDataClient | undefined;
+  let hostedResolved = false;
+  const getHosted = (): HostedDataClient | undefined => {
+    if (!hostedResolved) {
+      cachedHosted = hostedFactory();
+      hostedResolved = true;
+    }
+    return cachedHosted;
+  };
+
+  registerCommands(program, getClient, getStore, getHosted);
   return program;
 }
 

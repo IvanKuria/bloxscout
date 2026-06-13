@@ -1,13 +1,15 @@
 import { vi } from "vitest";
 import { runCli } from "../../../src/cli/index.js";
+import type { HostedDataClient } from "../../../src/core/hosted-data.js";
 import type { RobloxClient } from "../../../src/core/roblox-client.js";
 import type { SnapshotStore } from "../../../src/core/snapshots.js";
 import type { Game, GameSummary } from "../../../src/core/types.js";
 
 /**
  * Build a fake-client / fake-store runner. The CLI's `runCli` exposes
- * `clientFactory` and `storeFactory` injection points so we don't need to
- * `vi.mock` the core modules — we hand it stubs directly.
+ * `clientFactory` / `storeFactory` / `hostedFactory` injection points so we
+ * don't need to `vi.mock` the core modules — we hand it stubs directly.
+ * `hostedStub` defaults to undefined so tests never touch the real CDN.
  */
 export type ClientStub = {
   [K in keyof RobloxClient]?: RobloxClient[K];
@@ -17,12 +19,18 @@ export type StoreStub = {
   [K in keyof SnapshotStore]?: SnapshotStore[K];
 };
 
-export function makeRunner(stub: ClientStub, storeStub: StoreStub = {}) {
+export type HostedStub = {
+  [K in keyof HostedDataClient]?: HostedDataClient[K];
+};
+
+export function makeRunner(stub: ClientStub, storeStub: StoreStub = {}, hostedStub?: HostedStub) {
   const exit = vi.fn();
   return async (argv: string[]) => {
     await runCli(["node", "bloxscout", ...argv], {
       clientFactory: () => stub as unknown as RobloxClient,
       storeFactory: () => storeStub as unknown as SnapshotStore,
+      hostedFactory: () =>
+        hostedStub === undefined ? undefined : (hostedStub as unknown as HostedDataClient),
       exit: exit as unknown as (code: number) => void,
     });
     return exit;

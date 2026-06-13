@@ -1,7 +1,11 @@
 import type { GameSummary, RobloxUniverseId } from "../../core/types.js";
-import { GetTrendingGamesInputSchema, GetTrendingGamesOutputSchema } from "../../shared/schemas.js";
-import { ALL_GENRE_SEARCH_QUERIES, lookupGenre } from "../data/genre-seeds.js";
-import type { ToolDefinition } from "./types.js";
+import {
+  GetTrendingGamesInputSchema,
+  type GetTrendingGamesOutput,
+  GetTrendingGamesOutputSchema,
+} from "../../shared/schemas.js";
+import { ALL_GENRE_SEARCH_QUERIES, lookupGenre, matchesHostedGenre } from "../data/genre-seeds.js";
+import type { ToolContext, ToolDefinition } from "./types.js";
 
 const PER_GENRE_CANDIDATES = 25;
 const CROSS_GENRE_CANDIDATES_PER_QUERY = 8;
@@ -15,26 +19,18 @@ const CROSS_GENRE_CANDIDATES_PER_QUERY = 8;
 const MAX_GAMES_LOOKUP = 50;
 
 /**
- * Discovery tool: v0.1 'trending' fallback.
+ * Discovery tool: trending games.
  *
- * The core `RobloxClient.getTrendingGames` is a stub (it requires the
- * Phase 4 snapshot store to compute real growth deltas). To avoid shipping
- * a useless tool now, this handler implements a v0.1 approximation:
+ * v0.2 primary path: the hosted `bloxscout-data` trending view — REAL
+ * 24h/7d CCU growth computed from the central snapshot pipeline, available
+ * from the very first call with no local history required. Entries are
+ * re-hydrated into full `Game` objects (one batched `/v1/games` call) with
+ * `growth24hPct` / `growth7dPct` / `zScore24h` merged in, and the response
+ * carries `source: "hosted"` plus the dataset's `generatedAt`.
  *
- *   1. If `genre` is provided and recognised, pull omni-search results for
- *      that genre keyword.
- *   2. If no `genre` is given (or it's unrecognised), sweep omni-search
- *      across every supported genre keyword and dedupe.
- *   3. Look every candidate up via `getGames` to get live `playing` CCU.
- *   4. Sort by `playing` and return the top N.
- *
- * Pre-v0.1.0 this used a hand-curated universe-id seed list that drifted
- * into template games with 0 CCU (#34); the omni-search-derived approach
- * is self-correcting.
- *
- * This proxies 'right-now activity' rather than 'recent growth'. The tool
- * description is explicit about the limitation so the agent does not
- * over-promise to the user.
+ * Fallback (offline, `BLOXSCOUT_NO_HOSTED=1`, CDN failure, or a genre the
+ * hosted taxonomy can't match): the v0.1 live approximation — omni-search
+ * candidates ranked by current `playing` CCU, `source: "live"`.
  */
 export const getTrendingGames: ToolDefinition<
   typeof GetTrendingGamesInputSchema,
@@ -42,36 +38,71 @@ export const getTrendingGames: ToolDefinition<
 > = {
   name: "get_trending_games",
   description: [
-    "Return games that are 'trending now', optionally filtered by `genre`.",
-    "Default `limit` is 20 (max 100).",
+    "Return trending games, optionally filtered by `genre`. Default `limit`",
+    "is 20 (max 100).",
     "",
-    "v0.1 limitation (important — surface this to the user if they ask",
-    "for week-over-week growth): true trending requires a historical",
-    "snapshot store, which ships in v0.2 (Phase 4). For now this tool",
-    "ranks the live omni-search top results by current `playing` CCU —",
-    "effectively 'who is hot right now', not 'who is growing fastest'.",
-    "If the user needs growth deltas, tell them the snapshot store is",
-    "coming and offer `compare_games` against a peer set they already",
-    "track in the meantime.",
+    "Primary data source is bloxscout's hosted snapshot dataset: games are",
+    "ranked by real 24h CCU growth (with 7d growth and a breakout z-score",
+    "included per game), refreshed about every 30 minutes. The response's",
+    "`source` field says which path served it: 'hosted' = growth ranking,",
+    "'live' = fallback ranking by current CCU only (used when the hosted",
+    "dataset is unreachable or the genre has no hosted matches).",
     "",
-    "When `genre` is provided, only that genre's omni-search results are",
-    "ranked. Supported genres: simulator, role-playing, adventure,",
-    "fighting, obby, social, horror, shooter (with common aliases like",
-    "'rpg' or 'fps'). Unknown genres fall back to a cross-genre sweep.",
+    "Genres: seed slugs like simulator, rpg, obby, horror, shooter (plus",
+    "aliases) map onto Roblox's genre taxonomy; other keywords are matched",
+    "fuzzily against taxonomy names ('survival', 'sports') or fall back to",
+    "a live omni-search sweep. For deeper genre analytics, see",
+    "`get_genre_momentum` and `get_breakout_games`.",
   ].join(" "),
   inputSchema: GetTrendingGamesInputSchema,
   outputSchema: GetTrendingGamesOutputSchema,
   handler: async (input, ctx) => {
+    const hosted = await tryHostedPath(input, ctx);
+    if (hosted !== null) return hosted;
+
+    // Live fallback: omni-search candidates ranked by current CCU.
     const candidateIds = await collectCandidateUniverseIds(ctx, input.genre);
     if (candidateIds.length === 0) {
-      return { games: [] };
+      return { games: [], source: "live" };
     }
     const trimmed = candidateIds.slice(0, MAX_GAMES_LOOKUP);
     const games = await ctx.client.getGames(trimmed);
     const ranked = games.slice().sort((a, b) => b.playing - a.playing);
-    return { games: ranked.slice(0, input.limit) };
+    return { games: ranked.slice(0, input.limit), source: "live" };
   },
 };
+
+async function tryHostedPath(
+  input: { genre?: string; limit: number },
+  ctx: ToolContext,
+): Promise<GetTrendingGamesOutput | null> {
+  if (ctx.hosted === undefined) return null;
+  const view = await ctx.hosted.getTrendingView();
+  if (view === null) return null;
+
+  const filtered =
+    input.genre === undefined
+      ? view.entries
+      : view.entries.filter((e) => matchesHostedGenre(input.genre as string, e.genre));
+  // No hosted matches for this genre — let the live sweep try the keyword.
+  if (filtered.length === 0) return null;
+
+  const top = filtered.slice(0, input.limit);
+  const games = await ctx.client.getGames(top.map((e) => e.universeId));
+  const byId = new Map(games.map((g) => [g.id, g]));
+  const merged = [];
+  for (const entry of top) {
+    const game = byId.get(entry.universeId);
+    if (game === undefined) continue;
+    merged.push({
+      ...game,
+      growth24hPct: entry.growth24hPct,
+      growth7dPct: entry.growth7dPct,
+      zScore24h: entry.zScore24h,
+    });
+  }
+  return { games: merged, source: "hosted", dataGeneratedAt: view.generatedAt };
+}
 
 async function collectCandidateUniverseIds(
   ctx: { client: import("../../core/roblox-client.js").RobloxClient },

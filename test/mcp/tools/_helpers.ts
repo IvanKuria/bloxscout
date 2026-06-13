@@ -1,6 +1,15 @@
 import { vi } from "vitest";
+import type { HostedDataClient } from "../../../src/core/hosted-data.js";
 import type { RobloxClient } from "../../../src/core/roblox-client.js";
+import type { SnapshotStore } from "../../../src/core/snapshots.js";
 import type { ToolContext } from "../../../src/mcp/tools/types.js";
+
+export interface MakeCtxExtras {
+  /** Stubbed hosted-data client (only the methods the tool under test uses). */
+  hosted?: Partial<Record<keyof HostedDataClient, ReturnType<typeof vi.fn>>>;
+  /** Stubbed snapshot store. */
+  store?: Partial<Record<keyof SnapshotStore, ReturnType<typeof vi.fn>>>;
+}
 
 /**
  * Build a test `ToolContext` whose `client` is a vitest-mocked `RobloxClient`.
@@ -10,6 +19,7 @@ import type { ToolContext } from "../../../src/mcp/tools/types.js";
  */
 export function makeCtx(
   overrides: Partial<Record<keyof RobloxClient, ReturnType<typeof vi.fn>>> = {},
+  extras: MakeCtxExtras = {},
 ): { ctx: ToolContext; client: Record<string, ReturnType<typeof vi.fn>> } {
   const client = {
     searchGames: vi.fn(),
@@ -22,11 +32,14 @@ export function makeCtx(
     getTrendingGames: vi.fn(),
     ...overrides,
   };
-  return {
-    client,
-    // Cast through unknown: the stub only implements the surface tools use.
-    ctx: { client: client as unknown as RobloxClient },
-  };
+  const ctx: ToolContext = { client: client as unknown as RobloxClient };
+  if (extras.hosted !== undefined) {
+    ctx.hosted = extras.hosted as unknown as HostedDataClient;
+  }
+  if (extras.store !== undefined) {
+    ctx.store = extras.store as unknown as SnapshotStore;
+  }
+  return { client, ctx };
 }
 
 /** Minimal Game fixture with overridable numeric fields. */

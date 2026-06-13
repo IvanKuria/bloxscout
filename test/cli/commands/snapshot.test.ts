@@ -56,6 +56,9 @@ describe("cli snapshot", () => {
       await runCli(["node", "bloxscout", ...argv], {
         clientFactory: () => client as RobloxClient,
         storeFactory: () => store,
+        // Never reach the real hosted CDN from unit tests — these cases
+        // exercise local-store behavior specifically.
+        hostedFactory: () => undefined,
         exit: exit as unknown as (code: number) => void,
       });
       return exit;

@@ -4,10 +4,11 @@
 
 Bloxscout is an open-source TypeScript package that ships both a command-line
 tool (`bloxscout`) and a Model Context Protocol (MCP) stdio server
-(`bloxscout-mcp`). The MCP server exposes 18 tools across discovery, game
+(`bloxscout-mcp`). The MCP server exposes 20 tools across discovery, game
 intelligence, creator/community lookup, calculators, snapshots, and reports —
-all backed by Roblox's public unauthenticated endpoints and (optionally)
-Open Cloud for games you own.
+all backed by Roblox's public unauthenticated endpoints, bloxscout's open
+hosted dataset of historical game metrics, and (optionally) Open Cloud for
+games you own.
 
 Roblox developers operate one of the largest game platforms in the world, yet
 most market-intelligence tools they rely on have no public API. Bloxscout
@@ -30,8 +31,10 @@ over time, so trends become queryable even though Roblox doesn't expose them.
   transports fit together.
 - [Roblox Data Sources](./Roblox-Data-Sources.md) — every endpoint we hit, and
   everything we deliberately do not.
+- [Hosted Data](./Hosted-Data.md) — the v0.2 hosted historical dataset and the
+  ingestion pipeline that publishes it.
 - [Snapshots and History](./Snapshots-and-History.md) — the local time-series
-  store (planned for v0.2).
+  store.
 - [FAQ](./FAQ.md) — common questions about affiliation, rate limits,
   contributions, and more.
 

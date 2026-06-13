@@ -3,6 +3,7 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { zodToJsonSchema } from "zod-to-json-schema";
+import { HostedDataClient, hostedDataEnabled } from "../core/hosted-data.js";
 import { RobloxClient } from "../core/roblox-client.js";
 import { SnapshotStore } from "../core/snapshots.js";
 import { BloxscoutError, mapToMcpError } from "../shared/errors.js";
@@ -27,6 +28,12 @@ export interface CreateMcpServerOptions {
    * Pass `null` to disable storage tools — they'll error if called.
    */
   store?: SnapshotStore | null;
+  /**
+   * Inject a pre-configured `HostedDataClient` (tests), or pass `null` to
+   * disable hosted reads. Default: constructed automatically unless the
+   * user opted out via `BLOXSCOUT_NO_HOSTED=1`.
+   */
+  hosted?: HostedDataClient | null;
   /**
    * Optional registry override. Defaults to the full tool set (`allTools`).
    * Mainly an extension hook for downstream forks; tests use it to scope
@@ -57,7 +64,13 @@ export function createMcpServer(options: CreateMcpServerOptions = {}): Server {
 
   const client = options.client ?? new RobloxClient();
   const store = options.store === null ? undefined : (options.store ?? new SnapshotStore());
-  const ctx: ToolContext = store === undefined ? { client } : { client, store };
+  const hosted =
+    options.hosted === null
+      ? undefined
+      : (options.hosted ?? (hostedDataEnabled() ? new HostedDataClient() : undefined));
+  const ctx: ToolContext = { client };
+  if (store !== undefined) ctx.store = store;
+  if (hosted !== undefined) ctx.hosted = hosted;
   const tools = options.tools ?? allTools;
   // biome-ignore lint/suspicious/noExplicitAny: heterogeneous tool definitions
   const byName = new Map<string, ToolDefinition<any, any>>(tools.map((t) => [t.name, t]));

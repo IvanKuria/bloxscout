@@ -78,6 +78,30 @@ export interface GetCreatorGamesOptions {
   sortOrder?: "Asc" | "Desc";
 }
 
+export interface GetExploreSortsOptions {
+  /** e.g. `computer`, `high_end_phone`, `console`, `all`. */
+  device: string;
+  /** ISO 3166 alpha-2 lowercase, or `all`. */
+  country: string;
+}
+
+/** One game entry from an explore-api Games sort. */
+export interface ExploreGame {
+  universeId: number;
+  rootPlaceId: number;
+  name: string;
+  playerCount: number;
+  totalUpVotes: number;
+  totalDownVotes: number;
+  isSponsored: boolean;
+}
+
+export interface ExploreSort {
+  sortId: string;
+  sortDisplayName: string;
+  games: ExploreGame[];
+}
+
 interface FetchJsonOptions {
   /** Endpoint label for error messages — e.g. `GET /v1/games`. */
   label: string;
@@ -163,6 +187,45 @@ export class RobloxClient {
       }
     }
     return games;
+  }
+
+  /**
+   * Roblox's home-page discovery sorts ("Top Trending", "Up-and-Coming",
+   * "Top Playing Now", …) via `GET /explore-api/v1/get-sorts`.
+   *
+   * Undocumented but unauthenticated endpoint (confirmed working 2026-06).
+   * Each Games-typed sort carries ~80-90 entries with live `playerCount`
+   * and vote totals inline; non-game sorts (filter pills, layout rows) are
+   * dropped. Results vary by `device` / `country`, which makes a small
+   * matrix sweep an effective discovery net for the ingestion pipeline.
+   *
+   * Not cached: discovery callers want fresh rankings per call, and nothing
+   * latency-sensitive sits on this path.
+   */
+  async getExploreSorts(opts: GetExploreSortsOptions): Promise<ExploreSort[]> {
+    const url = new URL("/explore-api/v1/get-sorts", ROBLOX_ENDPOINTS.omniSearch);
+    url.searchParams.set("sessionId", randomUUID());
+    url.searchParams.set("device", opts.device);
+    url.searchParams.set("country", opts.country);
+    const data = await this.fetchJson<{
+      sorts?: Array<{
+        contentType?: string;
+        sortId?: string;
+        sortDisplayName?: string;
+        games?: ExploreGame[];
+      }>;
+    }>(url, { label: "GET /explore-api/v1/get-sorts" });
+
+    const sorts: ExploreSort[] = [];
+    for (const sort of data.sorts ?? []) {
+      if (sort.contentType !== "Games") continue;
+      sorts.push({
+        sortId: sort.sortId ?? "",
+        sortDisplayName: sort.sortDisplayName ?? "",
+        games: sort.games ?? [],
+      });
+    }
+    return sorts;
   }
 
   // ---------------------------------------------------------------------------
