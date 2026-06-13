@@ -11,7 +11,7 @@
 
 Roblox developers operate one of the largest game platforms in the world, yet most market-intelligence tools they rely on (chiefly rotrends.com) have no public API. That means a developer cannot ask their AI agent simple questions like "which Simulator games are trending this week?", "how does my game's CCU compare to the genre median?", or "what would a 20,000 Robux DevEx payout net me in USD?" without leaving their editor, copy-pasting between tabs, and re-explaining context every time.
 
-Bloxscout closes that gap. It is a single open-source TypeScript package that ships both a command-line tool (`bloxscout`) and a Model Context Protocol (MCP) stdio server (`bloxscout-mcp`). The MCP server exposes 20 tools across discovery, game intelligence, creator/community lookup, calculators, snapshots, and reports — all backed by Roblox's public unauthenticated endpoints and (optionally) Open Cloud for the user's own games.
+Bloxscout closes that gap. It is an open-source TypeScript Model Context Protocol (MCP) stdio server (`bloxscout-mcp`) that exposes 20 tools across discovery, game intelligence, creator/community lookup, calculators, snapshots, and reports — all backed by Roblox's public unauthenticated endpoints and (optionally) Open Cloud for the user's own games.
 
 **New in v0.2: hosted historical data.** Bloxscout runs an open ingestion pipeline that snapshots thousands of popular Roblox games every ~30 minutes and publishes the rollups as static JSON in the public [bloxscout-data](https://github.com/IvanKuria/bloxscout-data) repo. The tools read it over plain HTTPS — so `get_trending_games` returns *real 24h/7d growth* from your very first call, `get_breakout_games` flags statistically anomalous CCU spikes, and `get_genre_momentum` shows which niches are rising — with no API key, no signup, and no waiting for a local store to fill up. The local SQLite snapshot store (`~/.bloxscout/data.db`) is still there for niche games the pipeline doesn't track and for finer-grained windows; everything degrades gracefully to local/live behavior when you're offline (or set `BLOXSCOUT_NO_HOSTED=1`).
 
@@ -67,20 +67,6 @@ claude mcp add bloxscout -- npx -y bloxscout-mcp
 ```
 
 Once registered, ask your agent things like *"Use bloxscout to find the top 10 trending Simulator games and tell me which ones are growing fastest week-over-week."*
-
-## Quick start (CLI)
-
-The CLI is a thin Commander wrapper over the same core, useful for shell scripts and one-offs.
-
-```sh
-npx bloxscout search "tower defense" --limit 5
-npx bloxscout trending --genre simulator --limit 10
-npx bloxscout breakouts --min-z 3
-npx bloxscout momentum --sort-by growth7dPct
-npx bloxscout report --genre rpg --limit 5
-npx bloxscout devex 100000
-npx bloxscout revenue --ccu 250000
-```
 
 ## What can it do?
 
