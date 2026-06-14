@@ -2,11 +2,25 @@ import { site } from "@/lib/site";
 import { toolCategories } from "@/lib/tools";
 import { faqs } from "@/lib/faqs";
 
+// Escape characters that are meaningful to the HTML parser before injecting the
+// JSON string into a <script> tag. Roblox game names / FAQ text are
+// attacker-controllable and flow into JSON-LD, so an unescaped "</script>" (or a
+// U+2028/U+2029 line separator, which is invalid in a JS string literal) could
+// break out of the script element. These escapes stay valid JSON.
+function serializeJsonLd(data: Record<string, unknown>): string {
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/ /g, "\\u2028")
+    .replace(/ /g, "\\u2029");
+}
+
 export function JsonLd({ data }: { data: Record<string, unknown> }) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: serializeJsonLd(data) }}
     />
   );
 }
