@@ -152,14 +152,20 @@ export default async function MethodologyPage() {
             </p>
           </section>
 
-          <p className="mt-10 text-sm">
+          <div className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm">
             <Link
               href="/games"
               className="font-medium underline underline-offset-4 hover:text-accent"
             >
               Browse top Roblox games by live player count &rarr;
             </Link>
-          </p>
+            <Link
+              href="/learn"
+              className="font-medium underline underline-offset-4 hover:text-accent"
+            >
+              Roblox glossary &amp; developer FAQ &rarr;
+            </Link>
+          </div>
         </article>
       </main>
       <SiteFooter />
