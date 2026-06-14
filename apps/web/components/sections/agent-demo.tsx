@@ -14,7 +14,7 @@
  * Everything is timer-driven and respects prefers-reduced-motion.
  */
 import * as React from "react";
-import { ArrowUp, Sparkles } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 
 const PROMPT = "is tower defense saturated?";
 
@@ -98,8 +98,8 @@ export function AgentDemo() {
         {/* window chrome */}
         <div className="flex items-center justify-between border-b border-border bg-muted-surface/60 px-4 py-2.5">
           <div className="flex items-center gap-2">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-[6px] bg-accent text-accent-foreground">
-              <Sparkles className="h-3 w-3" strokeWidth={2.4} />
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-[6px] bg-accent font-mono text-[11px] leading-none font-bold text-accent-foreground">
+              b
             </span>
             <span className="font-mono text-[11px] tracking-tight text-foreground">
               bloxscout agent
@@ -107,7 +107,7 @@ export function AgentDemo() {
           </div>
           <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-wider text-muted-foreground uppercase">
             <span
-              className="recon-pulse inline-block h-1.5 w-1.5 rounded-full bg-positive"
+              className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-positive motion-reduce:animate-none"
               aria-hidden
             />
             live data

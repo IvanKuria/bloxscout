@@ -1,13 +1,21 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { site } from "@/lib/site";
+import { IconTrailLayer } from "./icon-trail";
 
-export function SiteFooter() {
+/**
+ * Site footer. The closing CTA band hosts a tasteful cursor flourish: real game
+ * icons trail the pointer (vendored fancycomponents `ImageTrail`), disabled on
+ * touch + reduced-motion. `trailIcons` are fetched server-side by the homepage;
+ * other pages render the band without the flourish (empty array).
+ */
+export function SiteFooter({ trailIcons = [] }: { trailIcons?: string[] }) {
   return (
     <footer className="bg-background">
       {/* Closing CTA band */}
-      <div className="border-b border-border bg-secondary/40">
-        <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-6 py-16 sm:flex-row sm:items-center sm:justify-between sm:py-20">
+      <div className="relative overflow-hidden border-b border-border bg-secondary/40">
+        <IconTrailLayer icons={trailIcons} />
+        <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-start gap-6 px-6 py-16 sm:flex-row sm:items-center sm:justify-between sm:py-20">
           <h2 className="font-heading text-2xl font-semibold tracking-[-0.01em] text-foreground sm:text-3xl">
             Find your next winning idea.
           </h2>
@@ -41,6 +49,9 @@ export function SiteFooter() {
             </span>
             <Link href="/signup" className="transition-colors hover:text-foreground">
               Start free
+            </Link>
+            <Link href="/pricing" className="transition-colors hover:text-foreground">
+              Pricing
             </Link>
             <Link href="/login" className="transition-colors hover:text-foreground">
               Sign in

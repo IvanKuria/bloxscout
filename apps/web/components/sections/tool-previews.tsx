@@ -189,7 +189,7 @@ export function TrendsPreview() {
       <div className="mb-2 flex items-center justify-between font-mono text-[10px] tracking-wider text-muted-foreground/80 uppercase">
         <span>live ccu</span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="recon-pulse h-1.5 w-1.5 rounded-full bg-positive" />
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-positive motion-reduce:animate-none" />
           live
         </span>
       </div>

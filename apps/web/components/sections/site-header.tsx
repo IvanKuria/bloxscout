@@ -7,28 +7,43 @@ export function SiteHeader() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 font-mono text-sm font-semibold tracking-tight text-foreground"
+          className="group inline-flex items-center gap-2 font-mono text-sm font-semibold tracking-tight text-foreground"
         >
+          {/* Bracket mark — the wordmark stands on its own, no pulsing dot. */}
           <span
-            className="recon-pulse inline-block h-2 w-2 rounded-full bg-accent"
+            className="text-accent transition-transform group-hover:-translate-x-0.5"
             aria-hidden
-          />
+          >
+            [
+          </span>
           {site.name}
+          <span
+            className="text-accent transition-transform group-hover:translate-x-0.5"
+            aria-hidden
+          >
+            ]
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-7 text-sm text-muted-foreground sm:flex">
-          <a
-            href="#capabilities"
+          <Link
+            href="/#capabilities"
             className="transition-colors hover:text-foreground"
           >
             Capabilities
-          </a>
-          <a href="#sample" className="transition-colors hover:text-foreground">
-            Sample answer
-          </a>
-          <a href="#faq" className="transition-colors hover:text-foreground">
+          </Link>
+          <Link
+            href="/#radar"
+            className="transition-colors hover:text-foreground"
+          >
+            On the radar
+          </Link>
+          <Link href="/pricing" className="transition-colors hover:text-foreground">
+            Pricing
+          </Link>
+          <Link href="/#faq" className="transition-colors hover:text-foreground">
             FAQ
-          </a>
+          </Link>
         </nav>
 
         <div className="flex items-center gap-3">

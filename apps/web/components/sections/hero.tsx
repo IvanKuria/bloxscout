@@ -1,26 +1,39 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import VerticalCutReveal from "@/components/fancy/vertical-cut-reveal";
-import { AgentDemo } from "./agent-demo";
+import { HeroFloatCluster, type HeroIcon } from "./hero-float-cluster";
 
-export function Hero() {
+/**
+ * Hero — the signature moment. A cluster of real Roblox game icons is dropped
+ * into a physics play-surface on the right (vendored fancycomponents `Gravity`):
+ * they tumble, settle, and stay grab-and-throw draggable. Copy on the left.
+ *
+ * `icons` are fetched server-side in `app/page.tsx` from the live trending view;
+ * if the fetch returns nothing the play-surface degrades to a calm static panel.
+ */
+export function Hero({ icons }: { icons: HeroIcon[] }) {
   return (
     <section className="relative overflow-hidden border-b border-border bg-background">
       {/* airy gradient wash + faint grid, kept entirely light */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_15%_-10%,rgba(226,35,26,0.05),transparent_55%),radial-gradient(90%_70%_at_100%_0%,rgba(10,10,10,0.035),transparent_60%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_15%_-10%,rgba(226,35,26,0.06),transparent_55%),radial-gradient(90%_70%_at_100%_0%,rgba(10,10,10,0.04),transparent_60%)]"
       />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.5] [background-image:linear-gradient(to_right,rgba(10,10,10,0.025)_1px,transparent_1px),linear-gradient(to_bottom,rgba(10,10,10,0.025)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(100%_70%_at_30%_0%,black,transparent_75%)]"
       />
 
-      <div className="relative mx-auto grid max-w-6xl gap-14 px-6 pt-20 pb-24 sm:pt-24 sm:pb-28 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-12 lg:pt-28">
+      <div className="relative mx-auto grid max-w-6xl gap-12 px-6 pt-20 pb-20 sm:pt-24 lg:grid-cols-[1.02fr_1fr] lg:items-center lg:gap-10 lg:pt-28 lg:pb-28">
         <div className="lg:max-w-xl">
-          <p className="mb-7 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-3 py-1 font-mono text-[11px] tracking-tight text-muted-foreground">
-            <span className="recon-pulse h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-            AI agent for Roblox developers
+          {/* Intentional mark — no eyebrow pill, no sparkle. A tiny live readout. */}
+          <p className="mb-7 inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-muted-foreground uppercase">
+            <span className="flex items-end gap-1" aria-hidden>
+              <span className="h-2.5 w-1 rounded-full bg-accent/30" />
+              <span className="h-4 w-1 rounded-full bg-accent/55" />
+              <span className="h-5 w-1 rounded-full bg-accent" />
+            </span>
+            Live Roblox market intel
           </p>
 
           <h1 className="font-heading text-[40px] leading-[1.02] font-semibold tracking-[-0.02em] text-foreground sm:text-[54px] lg:text-[60px]">
@@ -38,7 +51,12 @@ export function Hero() {
                 splitBy="words"
                 staggerDuration={0.045}
                 staggerFrom="first"
-                transition={{ type: "spring", stiffness: 200, damping: 24, delay: 0.32 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 24,
+                  delay: 0.32,
+                }}
                 containerClassName="block"
               >
                 before everyone else.
@@ -62,10 +80,10 @@ export function Hero() {
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
-              href="/login"
+              href="/pricing"
               className="inline-flex items-center rounded-xl border border-border bg-background px-5 py-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
             >
-              Sign in
+              See pricing
             </Link>
           </div>
 
@@ -74,8 +92,20 @@ export function Hero() {
           </p>
         </div>
 
-        <div className="lg:pl-2">
-          <AgentDemo />
+        {/* Physics play-surface: real game icons that drop, pile and drag. */}
+        <div className="relative">
+          <div className="pointer-events-none absolute -inset-6 -z-10 bg-[radial-gradient(60%_55%_at_60%_30%,rgba(226,35,26,0.10),transparent_72%)]" />
+          <div className="relative aspect-square w-full overflow-hidden rounded-[28px] border border-border bg-gradient-to-b from-secondary/60 to-background shadow-[0_1px_0_0_rgba(10,10,10,0.04),0_40px_80px_-48px_rgba(10,10,10,0.35)] ring-1 ring-foreground/[0.04]">
+            {/* corner labels */}
+            <div className="pointer-events-none absolute top-3 left-4 z-10 inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.16em] text-muted-foreground/80 uppercase">
+              <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-positive" />
+              top games · live
+            </div>
+            <div className="pointer-events-none absolute right-4 bottom-3 z-10 font-mono text-[10px] tracking-[0.16em] text-muted-foreground/60 uppercase select-none">
+              drag the tiles
+            </div>
+            <HeroFloatCluster icons={icons} />
+          </div>
         </div>
       </div>
     </section>
