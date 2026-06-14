@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { site } from "@/lib/site";
 
 export function SiteFooter() {
@@ -16,6 +17,18 @@ export function SiteFooter() {
           </p>
         </div>
         <div className="flex flex-col gap-2 text-sm text-muted-foreground sm:items-end">
+          <Link
+            href="/games"
+            className="transition-colors hover:text-foreground"
+          >
+            Top games
+          </Link>
+          <Link
+            href="/about/methodology"
+            className="transition-colors hover:text-foreground"
+          >
+            Methodology
+          </Link>
           <a
             href={site.github}
             target="_blank"

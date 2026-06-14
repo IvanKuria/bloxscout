@@ -25,6 +25,16 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-archivo);
+  /* Recon console palette — dark data-surface tokens used by the
+     stat panels, sparklines and live counters on the data pages. */
+  --color-console: var(--console);
+  --color-console-foreground: var(--console-foreground);
+  --color-console-muted: var(--console-muted);
+  --color-console-border: var(--console-border);
+  --color-console-grid: var(--console-grid);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -54,6 +64,60 @@
   --destructive: #e2231a;
   --destructive-foreground: #ffffff;
   --radius: 0.5rem;
+
+  /* Recon console surface — near-black with a faint cool cast. */
+  --console: #0b0e0f;
+  --console-foreground: #e9edf0;
+  --console-muted: #7e8a91;
+  --console-border: #1d2528;
+  --console-grid: rgba(233, 237, 240, 0.045);
+  --positive: #1faa6b;
+  --negative: #e2231a;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  .font-heading {
+    font-family: var(--font-heading), var(--font-geist-sans), sans-serif;
+  }
+}
+
+@layer utilities {
+  /* Faint engineering grid for console panels. */
+  .recon-grid {
+    background-image:
+      linear-gradient(var(--console-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--console-grid) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  /* Tabular, monospace numerics so columns line up like a readout. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+}
+
+/* Live pulse for the concurrency indicator dot. */
+@keyframes recon-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.82);
+  }
+}
+.recon-pulse {
+  animation: recon-pulse 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .recon-pulse {
+    animation: none;
+  }
 }
 
 @layer base {

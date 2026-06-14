@@ -2,7 +2,7 @@ import { site } from "@/lib/site";
 import { toolCategories } from "@/lib/tools";
 import { faqs } from "@/lib/faqs";
 
-function JsonLd({ data }: { data: Record<string, unknown> }) {
+export function JsonLd({ data }: { data: Record<string, unknown> }) {
   return (
     <script
       type="application/ld+json"
@@ -14,12 +14,25 @@ function JsonLd({ data }: { data: Record<string, unknown> }) {
 export function OrganizationJsonLd() {
   const data = {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    name: site.name,
-    url: site.url,
-    description: site.description,
-    sameAs: [site.github, site.npm],
-    logo: `${site.url}/icon`,
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${site.url}#organization`,
+        name: site.name,
+        url: site.url,
+        description: site.description,
+        sameAs: [site.github, site.npm],
+        logo: `${site.url}/icon`,
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${site.url}#website`,
+        url: site.url,
+        name: site.name,
+        description: site.tagline,
+        publisher: { "@id": `${site.url}#organization` },
+      },
+    ],
   };
   return <JsonLd data={data} />;
 }
