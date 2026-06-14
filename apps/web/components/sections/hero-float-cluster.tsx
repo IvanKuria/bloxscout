@@ -85,9 +85,12 @@ export function HeroFloatCluster({ icons }: { icons: HeroIcon[] }) {
         className="pointer-events-none absolute inset-0 overflow-hidden"
       >
         {tiles.map((icon, i) => {
-          const left = 6 + seeded(icon.id + 1) * 84;
-          const top = 8 + seeded(icon.id + 7) * 78;
-          const rot = (seeded(icon.id + 3) - 0.5) * 24;
+          // Fixed precision so the SSR string and the client string are
+          // byte-identical (a sin-based PRNG can diverge in late decimals
+          // across the Node/browser V8 builds → hydration mismatch).
+          const left = (6 + seeded(icon.id + 1) * 84).toFixed(3);
+          const top = (8 + seeded(icon.id + 7) * 78).toFixed(3);
+          const rot = ((seeded(icon.id + 3) - 0.5) * 24).toFixed(3);
           const size = SIZES[i % SIZES.length];
           return (
             <div
