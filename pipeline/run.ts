@@ -11,6 +11,12 @@
  * Usage:
  *   tsx pipeline/run.ts --data-dir ../bloxscout-data [--max-games N]
  *                       [--skip-discovery] [--omni-sweep]
+ *                       [--sample-gamepasses [--gamepass-top-n N]]
+ *
+ * `--sample-gamepasses` (off by default) fetches monetization/gamepass
+ * pricing for the top-N games by CCU, once per UTC day. See
+ * pipeline/gamepasses.ts for the request budget; the endpoint's
+ * unauthenticated reachability is not guaranteed, which is why it is gated.
  */
 
 import { randomUUID } from "node:crypto";
@@ -19,6 +25,7 @@ import { join } from "node:path";
 import { parseArgs } from "node:util";
 import {
   type DailyFile,
+  type GamePassFile,
   HOSTED_PATHS,
   HOSTED_SCHEMA_VERSION,
   type HourlyFile,
@@ -30,6 +37,7 @@ import {
 import { RobloxClient } from "@bloxscout/core/roblox-client";
 import type { Game } from "@bloxscout/core/types";
 import { discoverGames } from "./discover.js";
+import { DEFAULT_GAMEPASS_TOP_N, sampleGamePasses, selectGamePassSampleIds } from "./gamepasses.js";
 import { snapshotInBatches } from "./ingest.js";
 import {
   listDailyDates,
@@ -47,7 +55,7 @@ import {
   upsertDiscovered,
 } from "./registry.js";
 import { aggregateDaily, aggregateHourly, buildHistoryShards } from "./rollup.js";
-import { validateRunOutputs } from "./validate.js";
+import { validateGamePassFile, validateRunOutputs } from "./validate.js";
 import { computeViews } from "./views.js";
 
 const MAX_TRACKED = 15_000;
@@ -67,6 +75,13 @@ function log(message: string): void {
 
 function dateKey(d: Date): string {
   return d.toISOString().slice(0, 10);
+}
+
+/** Parse an ISO timestamp to epoch ms, or 0 when missing/unparseable. */
+function epochMs(iso: string | null | undefined): number {
+  if (iso == null) return 0;
+  const t = Date.parse(iso);
+  return Number.isFinite(t) ? t : 0;
 }
 
 function readHourlyFiles(dataDir: string, dates: string[]): HourlyFile[] {
@@ -93,6 +108,11 @@ async function main(): Promise<void> {
       "max-games": { type: "string" },
       "skip-discovery": { type: "boolean", default: false },
       "omni-sweep": { type: "boolean", default: false },
+      // Optional, rate-limit-safe monetization sampling (off by default). See
+      // pipeline/gamepasses.ts for the request budget. Endpoint reachability
+      // is not guaranteed unauthenticated, hence the gate.
+      "sample-gamepasses": { type: "boolean", default: false },
+      "gamepass-top-n": { type: "string" },
     },
   });
   const dataDir = values["data-dir"];
@@ -163,15 +183,62 @@ async function main(): Promise<void> {
     schemaVersion: HOSTED_SCHEMA_VERSION,
     runId,
     takenAt: nowIso,
-    games: games.map((g) => [g.id, g.playing ?? 0, g.visits ?? 0, g.favoritedCount ?? 0]),
+    // Trailing createdMs/updatedMs columns are additive (v1) — see
+    // RawRunRowSchema. Epoch ms; 0 when the timestamp is missing/unparseable.
+    games: games.map((g) => [
+      g.id,
+      g.playing ?? 0,
+      g.visits ?? 0,
+      g.favoritedCount ?? 0,
+      epochMs(g.created),
+      epochMs(g.updated),
+    ]),
   };
   applyIngestResults(
     registry,
-    games.map((g) => ({ id: g.id, name: g.name ?? null, genre: g.genre_l1 ?? g.genre ?? null })),
+    games.map((g) => ({
+      id: g.id,
+      name: g.name ?? null,
+      genre: g.genre_l1 ?? g.genre ?? null,
+      created: g.created ?? null,
+      updated: g.updated ?? null,
+    })),
     nowIso,
   );
   writeJsonFile(join(dataDir, HOSTED_PATHS.raw(today, runId)), run);
   log(`snapshot: ${games.length}/${ids.length} games captured`);
+
+  // -------------------------------------------------------------------------
+  // Optional gamepass / monetization sampling (flag-gated, slow cadence)
+  // -------------------------------------------------------------------------
+  // Runs only on the first run of the day to stay conservative: at most
+  // top-N extra requests once per UTC day, not every 30-min run.
+  if (values["sample-gamepasses"] && isFirstRunOfDay) {
+    const topN = values["gamepass-top-n"]
+      ? Number(values["gamepass-top-n"])
+      : DEFAULT_GAMEPASS_TOP_N;
+    const sampleIds = selectGamePassSampleIds(run, topN);
+    log(`gamepasses: sampling top ${sampleIds.length} games by CCU…`);
+    const sampled = await sampleGamePasses(client, sampleIds, { log });
+    const gamePassFile: GamePassFile = {
+      schemaVersion: HOSTED_SCHEMA_VERSION,
+      date: today,
+      sampledAt: nowIso,
+      games: Object.fromEntries(
+        Object.entries(sampled).map(([id, passes]) => [
+          id,
+          passes.map((p) => [p.id, p.name, p.price] as [number, string, number | null]),
+        ]),
+      ),
+    };
+    const gamePassErrors = validateGamePassFile(gamePassFile);
+    if (gamePassErrors.length > 0) {
+      for (const error of gamePassErrors) console.error(`[ingest] VALIDATION FAILED: ${error}`);
+      process.exit(1);
+    }
+    writeJsonFile(join(dataDir, HOSTED_PATHS.gamepasses(today)), gamePassFile);
+    log(`gamepasses: captured passes for ${Object.keys(sampled).length}/${sampleIds.length} games`);
+  }
 
   // -------------------------------------------------------------------------
   // Rollups

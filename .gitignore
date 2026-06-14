@@ -38,3 +38,7 @@ Thumbs.db
 *.sqlite-journal
 *.db
 *.db-journal
+
+# Local tooling / agent state
+.claude/
+.playwright-mcp/

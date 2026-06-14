@@ -415,6 +415,84 @@ describe("RobloxClient.getTrendingGames stub", () => {
   });
 });
 
+describe("RobloxClient.getGamePasses", () => {
+  let agent: MockAgent;
+  let client: RobloxClient;
+
+  beforeEach(() => {
+    ({ client, agent } = makeClient());
+  });
+
+  afterEach(async () => {
+    await agent.close();
+  });
+
+  it("normalizes the apis.roblox.com `gamePasses` envelope to {id, name, price}", async () => {
+    agent
+      .get("https://apis.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/game-passes/v1/universes/123/game-passes") })
+      .reply(200, {
+        gamePasses: [
+          { id: 1, name: "VIP", price: 199, isForSale: true },
+          { id: 2, name: "Starter Pack", price: 1000, isForSale: true },
+        ],
+        nextPageToken: null,
+      });
+
+    const passes = await client.getGamePasses(123);
+    expect(passes).toEqual([
+      { id: 1, name: "VIP", price: 199 },
+      { id: 2, name: "Starter Pack", price: 1000 },
+    ]);
+  });
+
+  it("accepts the legacy `data` envelope and treats missing/off-sale price as null", async () => {
+    agent
+      .get("https://apis.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/game-passes/v1/universes/55/game-passes") })
+      .reply(200, {
+        data: [
+          { id: 9, name: "Free Perk", price: null },
+          { id: 10, name: "Unpriced" },
+        ],
+      });
+
+    const passes = await client.getGamePasses(55);
+    expect(passes).toEqual([
+      { id: 9, name: "Free Perk", price: null },
+      { id: 10, name: "Unpriced", price: null },
+    ]);
+  });
+
+  it("returns [] for a universe with no passes", async () => {
+    agent
+      .get("https://apis.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/game-passes/v1/universes/77/game-passes") })
+      .reply(200, { gamePasses: [] });
+
+    expect(await client.getGamePasses(77)).toEqual([]);
+  });
+
+  it("rejects a non-positive universeId without making a request", async () => {
+    await expect(client.getGamePasses(0)).rejects.toBeInstanceOf(BloxscoutError);
+  });
+
+  it("caches by universe id (one network call for repeat lookups)", async () => {
+    let calls = 0;
+    agent
+      .get("https://apis.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/game-passes/v1/universes/123/game-passes") })
+      .reply(200, () => {
+        calls++;
+        return { gamePasses: [{ id: 1, name: "VIP", price: 199 }] };
+      });
+
+    await client.getGamePasses(123);
+    await client.getGamePasses(123);
+    expect(calls).toBe(1);
+  });
+});
+
 // -----------------------------------------------------------------------------
 // Fixtures
 // -----------------------------------------------------------------------------

@@ -14,6 +14,7 @@
  */
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { isCopilotPreview } from "../preview";
 import { isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from "./env";
 
 /** Path prefixes that require an authenticated session. */
@@ -55,7 +56,7 @@ export async function updateSession(request: NextRequest) {
     (p) => path === p || path.startsWith(`${p}/`),
   );
 
-  if (isProtected && !user) {
+  if (isProtected && !user && !isCopilotPreview()) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirectedFrom", path);
