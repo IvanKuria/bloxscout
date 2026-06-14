@@ -35,9 +35,15 @@ export function AgentApp() {
     ConversationSummary[]
   >([]);
   const [loadingList, setLoadingList] = React.useState(true);
+  // `activeId` drives the sidebar highlight + toolbar title (set on both select
+  // AND on a fresh chat's first-send creation). `hydrateId` is what the MOUNTED
+  // thread loads from — set ONLY when opening a past thread, never on creation,
+  // so creating a conversation mid-stream doesn't remount/re-hydrate (which
+  // would wipe the in-flight messages). The thread tracks its own id internally.
   const [activeId, setActiveId] = React.useState<string | null>(null);
-  // A monotonically-bumped key forces the thread to remount for "New chat"
-  // even when activeId is already null (start a second fresh chat).
+  const [hydrateId, setHydrateId] = React.useState<string | null>(null);
+  // A monotonically-bumped key forces the thread to remount for "New chat" /
+  // when switching threads — but NOT when a conversation is just created.
   const [threadKey, setThreadKey] = React.useState(0);
   const [collapsed, setCollapsed] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -67,12 +73,14 @@ export function AgentApp() {
 
   const selectThread = React.useCallback((id: string) => {
     setActiveId(id);
+    setHydrateId(id);
     setThreadKey((k) => k + 1);
     setMobileOpen(false);
   }, []);
 
   const newChat = React.useCallback(() => {
     setActiveId(null);
+    setHydrateId(null);
     setThreadKey((k) => k + 1);
     setMobileOpen(false);
   }, []);
@@ -187,8 +195,8 @@ export function AgentApp() {
 
         <div className="min-h-0 flex-1">
           <CopilotThread
-            key={`${activeId ?? "new"}-${threadKey}`}
-            conversationId={activeId}
+            key={`thread-${threadKey}`}
+            conversationId={hydrateId}
             onConversationCreated={handleCreated}
             onTitle={handleTitle}
           />
