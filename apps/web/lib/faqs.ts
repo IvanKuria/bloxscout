@@ -7,41 +7,31 @@ export const faqs: Faq[] = [
   {
     question: "What is bloxscout?",
     answer:
-      "bloxscout is an open-source MCP server and CLI for Roblox developers. It exposes 18 tools across discovery, game intelligence, creator lookup, calculators, snapshots, and reports — all backed by Roblox's public endpoints and (optionally) Open Cloud. The primary user is an AI agent inside your editor; the CLI is a thin wrapper around the same core for shell scripts and one-offs.",
+      "bloxscout is an AI agent built for Roblox developers. You ask it questions in plain language — what to build, whether a niche is saturated, which games are breaking out — and it answers using live data from the Roblox economy. Think of it as a market analyst that has read every game's live numbers and is always up to date.",
   },
   {
-    question: "How do I install it?",
+    question: "What can I actually ask it?",
     answer:
-      "If you use Claude Code, run `claude mcp add bloxscout -- npx -y bloxscout-mcp`. For Cursor, Windsurf, and Zed, drop a single JSON block into the editor's MCP config file. The CLI runs zero-install with `npx bloxscout <command>` or globally via `npm install -g bloxscout`.",
+      'Anything about the Roblox market. "Is tower defense saturated?", "What niches are heating up?", "Which games are breaking out this week?", "I\'m a solo dev — what should I build?". The agent finds the matching games live, measures real competition and momentum, and answers with the reasoning so you can act on it.',
   },
   {
-    question: "What is MCP, and why is bloxscout MCP-first?",
+    question: "Where does the data come from?",
     answer:
-      "Model Context Protocol is the open standard that lets AI agents call external tools through a stdio interface. Agents are the natural user for market reconnaissance — they can ask follow-up questions, combine tools, and surface insights without you leaving your editor. bloxscout exposes its full surface as MCP tools first; the CLI is the same engine wrapped in Commander.",
+      "Live Roblox player data — concurrent players, visits, favorites, growth and genre signal — refreshed roughly every 30 minutes. Because the agent reads current numbers instead of relying on stale training data, it can answer questions a general-purpose chatbot simply can't: who's playing what right now, and where attention is moving today.",
   },
   {
-    question: "Which agents and editors does it work with?",
+    question: "How is this different from asking ChatGPT or a dashboard?",
     answer:
-      "Claude Code, Cursor, Windsurf, and Zed are first-class — each has a copy-pasteable config block. Any MCP-compliant client can launch `bloxscout-mcp` as a stdio server. The CLI runs anywhere Node.js 20+ is installed.",
+      "A general chatbot guesses from old training data and has no idea what's trending today. A dashboard shows you numbers but leaves the analysis to you. bloxscout does both: it pulls the live numbers and reasons over them — sizing demand, scoring saturation, and pointing at the white space — so you get a decision, not a chart to interpret.",
   },
   {
-    question: "Is bloxscout affiliated with Roblox or Rotrends?",
+    question: "How do I get started?",
     answer:
-      "No. bloxscout is an unofficial tool. It is not affiliated with, endorsed by, or sponsored by Roblox Corporation or Super League Enterprise / Rotrends. Data is sourced from Roblox's public unauthenticated endpoints — `games.roblox.com`, `presence.roblox.com`, `groups.roblox.com`, `users.roblox.com`, and `thumbnails.roblox.com`.",
+      "Create a free account and start asking the agent. There's nothing to install and no setup — sign in, type your first question, and you'll have a grounded answer in seconds.",
   },
   {
-    question: "Is it free? What is the license?",
+    question: "Is bloxscout affiliated with Roblox?",
     answer:
-      "Yes. bloxscout is free, open source, and MIT-licensed. Source lives on GitHub at IvanKuria/bloxscout. Contributions are welcome — start with the CONTRIBUTING.md and the `good first issue` label.",
-  },
-  {
-    question: "How does the local snapshot store work?",
-    answer:
-      "Roblox does not expose historical time-series for CCU, visits, or likes. bloxscout's `snapshot_game` and `watch_games` tools persist point-in-time observations into a local SQLite database at `~/.bloxscout/data.db`. The `get_game_history` tool reads from that store, so the longer you run bloxscout, the richer your trend data becomes.",
-  },
-  {
-    question: "Do I need a Roblox API key?",
-    answer:
-      "No, not for the default tools. bloxscout uses unauthenticated public Roblox endpoints. An Open Cloud key is only required if you want bloxscout to read data for games you own that is not exposed publicly.",
+      "No. bloxscout is an independent tool and is not affiliated with, endorsed by, or sponsored by Roblox Corporation. It reads from Roblox's public player data to ground its answers.",
   },
 ];

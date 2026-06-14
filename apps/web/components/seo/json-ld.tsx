@@ -1,5 +1,5 @@
 import { site } from "@/lib/site";
-import { toolCategories } from "@/lib/tools";
+import { capabilityGroups } from "@/lib/tools";
 import { faqs } from "@/lib/faqs";
 
 // Escape characters that are meaningful to the HTML parser before injecting the
@@ -39,7 +39,6 @@ export function OrganizationJsonLd() {
         name: site.name,
         url: site.url,
         description: site.description,
-        sameAs: [site.github, site.npm],
         logo: `${site.url}/icon`,
       },
       {
@@ -56,27 +55,17 @@ export function OrganizationJsonLd() {
 }
 
 export function SoftwareApplicationJsonLd() {
-  const featureList = toolCategories.flatMap((c) =>
-    c.tools.map((t) => t.name),
-  );
+  const featureList = capabilityGroups.map((g) => g.name);
   const data = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+    "@type": "WebApplication",
     name: site.name,
     description: site.description,
     url: site.url,
-    applicationCategory: "DeveloperApplication",
-    operatingSystem: "macOS, Linux, Windows",
-    softwareRequirements: "Node.js 20+",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-    },
-    license: "https://opensource.org/license/mit",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    browserRequirements: "Requires a modern web browser",
     featureList,
-    softwareVersion: "0.1.2",
-    downloadUrl: site.npm,
     author: {
       "@type": "Person",
       name: site.author,
