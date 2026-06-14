@@ -5,10 +5,13 @@
  */
 
 import {
+  GenreRevenueViewSchema,
   GenresViewSchema,
   RankedViewSchema,
   type RawRunFile,
   RawRunFileSchema,
+  RisingNichesViewSchema,
+  SaturationViewSchema,
 } from "@bloxscout/core/hosted-format";
 import type { ComputedViews } from "./views.js";
 
@@ -54,6 +57,21 @@ export function validateRunOutputs(input: ValidateRunInput): string[] {
   const genresParsed = GenresViewSchema.safeParse(views.genres);
   if (!genresParsed.success) {
     errors.push(`genres view fails schema: ${genresParsed.error.message.slice(0, 300)}`);
+  }
+
+  const saturationParsed = SaturationViewSchema.safeParse(views.saturation);
+  if (!saturationParsed.success) {
+    errors.push(`saturation view fails schema: ${saturationParsed.error.message.slice(0, 300)}`);
+  }
+  const risingParsed = RisingNichesViewSchema.safeParse(views.risingNiches);
+  if (!risingParsed.success) {
+    errors.push(`rising-niches view fails schema: ${risingParsed.error.message.slice(0, 300)}`);
+  }
+  const genreRevenueParsed = GenreRevenueViewSchema.safeParse(views.genreRevenue);
+  if (!genreRevenueParsed.success) {
+    errors.push(
+      `genre-revenue view fails schema: ${genreRevenueParsed.error.message.slice(0, 300)}`,
+    );
   }
 
   return errors;

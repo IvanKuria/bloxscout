@@ -245,10 +245,13 @@ async function main(): Promise<void> {
   writeJsonFile(join(dataDir, HOSTED_PATHS.upAndComingView), views.upAndComing);
   writeJsonFile(join(dataDir, HOSTED_PATHS.breakoutsView), views.breakouts);
   writeJsonFile(join(dataDir, HOSTED_PATHS.genresView), views.genres);
+  writeJsonFile(join(dataDir, HOSTED_PATHS.saturationView), views.saturation);
+  writeJsonFile(join(dataDir, HOSTED_PATHS.risingNichesView), views.risingNiches);
+  writeJsonFile(join(dataDir, HOSTED_PATHS.genreRevenueView), views.genreRevenue);
   registry.generatedAt = nowIso;
   writeJsonFile(join(dataDir, HOSTED_PATHS.registry), registry);
   log(
-    `views: trending=${views.trending.entries.length} upAndComing=${views.upAndComing.entries.length} breakouts=${views.breakouts.entries.length} genres=${views.genres.genres.length}`,
+    `views: trending=${views.trending.entries.length} upAndComing=${views.upAndComing.entries.length} breakouts=${views.breakouts.entries.length} genres=${views.genres.genres.length} saturation=${views.saturation.entries.length} risingNiches=${views.risingNiches.entries.length} genreRevenue=${views.genreRevenue.entries.length}`,
   );
 
   // -------------------------------------------------------------------------

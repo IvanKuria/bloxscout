@@ -191,6 +191,112 @@ export const GenresViewSchema = z.object({
 export type GenresView = z.infer<typeof GenresViewSchema>;
 
 // ---------------------------------------------------------------------------
+// Saturation / gap view — v1/views/saturation.json
+// ---------------------------------------------------------------------------
+
+export const SaturationEntrySchema = z.object({
+  genre: z.string(),
+  gameCount: z.number().int(),
+  totalPlaying: z.number().int(),
+  /** 0-100, higher = more saturated. `null` when there is too little data. */
+  saturationScore: z.number().nullable(),
+  /** Low score + enough games = under-served "white space". */
+  whiteSpace: z.boolean(),
+  components: z.object({
+    hhi: z.number(),
+    top1Share: z.number(),
+    top3Share: z.number(),
+    /** `null` while `addedAt` history is too young to judge incumbency. */
+    incumbencyScore: z.number().nullable(),
+    intensityScore: z.number(),
+    playersPerGame: z.number(),
+  }),
+  /** Why the score is `null`, else `null`. */
+  reason: z.string().nullable(),
+});
+export type SaturationEntry = z.infer<typeof SaturationEntrySchema>;
+
+export const SaturationViewSchema = z.object({
+  schemaVersion: z.number().int(),
+  generatedAt: isoDateTime,
+  entries: z.array(SaturationEntrySchema),
+});
+export type SaturationView = z.infer<typeof SaturationViewSchema>;
+
+// ---------------------------------------------------------------------------
+// Rising-niches view — v1/views/rising-niches.json
+// ---------------------------------------------------------------------------
+
+export const RisingNicheEntrySchema = z.object({
+  genre: z.string(),
+  /** 0-100 multiplicative momentum × opportunity × durability. */
+  risingScore: z.number(),
+  growth24hPct: z.number().nullable(),
+  growth7dPct: z.number().nullable(),
+  saturationScore: z.number().nullable(),
+  components: z.object({
+    momentum: z.number(),
+    opportunity: z.number(),
+    durability: z.number(),
+    genreZScore: z.number().nullable(),
+    top1Share: z.number(),
+  }),
+  /** `"7d"` once weekly history is reliable; `"24h-only"` before then. */
+  durabilityBasis: z.enum(["7d", "24h-only"]),
+  topGames: z.array(
+    z.object({
+      universeId: z.number().int(),
+      name: z.string().nullable(),
+      playing: z.number().int(),
+    }),
+  ),
+});
+export type RisingNicheEntry = z.infer<typeof RisingNicheEntrySchema>;
+
+export const RisingNichesViewSchema = z.object({
+  schemaVersion: z.number().int(),
+  generatedAt: isoDateTime,
+  entries: z.array(RisingNicheEntrySchema),
+});
+export type RisingNichesView = z.infer<typeof RisingNichesViewSchema>;
+
+// ---------------------------------------------------------------------------
+// Per-genre revenue-estimate view — v1/views/genre-revenue.json
+// ---------------------------------------------------------------------------
+
+export const GenreRevenueEntrySchema = z.object({
+  genre: z.string(),
+  gameCount: z.number().int(),
+  totalPlaying: z.number().int(),
+  /** Σ of per-game monthly estimates — total addressable. */
+  estTotalMonthlyUsd: z.number(),
+  /** Median per-game monthly estimate — the typical game. */
+  estMedianGameMonthlyUsd: z.number(),
+  /** Σ of the top-N earners by playing — headline figure. */
+  estTopNMonthlyUsd: z.number(),
+  /** Total estimate per 1,000 CCU — efficiency under the assumptions. */
+  revenuePerThousandCcuUsd: z.number(),
+  /** `true` when a per-genre monetization override was applied. */
+  assumptionsOverridden: z.boolean(),
+});
+export type GenreRevenueEntry = z.infer<typeof GenreRevenueEntrySchema>;
+
+export const GenreRevenueViewSchema = z.object({
+  schemaVersion: z.number().int(),
+  generatedAt: isoDateTime,
+  confidence: z.literal("low"),
+  assumptions: z.object({
+    conversionRate: z.number(),
+    averageRobuxPerPayingUser: z.number(),
+    daysActive: z.number(),
+    rateUsdPerRobux: z.number(),
+  }),
+  disclaimer: z.string(),
+  entries: z.array(GenreRevenueEntrySchema),
+});
+export type GenreRevenueView = z.infer<typeof GenreRevenueViewSchema>;
+
+// ---------------------------------------------------------------------------
 // Meta — v1/meta.json
 // ---------------------------------------------------------------------------
 
@@ -214,6 +320,9 @@ export const HOSTED_PATHS = {
   upAndComingView: "v1/views/up-and-coming.json",
   breakoutsView: "v1/views/breakouts.json",
   genresView: "v1/views/genres.json",
+  saturationView: "v1/views/saturation.json",
+  risingNichesView: "v1/views/rising-niches.json",
+  genreRevenueView: "v1/views/genre-revenue.json",
   raw: (date: string, runId: string) => `v1/raw/${date}/${runId}.json.gz`,
   hourly: (date: string) => `v1/hourly/${date}.json.gz`,
   daily: (date: string) => `v1/daily/${date}.json.gz`,

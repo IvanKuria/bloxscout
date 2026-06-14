@@ -20,6 +20,21 @@ const views = {
   upAndComing: emptyView,
   breakouts: emptyView,
   genres: { schemaVersion: HOSTED_SCHEMA_VERSION, generatedAt: NOW_ISO, genres: [] },
+  saturation: emptyView,
+  risingNiches: emptyView,
+  genreRevenue: {
+    schemaVersion: HOSTED_SCHEMA_VERSION,
+    generatedAt: NOW_ISO,
+    confidence: "low" as const,
+    assumptions: {
+      conversionRate: 0.02,
+      averageRobuxPerPayingUser: 100,
+      daysActive: 30,
+      rateUsdPerRobux: 0.0038,
+    },
+    disclaimer: "estimate",
+    entries: [],
+  },
 };
 
 describe("validateRunOutputs", () => {
