@@ -352,6 +352,14 @@ export default async function GamePage({ params }: PageProps) {
                 </div>
               ) : null}
             </ConsolePanel>
+            <p className="mt-3 text-sm">
+              <Link
+                href={`/game/${snapshot.universeId}/${canonicalSlug}/status`}
+                className="font-medium underline underline-offset-4 hover:text-accent"
+              >
+                Is {name} dead, or still active? See the verdict &rarr;
+              </Link>
+            </p>
           </section>
 
           {/* ---- Revenue estimate ---- */}

@@ -68,6 +68,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  // Per-game status pages ("is <game> dead / still popular").
+  const statusPages: MetadataRoute.Sitemap = topGames.map((e) => ({
+    url: `${site.url}/game/${e.universeId}/${slugify(e.name)}/status`,
+    lastModified: generatedAt,
+    changeFrequency: "hourly" as const,
+    priority: 0.5,
+  }));
+
   // Head-to-head comparison pages ("<game> vs <game>").
   const comparePages: MetadataRoute.Sitemap = (await topMatchups()).map(
     (matchup) => ({
@@ -83,6 +91,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...genrePages,
     ...gamePages,
     ...revenuePages,
+    ...statusPages,
     ...comparePages,
   ];
 }
