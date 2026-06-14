@@ -1,7 +1,7 @@
+import type { HourlyFile, RawRunFile } from "@bloxscout/core/hosted-format";
 import { describe, expect, it } from "vitest";
 import { emptyRegistry, upsertDiscovered } from "../../pipeline/registry.js";
 import { computeViews } from "../../pipeline/views.js";
-import type { HourlyFile, RawRunFile } from "../../src/shared/hosted-format.js";
 
 const NOW_ISO = "2026-06-12T12:00:00.000Z";
 const NOW = Date.parse(NOW_ISO);

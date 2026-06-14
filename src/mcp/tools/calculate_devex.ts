@@ -10,13 +10,13 @@ import {
   DEFAULT_DEVEX_RATE_USD_PER_ROBUX,
   DEVEX_PAYOUT_MINIMUM_ROBUX,
   calculateDevex,
-} from "../../core/calculators.js";
+} from "@bloxscout/core/calculators";
 import {
   type CalculateDevexInput,
   CalculateDevexInputSchema,
   type CalculateDevexOutput,
   CalculateDevexOutputSchema,
-} from "../../shared/schemas.js";
+} from "@bloxscout/core/schemas";
 import type { ToolContext, ToolDefinition } from "./types.js";
 
 const TOOL_NAME = "calculate_devex";

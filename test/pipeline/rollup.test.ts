@@ -1,7 +1,7 @@
+import type { DailyFile, HourlyFile, RawRunFile } from "@bloxscout/core/hosted-format";
+import { HISTORY_SHARD_COUNT } from "@bloxscout/core/hosted-format";
 import { describe, expect, it } from "vitest";
 import { aggregateDaily, aggregateHourly, buildHistoryShards } from "../../pipeline/rollup.js";
-import type { DailyFile, HourlyFile, RawRunFile } from "../../src/shared/hosted-format.js";
-import { HISTORY_SHARD_COUNT } from "../../src/shared/hosted-format.js";
 
 function run(
   runId: string,

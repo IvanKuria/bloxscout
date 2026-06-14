@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest";
 import {
   type GrowthPoint,
   growthRate,
   windowGrowthPct,
   zScoreOfLatest,
-} from "../../src/core/growth.js";
+} from "@bloxscout/core/growth";
+import { describe, expect, it } from "vitest";
 
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;

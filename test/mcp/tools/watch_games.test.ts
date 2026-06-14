@@ -1,15 +1,15 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { BloxscoutError } from "@bloxscout/core/errors";
+import { SnapshotStore } from "@bloxscout/core/snapshots";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SnapshotStore } from "../../../src/core/snapshots.js";
 import type { ToolContext } from "../../../src/mcp/tools/types.js";
 import {
   WatchGamesInputSchema,
   _resetWatchesForTests,
   watchGames,
 } from "../../../src/mcp/tools/watch_games.js";
-import { BloxscoutError } from "../../../src/shared/errors.js";
 import { gameFixture, makeCtx } from "./_helpers.js";
 
 function buildCtx(): {

@@ -1,5 +1,5 @@
+import { BloxscoutCache } from "@bloxscout/core/cache";
 import { describe, expect, it, vi } from "vitest";
-import { BloxscoutCache } from "../../src/core/cache.js";
 
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 

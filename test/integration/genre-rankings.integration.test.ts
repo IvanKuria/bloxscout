@@ -1,5 +1,5 @@
+import { RobloxClient } from "@bloxscout/core/roblox-client";
 import { describe, expect, it } from "vitest";
-import { RobloxClient } from "../../src/core/roblox-client.js";
 import { generateMarketReport } from "../../src/mcp/tools/generate_market_report.js";
 import { getTopByGenre } from "../../src/mcp/tools/get-top-by-genre.js";
 import { getTrendingGames } from "../../src/mcp/tools/get-trending-games.js";

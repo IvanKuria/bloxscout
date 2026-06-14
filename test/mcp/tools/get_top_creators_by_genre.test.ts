@@ -1,6 +1,6 @@
+import type { RobloxClient } from "@bloxscout/core/roblox-client";
+import type { Game } from "@bloxscout/core/types";
 import { describe, expect, it, vi } from "vitest";
-import type { RobloxClient } from "../../../src/core/roblox-client.js";
-import type { Game } from "../../../src/core/types.js";
 import { getTopCreatorsByGenreTool } from "../../../src/mcp/tools/get_top_creators_by_genre.js";
 
 function makeGame(id: number, playing: number, creatorId: number, creatorName: string): Game {

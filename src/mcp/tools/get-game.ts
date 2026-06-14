@@ -1,5 +1,5 @@
-import { RobloxNotFoundError } from "../../shared/errors.js";
-import { GetGameInputSchema, GetGameOutputSchema } from "../../shared/schemas.js";
+import { RobloxNotFoundError } from "@bloxscout/core/errors";
+import { GetGameInputSchema, GetGameOutputSchema } from "@bloxscout/core/schemas";
 import type { ToolDefinition } from "./types.js";
 
 /**

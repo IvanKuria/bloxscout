@@ -1,5 +1,5 @@
+import { GameSchema } from "@bloxscout/core/schemas";
 import { z } from "zod";
-import { GameSchema } from "../../shared/schemas.js";
 import { analyzeGameVsGenre } from "./analyze-game-vs-genre.js";
 import { getTopByGenre } from "./get-top-by-genre.js";
 import type { ToolDefinition } from "./types.js";

@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "ignore": ["dist", "node_modules", "coverage", "*.tsbuildinfo"]
+    "ignore": ["dist", "node_modules", "coverage", "*.tsbuildinfo", "apps/web", ".claude"]
   },
   "formatter": {
     "enabled": true,

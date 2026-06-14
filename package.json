@@ -1,7 +1,7 @@
 {
   "name": "bloxscout",
   "version": "0.2.0",
-  "description": "Reconnaissance for Roblox game devs and their agents — open-source MCP server + CLI for Roblox game analytics.",
+  "description": "Reconnaissance for Roblox game devs and their agents — open-source MCP server for Roblox game analytics.",
   "author": "Ivan Kuria <ivankuria7@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/IvanKuria/bloxscout",
@@ -18,7 +18,6 @@
     "model-context-protocol",
     "roblox",
     "roblox-api",
-    "cli",
     "analytics",
     "game-analytics",
     "claude",
@@ -31,31 +30,28 @@
     "node": ">=20"
   },
   "bin": {
-    "bloxscout": "dist/cli.js",
     "bloxscout-mcp": "dist/mcp.js"
   },
   "files": ["dist", "README.md", "LICENSE"],
   "packageManager": "pnpm@9.12.0",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build:core": "pnpm --filter @bloxscout/core build",
+    "build": "pnpm build:core && tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
+    "pretest": "pnpm build:core",
     "test": "vitest run --exclude 'test/integration/**'",
     "test:watch": "vitest --exclude 'test/integration/**'",
     "test:integration": "INTEGRATION=1 vitest run test/integration",
     "lint": "biome check .",
     "format": "biome format --write .",
+    "pretypecheck": "pnpm build:core",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.pipeline.json",
     "ingest": "tsx pipeline/run.ts",
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
+    "@bloxscout/core": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.0.4",
-    "better-sqlite3": "^12.10.0",
-    "chalk": "^5.3.0",
-    "cli-table3": "^0.6.5",
-    "commander": "^12.1.0",
-    "lru-cache": "^11.0.2",
-    "undici": "^7.0.0",
     "zod": "^3.23.8",
     "zod-to-json-schema": "^3.23.5"
   },
@@ -63,8 +59,12 @@
     "@biomejs/biome": "^1.9.4",
     "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^22.9.0",
+    "better-sqlite3": "^12.10.0",
+    "lru-cache": "^11.0.2",
     "tsx": "^4.19.2",
+    "turbo": "^2.3.0",
     "typescript": "^5.6.3",
+    "undici": "^7.0.0",
     "vitest": "^2.1.5"
   }
 }

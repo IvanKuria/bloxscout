@@ -1,11 +1,11 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import type { RobloxClient } from "@bloxscout/core/roblox-client";
+import { SnapshotScheduler } from "@bloxscout/core/scheduler";
+import { SnapshotStore } from "@bloxscout/core/snapshots";
+import type { Game } from "@bloxscout/core/types";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { RobloxClient } from "../../src/core/roblox-client.js";
-import { SnapshotScheduler } from "../../src/core/scheduler.js";
-import { SnapshotStore } from "../../src/core/snapshots.js";
-import type { Game } from "../../src/core/types.js";
 
 // biome-ignore lint/suspicious/noExplicitAny: fixture helper.
 type AnyGame = any;

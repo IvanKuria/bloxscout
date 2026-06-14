@@ -1,0 +1,131 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted-surface: var(--muted-surface);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-hover: var(--accent-hover);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-archivo);
+  /* Recon console palette — dark data-surface tokens used by the
+     stat panels, sparklines and live counters on the data pages. */
+  --color-console: var(--console);
+  --color-console-foreground: var(--console-foreground);
+  --color-console-muted: var(--console-muted);
+  --color-console-border: var(--console-border);
+  --color-console-grid: var(--console-grid);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --muted: #6b7280;
+  --muted-foreground: #6b7280;
+  --muted-surface: #f5f5f0;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #e2231a;
+  --accent: #e2231a;
+  --accent-foreground: #ffffff;
+  --accent-hover: #c41e16;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #0a0a0a;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f5f0;
+  --secondary-foreground: #0a0a0a;
+  --destructive: #e2231a;
+  --destructive-foreground: #ffffff;
+  --radius: 0.5rem;
+
+  /* Recon console surface — near-black with a faint cool cast. */
+  --console: #0b0e0f;
+  --console-foreground: #e9edf0;
+  --console-muted: #7e8a91;
+  --console-border: #1d2528;
+  --console-grid: rgba(233, 237, 240, 0.045);
+  --positive: #1faa6b;
+  --negative: #e2231a;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  .font-heading {
+    font-family: var(--font-heading), var(--font-geist-sans), sans-serif;
+  }
+}
+
+@layer utilities {
+  /* Faint engineering grid for console panels. */
+  .recon-grid {
+    background-image:
+      linear-gradient(var(--console-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--console-grid) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  /* Tabular, monospace numerics so columns line up like a readout. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+}
+
+/* Live pulse for the concurrency indicator dot. */
+@keyframes recon-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.82);
+  }
+}
+.recon-pulse {
+  animation: recon-pulse 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .recon-pulse {
+    animation: none;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+}

@@ -7,9 +7,9 @@
  * juggernauts.
  */
 
+import { BloxscoutError } from "@bloxscout/core/errors";
+import { computeUpAndComing } from "@bloxscout/core/rankings";
 import { z } from "zod";
-import { computeUpAndComing } from "../../core/rankings.js";
-import { BloxscoutError } from "../../shared/errors.js";
 import type { ToolContext, ToolDefinition } from "./types.js";
 
 export const getUpAndComingInputSchema = z.object({

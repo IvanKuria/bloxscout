@@ -5,7 +5,7 @@
  * explore sorts under-represent.
  */
 
-import { ALL_GENRE_SEARCH_QUERIES } from "../src/mcp/data/genre-seeds.js";
+import { ALL_GENRE_SEARCH_QUERIES } from "@bloxscout/core/genre-seeds";
 
 const EXTRA_DISCOVERY_QUERIES: readonly string[] = [
   // Formats / mechanics

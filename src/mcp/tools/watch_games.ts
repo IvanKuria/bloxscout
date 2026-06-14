@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
+import { BloxscoutError } from "@bloxscout/core/errors";
+import { SnapshotScheduler } from "@bloxscout/core/scheduler";
+import { SnapshotStore } from "@bloxscout/core/snapshots";
 import { z } from "zod";
-import { SnapshotScheduler } from "../../core/scheduler.js";
-import { SnapshotStore } from "../../core/snapshots.js";
-import { BloxscoutError } from "../../shared/errors.js";
 import type { ToolDefinition } from "./types.js";
 
 /**

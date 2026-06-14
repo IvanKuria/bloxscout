@@ -1,10 +1,14 @@
-import type { GameSummary, RobloxUniverseId } from "../../core/types.js";
+import {
+  ALL_GENRE_SEARCH_QUERIES,
+  lookupGenre,
+  matchesHostedGenre,
+} from "@bloxscout/core/genre-seeds";
 import {
   GetTrendingGamesInputSchema,
   type GetTrendingGamesOutput,
   GetTrendingGamesOutputSchema,
-} from "../../shared/schemas.js";
-import { ALL_GENRE_SEARCH_QUERIES, lookupGenre, matchesHostedGenre } from "../data/genre-seeds.js";
+} from "@bloxscout/core/schemas";
+import type { GameSummary, RobloxUniverseId } from "@bloxscout/core/types";
 import type { ToolContext, ToolDefinition } from "./types.js";
 
 const PER_GENRE_CANDIDATES = 25;
@@ -105,7 +109,7 @@ async function tryHostedPath(
 }
 
 async function collectCandidateUniverseIds(
-  ctx: { client: import("../../core/roblox-client.js").RobloxClient },
+  ctx: { client: import("@bloxscout/core/roblox-client").RobloxClient },
   genre: string | undefined,
 ): Promise<RobloxUniverseId[]> {
   if (genre !== undefined) {

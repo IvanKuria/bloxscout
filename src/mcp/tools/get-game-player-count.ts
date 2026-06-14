@@ -1,8 +1,8 @@
-import { RobloxNotFoundError } from "../../shared/errors.js";
+import { RobloxNotFoundError } from "@bloxscout/core/errors";
 import {
   GetGamePlayerCountInputSchema,
   GetGamePlayerCountOutputSchema,
-} from "../../shared/schemas.js";
+} from "@bloxscout/core/schemas";
 import type { ToolDefinition } from "./types.js";
 
 /**

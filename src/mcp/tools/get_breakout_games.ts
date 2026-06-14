@@ -7,9 +7,9 @@
  * ranking) and `get_up_and_coming` (small-baseline growers).
  */
 
+import { BloxscoutError } from "@bloxscout/core/errors";
+import { ViewEntrySchema } from "@bloxscout/core/hosted-format";
 import { z } from "zod";
-import { BloxscoutError } from "../../shared/errors.js";
-import { ViewEntrySchema } from "../../shared/hosted-format.js";
 import type { ToolContext, ToolDefinition } from "./types.js";
 
 export const getBreakoutGamesInputSchema = z.object({

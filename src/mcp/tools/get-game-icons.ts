@@ -1,5 +1,5 @@
+import { GameIconSchema } from "@bloxscout/core/schemas";
 import { z } from "zod";
-import { GameIconSchema } from "../../shared/schemas.js";
 import type { ToolDefinition } from "./types.js";
 
 const GameIconSizeSchema = z.enum(["512x512", "256x256", "150x150", "128x128", "100x100", "50x50"]);

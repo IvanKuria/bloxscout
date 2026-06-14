@@ -1,4 +1,4 @@
-import { GetCreatorInputSchema, GetCreatorOutputSchema } from "../../shared/schemas.js";
+import { GetCreatorInputSchema, GetCreatorOutputSchema } from "@bloxscout/core/schemas";
 import type { ToolDefinition } from "./types.js";
 
 /**

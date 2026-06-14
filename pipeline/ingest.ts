@@ -9,8 +9,8 @@
  * decides afterwards whether enough of the run survived to publish.
  */
 
-import type { RobloxClient } from "../src/core/roblox-client.js";
-import type { Game } from "../src/core/types.js";
+import type { RobloxClient } from "@bloxscout/core/roblox-client";
+import type { Game } from "@bloxscout/core/types";
 
 const DEFAULT_CHUNK_SIZE = 50;
 const DEFAULT_DELAY_MS = 400;

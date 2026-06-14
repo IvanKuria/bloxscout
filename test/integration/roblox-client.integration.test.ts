@@ -1,12 +1,12 @@
-import { describe, expect, it } from "vitest";
-import { RobloxClient } from "../../src/core/roblox-client.js";
+import { RobloxClient } from "@bloxscout/core/roblox-client";
 import {
   GameIconSchema,
   GameSchema,
   GameSummarySchema,
   GroupSchema,
   UserSchema,
-} from "../../src/shared/schemas.js";
+} from "@bloxscout/core/schemas";
+import { describe, expect, it } from "vitest";
 
 /**
  * Live integration suite. Skipped unless `INTEGRATION=1` is set so CI's main

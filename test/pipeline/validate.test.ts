@@ -1,7 +1,7 @@
+import type { RawRunFile } from "@bloxscout/core/hosted-format";
+import { HOSTED_SCHEMA_VERSION } from "@bloxscout/core/hosted-format";
 import { describe, expect, it } from "vitest";
 import { validateRunOutputs } from "../../pipeline/validate.js";
-import type { RawRunFile } from "../../src/shared/hosted-format.js";
-import { HOSTED_SCHEMA_VERSION } from "../../src/shared/hosted-format.js";
 
 const NOW_ISO = "2026-06-12T12:00:00.000Z";
 
@@ -20,6 +20,21 @@ const views = {
   upAndComing: emptyView,
   breakouts: emptyView,
   genres: { schemaVersion: HOSTED_SCHEMA_VERSION, generatedAt: NOW_ISO, genres: [] },
+  saturation: emptyView,
+  risingNiches: emptyView,
+  genreRevenue: {
+    schemaVersion: HOSTED_SCHEMA_VERSION,
+    generatedAt: NOW_ISO,
+    confidence: "low" as const,
+    assumptions: {
+      conversionRate: 0.02,
+      averageRobuxPerPayingUser: 100,
+      daysActive: 30,
+      rateUsdPerRobux: 0.0038,
+    },
+    disclaimer: "estimate",
+    entries: [],
+  },
 };
 
 describe("validateRunOutputs", () => {

@@ -1,6 +1,6 @@
+import type { RobloxClient } from "@bloxscout/core/roblox-client";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { describe, expect, it, vi } from "vitest";
-import type { RobloxClient } from "../../src/core/roblox-client.js";
 import { createMcpServer } from "../../src/mcp/server.js";
 import { allTools } from "../../src/mcp/tools/index.js";
 

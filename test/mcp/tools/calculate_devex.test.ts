@@ -1,5 +1,5 @@
+import type { RobloxClient } from "@bloxscout/core/roblox-client";
 import { describe, expect, it } from "vitest";
-import type { RobloxClient } from "../../../src/core/roblox-client.js";
 import { calculateDevexTool } from "../../../src/mcp/tools/calculate_devex.js";
 import type { ToolContext } from "../../../src/mcp/tools/types.js";
 

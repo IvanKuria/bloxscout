@@ -12,7 +12,7 @@ import {
   HOSTED_SCHEMA_VERSION,
   type RegistryEntry,
   type RegistryFile,
-} from "../src/shared/hosted-format.js";
+} from "@bloxscout/core/hosted-format";
 
 const DORMANT_AFTER_MS = 7 * 24 * 60 * 60 * 1000;
 const DORMANT_PEAK_CCU = 5;

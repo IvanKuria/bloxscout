@@ -7,9 +7,9 @@
  * what to build next — which no per-game tool can.
  */
 
+import { BloxscoutError } from "@bloxscout/core/errors";
+import { GenreAggregateSchema } from "@bloxscout/core/hosted-format";
 import { z } from "zod";
-import { BloxscoutError } from "../../shared/errors.js";
-import { GenreAggregateSchema } from "../../shared/hosted-format.js";
 import type { ToolContext, ToolDefinition } from "./types.js";
 
 export const getGenreMomentumInputSchema = z.object({

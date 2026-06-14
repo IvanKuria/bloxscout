@@ -7,8 +7,8 @@
  * the tool surface is reviewable and unit-testable in isolation.
  */
 
+import { BloxscoutError } from "@bloxscout/core/errors";
 import { z } from "zod";
-import { BloxscoutError } from "../../shared/errors.js";
 import type { ToolContext, ToolDefinition } from "./types.js";
 
 export const snapshotGameInputSchema = z.object({

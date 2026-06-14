@@ -1,9 +1,9 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { SnapshotStore } from "@bloxscout/core/snapshots";
+import type { Game } from "@bloxscout/core/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { SnapshotStore } from "../../src/core/snapshots.js";
-import type { Game } from "../../src/core/types.js";
 
 // biome-ignore lint/suspicious/noExplicitAny: test fixtures intentionally loose.
 type AnyGame = any;

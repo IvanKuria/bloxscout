@@ -1,4 +1,4 @@
-import { SearchGamesInputSchema, SearchGamesOutputSchema } from "../../shared/schemas.js";
+import { SearchGamesInputSchema, SearchGamesOutputSchema } from "@bloxscout/core/schemas";
 import type { ToolDefinition } from "./types.js";
 
 /**
