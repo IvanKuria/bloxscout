@@ -14,10 +14,12 @@
  */
 import * as React from "react";
 import { NicheCard } from "@/components/copilot/niche-card";
+import { NicheScan } from "@/components/copilot/niche-scan";
 import { RankingWidget } from "@/components/copilot/ranking-widget";
 import { RisingList } from "@/components/copilot/rising-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import type {
+  NicheAnalysisResult,
   RankingResult,
   RisingResult,
   SaturationResult,
@@ -42,6 +44,9 @@ export const WIDGET_BY_TOOL: Record<string, WidgetRenderer> = {
     <NicheCard result={result as SaturationResult} />
   ),
   get_rising_niches: (result) => <RisingList result={result as RisingResult} />,
+  analyze_niche: (result) => (
+    <NicheScan result={result as NicheAnalysisResult} />
+  ),
 };
 
 /** Human label for the running-tool indicator, keyed by tool name. */
@@ -50,6 +55,7 @@ const RUNNING_LABEL: Record<string, string> = {
   get_breakout_games: "Reading breakout games",
   get_genre_saturation: "Scoring genre saturation",
   get_rising_niches: "Scanning rising niches",
+  analyze_niche: "Scanning the niche live",
 };
 
 /**

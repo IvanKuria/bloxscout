@@ -27,6 +27,12 @@ import {
   getTrending,
 } from "@/lib/data";
 import { genreSlug } from "@/lib/format";
+import { analyzeNiche } from "@/lib/niche";
+import type { NicheAnalysisResult } from "@/lib/niche";
+
+// Re-export the niche-scan result types so the widget layer imports its props
+// from the same place as the other tool results (type-only; erased at build).
+export type { NicheAnalysisResult, NicheGameRow, NicheVerdict } from "@/lib/niche";
 
 /** A JSON-Schema-ish object the Anthropic SDK accepts as `input_schema`. */
 type JsonSchema = {
@@ -291,6 +297,47 @@ export const COPILOT_TOOLS: CopilotTool[] = [
 
   {
     def: {
+      name: "analyze_niche",
+      description:
+        "Analyze a SPECIFIC niche / sub-genre / game-type by name — e.g. " +
+        "'tower defense', 'anime fighting', 'brainrot', 'tycoon', 'horror', " +
+        "'simulator', 'obby'. Searches Roblox LIVE for matching games and " +
+        "measures real competition from current player counts: how many games, " +
+        "total live players, how dominant the top titles are (concentration), " +
+        "and whether smaller games are getting traction (room to enter). " +
+        "USE THIS for any specific niche question — 'is X saturated?', 'is " +
+        "there room in X?', 'what should I build in X?' — and for any niche " +
+        "phrase that is NOT one of Roblox's ~18 coarse official genres. Prefer " +
+        "this over get_genre_saturation for anything more specific than a broad " +
+        "genre. Works on live data (no history needed). Renders an interactive " +
+        "niche-scan widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description:
+              "The niche / sub-genre / game-type to analyze, e.g. " +
+              "'tower defense', 'anime fighting', 'tycoon'.",
+          },
+          limit: {
+            type: "integer",
+            description: "Max games to scan (1-50). Default 30.",
+          },
+        },
+        required: ["query"],
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<NicheAnalysisResult> {
+      const query = typeof input.query === "string" ? input.query : "";
+      const limit = typeof input.limit === "number" ? input.limit : undefined;
+      return analyzeNiche(query, limit);
+    },
+  },
+
+  {
+    def: {
       name: "get_genre_saturation",
       description:
         "Assess how saturated/crowded a Roblox genre is (0-100, higher = more " +
@@ -332,7 +379,9 @@ export const COPILOT_TOOLS: CopilotTool[] = [
         };
       }
       const scored = view.entries
-        .filter((e) => e.saturationScore !== null)
+        // Drop the unlabeled/empty-genre bucket — showing "(blank) 66" is
+        // noise, never a real answer.
+        .filter((e) => e.saturationScore !== null && e.genre.trim() !== "")
         .sort((a, b) => (b.saturationScore ?? 0) - (a.saturationScore ?? 0));
 
       let focus: NicheGauge | null = null;
