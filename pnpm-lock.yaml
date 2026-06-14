@@ -34,8 +34,8 @@ importers:
         specifier: ^12.10.0
         version: 12.10.0
       lru-cache:
-        specifier: ^11.0.2
-        version: 11.5.0
+        specifier: ^11.5.1
+        version: 11.5.1
       tsx:
         specifier: ^4.19.2
         version: 4.22.3
@@ -134,8 +134,8 @@ importers:
         specifier: ^12.10.0
         version: 12.10.0
       lru-cache:
-        specifier: ^11.0.2
-        version: 11.5.0
+        specifier: ^11.5.1
+        version: 11.5.1
       undici:
         specifier: ^7.0.0
         version: 7.25.0
@@ -2887,8 +2887,8 @@ packages:
   loupe@3.2.1:
     resolution: {integrity: sha512-CdzqowRJCeLU72bHvWqwRBBlLcMEtIvGrlvef74kMnV2AolS9Y8xUv1I0U/MNAWMhBlKIoyuEgoJ0t/bbwHbLQ==}
 
-  lru-cache@11.5.0:
-    resolution: {integrity: sha512-5YgH9UJd7wVb9hIouI2adWpgqrrICkt070Dnj8EUY1+B4B2P9eRLPAkAAo6NICA7CEhOIeBHl46u9zSNpNu7zA==}
+  lru-cache@11.5.1:
+    resolution: {integrity: sha512-RPimw/7aMdv2oqRrxKwvZXcPfwBrn/JZ2xYcY9Hus/6LaS3VOAKVWKWgNLCFSiOm1ESXinjsDlidVU7JlnCN2A==}
     engines: {node: 20 || >=22}
 
   lru-cache@5.1.1:
@@ -6483,7 +6483,7 @@ snapshots:
 
   loupe@3.2.1: {}
 
-  lru-cache@11.5.0: {}
+  lru-cache@11.5.1: {}
 
   lru-cache@5.1.1:
     dependencies:
