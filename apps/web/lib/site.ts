@@ -2,12 +2,8 @@ export const site = {
   name: "bloxscout",
   domain: "bloxscout.ai",
   url: "https://bloxscout.ai",
-  tagline: "Reconnaissance for Roblox game devs and their agents.",
+  tagline: "The AI agent that finds winning Roblox game ideas.",
   description:
-    "bloxscout is an MCP server and CLI for Roblox developers. 18 tools for game discovery, market intelligence, creator lookup, DevEx and revenue calculations, snapshots, and reports — usable from Claude Code, Cursor, Windsurf, and Zed, or directly from your terminal.",
-  installCommand: "claude mcp add bloxscout -- npx -y bloxscout-mcp",
-  github: "https://github.com/IvanKuria/bloxscout",
-  npm: "https://www.npmjs.com/package/bloxscout",
-  license: "MIT",
+    "bloxscout is an AI agent that scouts the Roblox economy for winning game ideas and emergent niches. Ask it what to build, whether a niche is saturated or winnable, and which games are breaking out — every answer grounded in live Roblox data refreshed every ~30 minutes.",
   author: "Ivan Kuria",
 } as const;

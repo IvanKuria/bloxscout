@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SiteHeader } from "@/components/sections/site-header";
 import { SiteFooter } from "@/components/sections/site-footer";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -74,6 +75,15 @@ export default async function GamesIndexPage() {
               minutes.
             </p>
           )}
+          <p className="mt-6 text-sm">
+            <Link
+              href="/roblox-statistics"
+              className="font-medium underline underline-offset-4 hover:text-accent"
+            >
+              See live Roblox statistics — players by genre, biggest games &amp;
+              revenue &rarr;
+            </Link>
+          </p>
         </div>
       </main>
       <SiteFooter />

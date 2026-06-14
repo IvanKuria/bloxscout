@@ -352,6 +352,14 @@ export default async function GamePage({ params }: PageProps) {
                 </div>
               ) : null}
             </ConsolePanel>
+            <p className="mt-3 text-sm">
+              <Link
+                href={`/game/${snapshot.universeId}/${canonicalSlug}/status`}
+                className="font-medium underline underline-offset-4 hover:text-accent"
+              >
+                Is {name} dead, or still active? See the verdict &rarr;
+              </Link>
+            </p>
           </section>
 
           {/* ---- Revenue estimate ---- */}
@@ -415,6 +423,15 @@ export default async function GamePage({ params }: PageProps) {
                     .
                   </p>
                 </div>
+                <p className="mt-3 text-sm">
+                  <Link
+                    href={`/game/${snapshot.universeId}/${canonicalSlug}/revenue`}
+                    className="font-medium underline underline-offset-4 hover:text-accent"
+                  >
+                    Full {name} revenue breakdown — daily, monthly &amp; yearly
+                    &rarr;
+                  </Link>
+                </p>
               </>
             ) : (
               <p className="text-sm text-muted-foreground">

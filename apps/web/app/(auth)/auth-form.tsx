@@ -94,8 +94,8 @@ export function AuthForm() {
           Sign in or create an account
         </h1>
         <p className="text-sm text-console-muted">
-          One account for the dashboard, exports, and your subscription. No
-          password — we send a one-time link.
+          Start asking the agent for winning Roblox ideas. No password — we send
+          a one-time link.
         </p>
       </div>
 
