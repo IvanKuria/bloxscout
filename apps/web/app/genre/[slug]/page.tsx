@@ -127,11 +127,14 @@ export default async function GenrePage({ params }: PageProps) {
               refreshes every 30 minutes.
             </p>
           )}
-          <p className="mt-6 text-sm">
+          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            <Link href={`/genre/${slug}/saturation`} className="font-medium underline underline-offset-4 hover:text-accent">
+              Is {genre} saturated? &rarr;
+            </Link>
             <Link href="/games" className="font-medium underline underline-offset-4 hover:text-accent">
               &larr; All top Roblox games
             </Link>
-          </p>
+          </div>
         </div>
       </main>
       <SiteFooter />

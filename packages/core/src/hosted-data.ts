@@ -18,6 +18,8 @@ import { type Dispatcher, request } from "undici";
 import { BloxscoutCache, CACHE_TTL } from "./cache.js";
 import {
   type GameHistoryEntry,
+  type GenreRevenueView,
+  GenreRevenueViewSchema,
   type GenresView,
   GenresViewSchema,
   HOSTED_PATHS,
@@ -26,6 +28,10 @@ import {
   MetaFileSchema,
   type RankedView,
   RankedViewSchema,
+  type RisingNichesView,
+  RisingNichesViewSchema,
+  type SaturationView,
+  SaturationViewSchema,
   shardOf,
 } from "./hosted-format.js";
 
@@ -86,6 +92,37 @@ export class HostedDataClient {
 
   async getGenresView(): Promise<GenresView | null> {
     return this.fetchValidated(HOSTED_PATHS.genresView, GenresViewSchema, CACHE_TTL.DEFAULT);
+  }
+
+  /**
+   * Genre saturation / white-space view. `null` until the pipeline publishes
+   * it (only after this branch merges and the cron runs) — callers must treat
+   * `null` as "rankings still computing", not an error.
+   */
+  async getSaturationView(): Promise<SaturationView | null> {
+    return this.fetchValidated(
+      HOSTED_PATHS.saturationView,
+      SaturationViewSchema,
+      CACHE_TTL.DEFAULT,
+    );
+  }
+
+  /** Rising-niches momentum view. `null` until first published (see above). */
+  async getRisingNichesView(): Promise<RisingNichesView | null> {
+    return this.fetchValidated(
+      HOSTED_PATHS.risingNichesView,
+      RisingNichesViewSchema,
+      CACHE_TTL.DEFAULT,
+    );
+  }
+
+  /** Per-genre revenue-estimate view. `null` until first published (see above). */
+  async getGenreRevenueView(): Promise<GenreRevenueView | null> {
+    return this.fetchValidated(
+      HOSTED_PATHS.genreRevenueView,
+      GenreRevenueViewSchema,
+      CACHE_TTL.DEFAULT,
+    );
   }
 
   /** Hosted time-series for one game, or `null` if untracked/unavailable. */

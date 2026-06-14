@@ -15,15 +15,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${site.url}/`, lastModified: generatedAt, changeFrequency: "daily", priority: 1 },
     { url: `${site.url}/games`, lastModified: generatedAt, changeFrequency: "hourly", priority: 0.9 },
+    { url: `${site.url}/trending`, lastModified: generatedAt, changeFrequency: "hourly", priority: 0.8 },
+    { url: `${site.url}/trending/day`, lastModified: generatedAt, changeFrequency: "hourly", priority: 0.7 },
+    { url: `${site.url}/trending/month`, lastModified: generatedAt, changeFrequency: "hourly", priority: 0.7 },
+    // Cluster-A opportunity / money pages (highest commercial intent).
+    { url: `${site.url}/best-roblox-games-to-make-2026`, lastModified: generatedAt, changeFrequency: "daily", priority: 0.9 },
+    { url: `${site.url}/most-profitable-roblox-game-genres`, lastModified: generatedAt, changeFrequency: "daily", priority: 0.9 },
+    { url: `${site.url}/rising-roblox-niches`, lastModified: generatedAt, changeFrequency: "daily", priority: 0.9 },
+    { url: `${site.url}/what-roblox-game-should-i-make`, lastModified: generatedAt, changeFrequency: "daily", priority: 0.9 },
+    // Calculators (static, high-volume search intent).
+    { url: `${site.url}/calculators/devex`, lastModified: generatedAt, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${site.url}/calculators/revenue`, lastModified: generatedAt, changeFrequency: "monthly", priority: 0.7 },
     { url: `${site.url}/about/methodology`, lastModified: generatedAt, changeFrequency: "monthly", priority: 0.5 },
   ];
 
-  const genrePages: MetadataRoute.Sitemap = (genres?.genres ?? []).map((g) => ({
-    url: `${site.url}/genre/${toGenreSlug(g.genre)}`,
-    lastModified: generatedAt,
-    changeFrequency: "hourly",
-    priority: 0.7,
-  }));
+  const genrePages: MetadataRoute.Sitemap = (genres?.genres ?? []).flatMap((g) => {
+    const slug = toGenreSlug(g.genre);
+    return [
+      {
+        url: `${site.url}/genre/${slug}`,
+        lastModified: generatedAt,
+        changeFrequency: "hourly" as const,
+        priority: 0.7,
+      },
+      {
+        url: `${site.url}/genre/${slug}/saturation`,
+        lastModified: generatedAt,
+        changeFrequency: "daily" as const,
+        priority: 0.7,
+      },
+    ];
+  });
 
   const gamePages: MetadataRoute.Sitemap = (trending?.entries ?? [])
     .slice()

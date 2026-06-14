@@ -17,13 +17,24 @@ import { cache } from "react";
 import { genreSlug } from "./format";
 import { HostedDataClient } from "@bloxscout/core/hosted-data";
 import type {
+  GenreRevenueView,
   GenresView,
   MetaFile,
   RankedView,
+  RisingNichesView,
+  SaturationView,
   ViewEntry,
 } from "@bloxscout/core/hosted-format";
 
-export type { ViewEntry, RankedView, GenresView, MetaFile };
+export type {
+  ViewEntry,
+  RankedView,
+  GenresView,
+  MetaFile,
+  SaturationView,
+  RisingNichesView,
+  GenreRevenueView,
+};
 
 /** Shared client. Default base URL = the live hosted CDN. */
 const client = new HostedDataClient();
@@ -48,6 +59,64 @@ export const getUpAndComing = cache((): Promise<RankedView | null> =>
 
 export const getGenres = cache((): Promise<GenresView | null> =>
   client.getGenresView(),
+);
+
+// ---------------------------------------------------------------------------
+// v0.3 opportunity views (saturation / rising-niches / genre-revenue)
+//
+// These three views are NOT on the CDN until this branch merges to `main` and
+// the pipeline cron runs. `HostedDataClient` returns `null` on the resulting
+// 404 — callers MUST treat `null` as "rankings still computing" and render the
+// page shell + AEO metadata + an honest empty state, never crash or fake data.
+// ---------------------------------------------------------------------------
+
+export const getSaturation = cache((): Promise<SaturationView | null> =>
+  client.getSaturationView(),
+);
+
+export const getRisingNiches = cache((): Promise<RisingNichesView | null> =>
+  client.getRisingNichesView(),
+);
+
+export const getGenreRevenue = cache((): Promise<GenreRevenueView | null> =>
+  client.getGenreRevenueView(),
+);
+
+/**
+ * Resolve a single genre's saturation entry by URL slug. Returns the canonical
+ * genre label even when the saturation view itself is missing (so the page can
+ * still render a titled empty state), by falling back to the genres/trending
+ * views to recover the label. `entry` is `null` when the view isn't published
+ * yet or the genre has too little data to score.
+ */
+export const getSaturationBySlug = cache(
+  async (
+    slug: string,
+  ): Promise<{
+    genre: string;
+    entry: SaturationView["entries"][number] | null;
+  } | null> => {
+    const [saturation, genres, trending] = await Promise.all([
+      getSaturation(),
+      getGenres(),
+      getTrending(),
+    ]);
+    const fromSaturation = saturation?.entries.find(
+      (e) => genreSlug(e.genre) === slug,
+    );
+    if (fromSaturation) {
+      return { genre: fromSaturation.genre, entry: fromSaturation };
+    }
+    // View not published yet (or genre unscored): still resolve the label so
+    // the page renders a titled, honest empty state instead of a 404.
+    const matchLabel =
+      genres?.genres.find((g) => genreSlug(g.genre) === slug)?.genre ??
+      trending?.entries.find((e) => e.genre && genreSlug(e.genre) === slug)
+        ?.genre ??
+      null;
+    if (!matchLabel) return null;
+    return { genre: matchLabel, entry: null };
+  },
 );
 
 /**

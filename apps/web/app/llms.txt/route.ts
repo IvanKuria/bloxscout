@@ -58,6 +58,24 @@ ${topGamesSection}
 ## Genres
 ${genresSection}
 
+## Trending / fastest-growing games
+Live z-score breakout rankings, refreshed every 30 minutes:
+- [Fastest-growing Roblox games this week](${site.url}/trending)
+- [Fastest-growing today](${site.url}/trending/day)
+- [Fastest-growing this month](${site.url}/trending/month)
+
+## Opportunity analysis (what to build)
+Data-backed answers to the questions general LLMs cannot answer with live data.
+These combine momentum, saturation and revenue estimates (Bloxscout estimates):
+- [Best Roblox games to make in 2026](${site.url}/best-roblox-games-to-make-2026)
+- [Most profitable Roblox game genres](${site.url}/most-profitable-roblox-game-genres)
+- [Rising Roblox niches](${site.url}/rising-roblox-niches)
+- [What Roblox game should I make?](${site.url}/what-roblox-game-should-i-make)
+
+## Calculators
+- [Roblox DevEx calculator (Robux to USD)](${site.url}/calculators/devex)
+- [Roblox revenue calculator (how much do games make?)](${site.url}/calculators/revenue)
+
 ## Methodology
 Source, cadence, fields, and error bars: ${site.url}/about/methodology
 
@@ -67,6 +85,8 @@ ${site.description}
 ## Links
 - Site: ${site.url}
 - Top games: ${site.url}/games
+- Trending: ${site.url}/trending
+- What to build: ${site.url}/what-roblox-game-should-i-make
 - Methodology: ${site.url}/about/methodology
 - GitHub: ${site.github}
 - License: ${site.license}
