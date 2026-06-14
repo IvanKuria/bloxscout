@@ -1,6 +1,6 @@
+import { RobloxNotFoundError } from "@bloxscout/core/errors";
 import { describe, expect, it } from "vitest";
 import { getGroup } from "../../../src/mcp/tools/get-group.js";
-import { RobloxNotFoundError } from "../../../src/shared/errors.js";
 import { makeCtx } from "./_helpers.js";
 
 describe("get_group tool", () => {

@@ -10,8 +10,8 @@
  *    explore-api ever disappears.
  */
 
-import type { ExploreSort, GetExploreSortsOptions } from "../src/core/roblox-client.js";
-import type { GameSummary } from "../src/core/types.js";
+import type { ExploreSort, GetExploreSortsOptions } from "@bloxscout/core/roblox-client";
+import type { GameSummary } from "@bloxscout/core/types";
 import type { DiscoveredGame } from "./registry.js";
 
 /** The slice of RobloxClient that discovery needs (narrow for testability). */

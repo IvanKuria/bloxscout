@@ -13,9 +13,9 @@
  * averages). Hosted daily points only fill dates no other source covers.
  */
 
+import { BloxscoutError } from "@bloxscout/core/errors";
+import type { GameHistoryEntry } from "@bloxscout/core/hosted-format";
 import { z } from "zod";
-import { BloxscoutError } from "../../shared/errors.js";
-import type { GameHistoryEntry } from "../../shared/hosted-format.js";
 import type { ToolContext, ToolDefinition } from "./types.js";
 
 export const getGameHistoryInputSchema = z.object({

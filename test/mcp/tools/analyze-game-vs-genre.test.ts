@@ -1,6 +1,6 @@
+import { BloxscoutError, RobloxNotFoundError } from "@bloxscout/core/errors";
 import { describe, expect, it } from "vitest";
 import { analyzeGameVsGenre } from "../../../src/mcp/tools/analyze-game-vs-genre.js";
-import { BloxscoutError, RobloxNotFoundError } from "../../../src/shared/errors.js";
 import { gameFixture, makeCtx } from "./_helpers.js";
 
 function summaryFixture(id: number, playerCount: number) {

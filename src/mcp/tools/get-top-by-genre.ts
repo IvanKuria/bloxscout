@@ -1,5 +1,5 @@
-import { GetTopByGenreInputSchema, GetTopByGenreOutputSchema } from "../../shared/schemas.js";
-import { resolveGenreSearchQuery } from "../data/genre-seeds.js";
+import { resolveGenreSearchQuery } from "@bloxscout/core/genre-seeds";
+import { GetTopByGenreInputSchema, GetTopByGenreOutputSchema } from "@bloxscout/core/schemas";
 import type { ToolDefinition } from "./types.js";
 
 /**

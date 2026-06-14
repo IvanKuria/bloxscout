@@ -1,7 +1,7 @@
+import { BloxscoutError, RobloxNotFoundError } from "@bloxscout/core/errors";
+import { SUPPORTED_GENRES, lookupGenre } from "@bloxscout/core/genre-seeds";
+import { GameSchema } from "@bloxscout/core/schemas";
 import { z } from "zod";
-import { BloxscoutError, RobloxNotFoundError } from "../../shared/errors.js";
-import { GameSchema } from "../../shared/schemas.js";
-import { SUPPORTED_GENRES, lookupGenre } from "../data/genre-seeds.js";
 import type { ToolDefinition } from "./types.js";
 
 const MetricComparisonSchema = z.object({

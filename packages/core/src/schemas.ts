@@ -11,7 +11,7 @@ import { z } from "zod";
  *
  * Naming convention: `<ToolName>Input` / `<ToolName>Output`. Each value is
  * also re-exported as a TypeScript type with the same name so consumers can
- * `import type { SearchGamesInput } from "../shared/schemas.js"`.
+ * `import type { SearchGamesInput } from "./schemas.js"`.
  */
 
 // ---------------------------------------------------------------------------

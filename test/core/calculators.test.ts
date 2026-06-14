@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import {
   DEFAULT_DEVEX_RATE_USD_PER_ROBUX,
   DEVEX_PAYOUT_MINIMUM_ROBUX,
@@ -6,8 +5,9 @@ import {
   REVENUE_ESTIMATE_DISCLAIMER,
   calculateDevex,
   estimateGameRevenue,
-} from "../../src/core/calculators.js";
-import { BloxscoutError } from "../../src/shared/errors.js";
+} from "@bloxscout/core/calculators";
+import { BloxscoutError } from "@bloxscout/core/errors";
+import { describe, expect, it } from "vitest";
 
 describe("calculateDevex", () => {
   it("converts robux to USD at the default rate", () => {

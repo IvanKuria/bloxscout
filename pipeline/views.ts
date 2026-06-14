@@ -7,7 +7,7 @@
  * rankings module uses, so hosted and local semantics never drift.
  */
 
-import { type GrowthPoint, windowGrowthPct, zScoreOfLatest } from "../src/core/growth.js";
+import { type GrowthPoint, windowGrowthPct, zScoreOfLatest } from "@bloxscout/core/growth";
 import {
   type GenreAggregate,
   type GenresView,
@@ -17,7 +17,7 @@ import {
   type RawRunFile,
   type RegistryFile,
   type ViewEntry,
-} from "../src/shared/hosted-format.js";
+} from "@bloxscout/core/hosted-format";
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;

@@ -6,13 +6,13 @@
  * resolve the genre's live top games via omni-search.
  */
 
-import { getTopCreatorsByGenre } from "../../core/top-creators.js";
 import {
   type GetTopCreatorsByGenreInput,
   GetTopCreatorsByGenreInputSchema,
   type GetTopCreatorsByGenreOutput,
   GetTopCreatorsByGenreOutputSchema,
-} from "../../shared/schemas.js";
+} from "@bloxscout/core/schemas";
+import { getTopCreatorsByGenre } from "@bloxscout/core/top-creators";
 import type { ToolContext, ToolDefinition } from "./types.js";
 
 const TOOL_NAME = "get_top_creators_by_genre";

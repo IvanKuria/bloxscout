@@ -1,6 +1,6 @@
+import type { ExploreSort } from "@bloxscout/core/roblox-client";
 import { describe, expect, it } from "vitest";
 import { discoverGames } from "../../pipeline/discover.js";
-import type { ExploreSort } from "../../src/core/roblox-client.js";
 
 function exploreSort(games: Array<[id: number, name: string]>): ExploreSort {
   return {

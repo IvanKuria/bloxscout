@@ -1,14 +1,10 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { computeGrowthSeries, computeTrending, computeUpAndComing } from "@bloxscout/core/rankings";
+import { SnapshotStore } from "@bloxscout/core/snapshots";
+import type { Game } from "@bloxscout/core/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import {
-  computeGrowthSeries,
-  computeTrending,
-  computeUpAndComing,
-} from "../../src/core/rankings.js";
-import { SnapshotStore } from "../../src/core/snapshots.js";
-import type { Game } from "../../src/core/types.js";
 
 // biome-ignore lint/suspicious/noExplicitAny: fixture helper.
 type AnyGame = any;

@@ -1,4 +1,4 @@
-import { GetGroupInputSchema, GetGroupOutputSchema } from "../../shared/schemas.js";
+import { GetGroupInputSchema, GetGroupOutputSchema } from "@bloxscout/core/schemas";
 import type { ToolDefinition } from "./types.js";
 
 /**

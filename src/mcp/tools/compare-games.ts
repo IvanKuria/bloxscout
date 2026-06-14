@@ -1,5 +1,5 @@
+import { CompareGamesInputSchema, GameSchema } from "@bloxscout/core/schemas";
 import { z } from "zod";
-import { CompareGamesInputSchema, GameSchema } from "../../shared/schemas.js";
 import type { ToolDefinition } from "./types.js";
 
 const MetricStatsSchema = z.object({

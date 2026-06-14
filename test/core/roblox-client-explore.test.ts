@@ -1,7 +1,7 @@
+import { BloxscoutCache } from "@bloxscout/core/cache";
+import { RobloxClient } from "@bloxscout/core/roblox-client";
 import { MockAgent } from "undici";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { BloxscoutCache } from "../../src/core/cache.js";
-import { RobloxClient } from "../../src/core/roblox-client.js";
 
 function makeClient() {
   const agent = new MockAgent();

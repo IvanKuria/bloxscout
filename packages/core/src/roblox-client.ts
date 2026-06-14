@@ -1,12 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { type Dispatcher, request } from "undici";
+import { BloxscoutCache, CACHE_TTL, type CacheTtlSeconds } from "./cache.js";
 import {
   BloxscoutError,
   RobloxApiError,
   RobloxNotFoundError,
   RobloxRateLimitError,
-} from "../shared/errors.js";
-import { BloxscoutCache, CACHE_TTL, type CacheTtlSeconds } from "./cache.js";
+} from "./errors.js";
 import type {
   CreatorGame,
   Game,

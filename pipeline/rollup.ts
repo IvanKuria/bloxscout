@@ -14,7 +14,7 @@ import {
   type HourlyRow,
   type RawRunFile,
   shardOf,
-} from "../src/shared/hosted-format.js";
+} from "@bloxscout/core/hosted-format";
 
 /**
  * Aggregate one UTC day's raw run files into an hourly rollup. Runs whose

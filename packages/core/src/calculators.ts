@@ -4,7 +4,7 @@
  * CLI consume these directly.
  */
 
-import { BloxscoutError } from "../shared/errors.js";
+import { BloxscoutError } from "./errors.js";
 
 /**
  * Current Roblox Developer Exchange (DevEx) rate, in USD per Earned Robux.

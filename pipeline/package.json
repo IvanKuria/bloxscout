@@ -1,0 +1,18 @@
+{
+  "name": "@bloxscout/pipeline",
+  "version": "0.2.0",
+  "description": "Hosted-data ingestion pipeline for bloxscout (run via tsx).",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ingest": "tsx run.ts",
+    "typecheck": "tsc -p ../tsconfig.pipeline.json"
+  },
+  "dependencies": {
+    "@bloxscout/core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

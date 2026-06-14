@@ -1,7 +1,7 @@
+import type { RawRunFile } from "@bloxscout/core/hosted-format";
+import { HOSTED_SCHEMA_VERSION } from "@bloxscout/core/hosted-format";
 import { describe, expect, it } from "vitest";
 import { validateRunOutputs } from "../../pipeline/validate.js";
-import type { RawRunFile } from "../../src/shared/hosted-format.js";
-import { HOSTED_SCHEMA_VERSION } from "../../src/shared/hosted-format.js";
 
 const NOW_ISO = "2026-06-12T12:00:00.000Z";
 

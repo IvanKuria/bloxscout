@@ -5,13 +5,13 @@
  * no network calls. Wraps `estimateGameRevenue` from `src/core/calculators.ts`.
  */
 
-import { REVENUE_ESTIMATE_DISCLAIMER, estimateGameRevenue } from "../../core/calculators.js";
+import { REVENUE_ESTIMATE_DISCLAIMER, estimateGameRevenue } from "@bloxscout/core/calculators";
 import {
   type EstimateGameRevenueInput,
   EstimateGameRevenueInputSchema,
   type EstimateGameRevenueOutput,
   EstimateGameRevenueOutputSchema,
-} from "../../shared/schemas.js";
+} from "@bloxscout/core/schemas";
 import type { ToolContext, ToolDefinition } from "./types.js";
 
 const TOOL_NAME = "estimate_game_revenue";

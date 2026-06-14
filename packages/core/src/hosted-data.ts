@@ -15,6 +15,7 @@
 
 import { gunzipSync } from "node:zlib";
 import { type Dispatcher, request } from "undici";
+import { BloxscoutCache, CACHE_TTL } from "./cache.js";
 import {
   type GameHistoryEntry,
   type GenresView,
@@ -26,8 +27,7 @@ import {
   type RankedView,
   RankedViewSchema,
   shardOf,
-} from "../shared/hosted-format.js";
-import { BloxscoutCache, CACHE_TTL } from "./cache.js";
+} from "./hosted-format.js";
 
 export const DEFAULT_HOSTED_BASE_URL =
   "https://raw.githubusercontent.com/IvanKuria/bloxscout-data/main/";

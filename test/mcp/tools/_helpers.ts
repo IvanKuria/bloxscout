@@ -1,7 +1,7 @@
+import type { HostedDataClient } from "@bloxscout/core/hosted-data";
+import type { RobloxClient } from "@bloxscout/core/roblox-client";
+import type { SnapshotStore } from "@bloxscout/core/snapshots";
 import { vi } from "vitest";
-import type { HostedDataClient } from "../../../src/core/hosted-data.js";
-import type { RobloxClient } from "../../../src/core/roblox-client.js";
-import type { SnapshotStore } from "../../../src/core/snapshots.js";
 import type { ToolContext } from "../../../src/mcp/tools/types.js";
 
 export interface MakeCtxExtras {

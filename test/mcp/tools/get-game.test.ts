@@ -1,6 +1,6 @@
+import { RobloxNotFoundError } from "@bloxscout/core/errors";
 import { describe, expect, it } from "vitest";
 import { getGame } from "../../../src/mcp/tools/get-game.js";
-import { RobloxNotFoundError } from "../../../src/shared/errors.js";
 import { gameFixture, makeCtx } from "./_helpers.js";
 
 describe("get_game tool", () => {

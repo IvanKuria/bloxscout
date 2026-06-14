@@ -9,7 +9,7 @@ import {
   RankedViewSchema,
   type RawRunFile,
   RawRunFileSchema,
-} from "../src/shared/hosted-format.js";
+} from "@bloxscout/core/hosted-format";
 import type { ComputedViews } from "./views.js";
 
 /** Below this fetch success rate the run is considered systemically broken. */

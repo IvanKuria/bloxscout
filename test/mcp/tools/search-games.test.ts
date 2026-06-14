@@ -1,6 +1,6 @@
+import { RobloxApiError } from "@bloxscout/core/errors";
 import { describe, expect, it } from "vitest";
 import { searchGames } from "../../../src/mcp/tools/search-games.js";
-import { RobloxApiError } from "../../../src/shared/errors.js";
 import { makeCtx } from "./_helpers.js";
 
 describe("search_games tool", () => {

@@ -1,8 +1,8 @@
+import { BloxscoutError } from "@bloxscout/core/errors";
+import type { RobloxClient } from "@bloxscout/core/roblox-client";
+import { getTopCreatorsByGenre } from "@bloxscout/core/top-creators";
+import type { Game } from "@bloxscout/core/types";
 import { describe, expect, it, vi } from "vitest";
-import type { RobloxClient } from "../../src/core/roblox-client.js";
-import { getTopCreatorsByGenre } from "../../src/core/top-creators.js";
-import type { Game } from "../../src/core/types.js";
-import { BloxscoutError } from "../../src/shared/errors.js";
 
 function makeGame(opts: {
   id: number;

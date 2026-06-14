@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import {
   CompareGamesInputSchema,
   GameSchema,
@@ -13,7 +12,8 @@ import {
   SearchGamesInputSchema,
   SearchGamesOutputSchema,
   UserSchema,
-} from "../../src/shared/schemas.js";
+} from "@bloxscout/core/schemas";
+import { describe, expect, it } from "vitest";
 
 describe("schemas — discovery", () => {
   it("SearchGamesInput accepts valid input and defaults limit", () => {

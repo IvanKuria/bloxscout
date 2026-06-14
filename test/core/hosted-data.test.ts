@@ -1,9 +1,9 @@
 import { gzipSync } from "node:zlib";
+import { BloxscoutCache } from "@bloxscout/core/cache";
+import { HostedDataClient } from "@bloxscout/core/hosted-data";
+import { HOSTED_SCHEMA_VERSION } from "@bloxscout/core/hosted-format";
 import { MockAgent } from "undici";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { BloxscoutCache } from "../../src/core/cache.js";
-import { HostedDataClient } from "../../src/core/hosted-data.js";
-import { HOSTED_SCHEMA_VERSION } from "../../src/shared/hosted-format.js";
 
 const ORIGIN = "https://raw.githubusercontent.com";
 const BASE_PATH = "/IvanKuria/bloxscout-data/main/";

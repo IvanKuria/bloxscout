@@ -1,13 +1,13 @@
-import { MockAgent } from "undici";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { BloxscoutCache } from "../../src/core/cache.js";
-import { RobloxClient } from "../../src/core/roblox-client.js";
+import { BloxscoutCache } from "@bloxscout/core/cache";
 import {
   BloxscoutError,
   RobloxApiError,
   RobloxNotFoundError,
   RobloxRateLimitError,
-} from "../../src/shared/errors.js";
+} from "@bloxscout/core/errors";
+import { RobloxClient } from "@bloxscout/core/roblox-client";
+import { MockAgent } from "undici";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
  * Helper: build a fresh client + MockAgent pair. We inject a no-op `sleep`

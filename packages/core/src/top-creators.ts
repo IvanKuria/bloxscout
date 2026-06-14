@@ -23,8 +23,8 @@
  * swap.
  */
 
-import { resolveGenreSearchQuery } from "../mcp/data/genre-seeds.js";
-import { BloxscoutError } from "../shared/errors.js";
+import { BloxscoutError } from "./errors.js";
+import { resolveGenreSearchQuery } from "./genre-seeds.js";
 import type { RobloxClient } from "./roblox-client.js";
 import type { Game, RobloxUniverseId } from "./types.js";
 

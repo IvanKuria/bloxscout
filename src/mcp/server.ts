@@ -1,12 +1,12 @@
 import { createRequire } from "node:module";
+import { BloxscoutError, mapToMcpError } from "@bloxscout/core/errors";
+import { HostedDataClient, hostedDataEnabled } from "@bloxscout/core/hosted-data";
+import { RobloxClient } from "@bloxscout/core/roblox-client";
+import { SnapshotStore } from "@bloxscout/core/snapshots";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import { HostedDataClient, hostedDataEnabled } from "../core/hosted-data.js";
-import { RobloxClient } from "../core/roblox-client.js";
-import { SnapshotStore } from "../core/snapshots.js";
-import { BloxscoutError, mapToMcpError } from "../shared/errors.js";
 import { allTools } from "./tools/index.js";
 import type { ToolContext, ToolDefinition } from "./tools/types.js";
 

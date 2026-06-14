@@ -17,8 +17,6 @@ import { randomUUID } from "node:crypto";
 import { existsSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
-import { RobloxClient } from "../src/core/roblox-client.js";
-import type { Game } from "../src/core/types.js";
 import {
   type DailyFile,
   HOSTED_PATHS,
@@ -28,7 +26,9 @@ import {
   type RawRunFile,
   type RegistryFile,
   RegistryFileSchema,
-} from "../src/shared/hosted-format.js";
+} from "@bloxscout/core/hosted-format";
+import { RobloxClient } from "@bloxscout/core/roblox-client";
+import type { Game } from "@bloxscout/core/types";
 import { discoverGames } from "./discover.js";
 import { snapshotInBatches } from "./ingest.js";
 import {

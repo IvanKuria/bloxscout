@@ -1,7 +1,7 @@
+import type { HostedDataClient } from "@bloxscout/core/hosted-data";
+import type { RobloxClient } from "@bloxscout/core/roblox-client";
+import type { SnapshotStore } from "@bloxscout/core/snapshots";
 import type { z } from "zod";
-import type { HostedDataClient } from "../../core/hosted-data.js";
-import type { RobloxClient } from "../../core/roblox-client.js";
-import type { SnapshotStore } from "../../core/snapshots.js";
 
 /**
  * Generic shape every MCP tool module exports. Inputs/outputs are typed via

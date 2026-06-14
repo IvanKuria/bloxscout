@@ -5,6 +5,9 @@ node_modules/
 dist/
 *.tsbuildinfo
 
+# Turborepo
+.turbo/
+
 # Test/coverage
 coverage/
 
