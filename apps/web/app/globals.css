@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Streamdown ships its own Tailwind-classed markdown components; include its
+   dist in the content scan so those utilities aren't tree-shaken away. */
+@source "../node_modules/streamdown/dist/*.js";
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
