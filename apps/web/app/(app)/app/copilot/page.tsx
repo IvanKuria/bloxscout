@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { CopilotRuntimeProvider } from "@/components/copilot/runtime-provider";
 import { CopilotThread } from "@/components/copilot/thread";
 import { isCopilotConfigured } from "@/lib/agent/anthropic";
+import { isCopilotPreview } from "@/lib/preview";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -15,15 +16,19 @@ export const dynamic = "force-dynamic";
 
 export default async function CopilotPage() {
   // Defense in depth: the layout + proxy gate this, re-check at the source.
+  // redirect() throws (NEXT_REDIRECT) — keep it OUTSIDE the try/catch.
+  const preview = isCopilotPreview();
+  let authed = false;
   try {
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) redirect("/login?redirectedFrom=/app/copilot");
+    if (user) authed = true;
   } catch {
-    redirect("/login?error=not_configured");
+    // Auth not configured — fall through to the gate below.
   }
+  if (!authed && !preview) redirect("/login?redirectedFrom=/app/copilot");
 
   const configured = isCopilotConfigured();
 
