@@ -5,6 +5,8 @@
  */
 
 import {
+  type GamePassFile,
+  GamePassFileSchema,
   GenreRevenueViewSchema,
   GenresViewSchema,
   RankedViewSchema,
@@ -75,4 +77,18 @@ export function validateRunOutputs(input: ValidateRunInput): string[] {
   }
 
   return errors;
+}
+
+/**
+ * Schema-validate a gamepass sample file before it is published. Sampling is
+ * optional/flag-gated, so this is only called when a file was actually
+ * produced (an absent file is not an error). A malformed file aborts the run
+ * the same way a malformed view does.
+ */
+export function validateGamePassFile(file: GamePassFile): string[] {
+  const parsed = GamePassFileSchema.safeParse(file);
+  if (!parsed.success) {
+    return [`gamepass file fails schema: ${parsed.error.message.slice(0, 300)}`];
+  }
+  return [];
 }

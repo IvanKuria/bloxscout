@@ -12,6 +12,7 @@ import type {
   Game,
   GameIcon,
   GameIconSize,
+  GamePass,
   GamePlayerCount,
   GameSummary,
   Group,
@@ -40,6 +41,8 @@ const DEFAULT_MAX_RETRIES = 3;
  */
 export const ROBLOX_ENDPOINTS = {
   omniSearch: "https://apis.roblox.com",
+  /** Game-passes listing lives on the apis.roblox.com host (post-2025 migration). */
+  gamePasses: "https://apis.roblox.com",
   games: "https://games.roblox.com",
   users: "https://users.roblox.com",
   groups: "https://groups.roblox.com",
@@ -304,6 +307,58 @@ export class RobloxClient {
         .join(",")}`,
     });
     return data.data ?? [];
+  }
+
+  /**
+   * Game passes (monetization) for a single universe, normalized to
+   * `{ id, name, price }` where `price` is Robux (`null` = off-sale).
+   *
+   * Endpoint: `GET apis.roblox.com/game-passes/v1/universes/{id}/game-passes?passView=Full&pageSize=100`.
+   * This replaced the legacy `games.roblox.com/v1/games/{id}/game-passes`,
+   * which Roblox deprecated 2025-08-31. The legacy path returned
+   * `{ data: [...] }`; the current one returns `{ gamePasses: [...] }`. We
+   * accept either envelope so a future Roblox flip-flop doesn't silently
+   * empty the data. Public reachability of the apis.roblox.com path is not
+   * guaranteed unauthenticated — the pipeline keeps the sampling behind a
+   * flag (see `pipeline/gamepasses.ts`).
+   *
+   * Only the first page (cap 100 passes) is fetched: that covers virtually
+   * every game's catalog and keeps this a single request. Cached on the
+   * SLOW bucket since pricing changes rarely.
+   */
+  async getGamePasses(universeId: RobloxUniverseId): Promise<GamePass[]> {
+    if (!Number.isInteger(universeId) || universeId < 1) {
+      throw new BloxscoutError(
+        "getGamePasses: universeId must be a positive integer",
+        "VALIDATION_ERROR",
+      );
+    }
+    const url = new URL(
+      `/game-passes/v1/universes/${universeId}/game-passes`,
+      ROBLOX_ENDPOINTS.gamePasses,
+    );
+    url.searchParams.set("passView", "Full");
+    url.searchParams.set("pageSize", "100");
+    const data = await this.fetchJson<{
+      gamePasses?: Array<{ id?: number; name?: string; price?: number | null }>;
+      data?: Array<{ id?: number; name?: string; price?: number | null }>;
+    }>(url, {
+      label: "GET /game-passes/v1/universes/{id}/game-passes",
+      ttlSeconds: CACHE_TTL.SLOW,
+      cacheKey: `game-passes:${universeId}`,
+    });
+
+    const raw = data.gamePasses ?? data.data ?? [];
+    const passes: GamePass[] = [];
+    for (const p of raw) {
+      if (typeof p.id !== "number") continue;
+      passes.push({
+        id: p.id,
+        name: p.name ?? "",
+        price: typeof p.price === "number" ? p.price : null,
+      });
+    }
+    return passes;
   }
 
   // ---------------------------------------------------------------------------
