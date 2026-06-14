@@ -53,6 +53,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build @bloxscout/core
+        # pipeline/run.ts imports @bloxscout/core via its dist-based exports map,
+        # so the workspace package must be built before tsx runs the pipeline.
+        run: pnpm --filter @bloxscout/core build
+
       - name: Check dataset freshness
         id: freshness
         shell: bash
