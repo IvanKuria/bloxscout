@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getFreshness, getGenres, getTrending } from "@/lib/data";
 import { topMatchups } from "@/lib/compare";
+import { LEARN_ENTRIES } from "@/lib/learn";
 import { genreSlug as toGenreSlug, slugify } from "@/lib/format";
 import { site } from "@/lib/site";
 
@@ -30,6 +31,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${site.url}/calculators/devex`, lastModified: generatedAt, changeFrequency: "monthly", priority: 0.7 },
     { url: `${site.url}/calculators/revenue`, lastModified: generatedAt, changeFrequency: "monthly", priority: 0.7 },
     { url: `${site.url}/about/methodology`, lastModified: generatedAt, changeFrequency: "monthly", priority: 0.5 },
+    // Glossary / Q&A authority hub (evergreen).
+    { url: `${site.url}/learn`, lastModified: generatedAt, changeFrequency: "monthly", priority: 0.6 },
+    ...LEARN_ENTRIES.map((e) => ({
+      url: `${site.url}/learn/${e.slug}`,
+      lastModified: generatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    })),
   ];
 
   const genrePages: MetadataRoute.Sitemap = (genres?.genres ?? []).flatMap((g) => {
