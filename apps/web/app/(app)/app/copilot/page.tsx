@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { CopilotRuntimeProvider } from "@/components/copilot/runtime-provider";
 import { CopilotThread } from "@/components/copilot/thread";
 import { isCopilotConfigured } from "@/lib/agent/anthropic";
 import { isCopilotPreview } from "@/lib/preview";
@@ -48,9 +47,7 @@ export default async function CopilotPage() {
           </p>
         </div>
       ) : (
-        <CopilotRuntimeProvider>
-          <CopilotThread />
-        </CopilotRuntimeProvider>
+        <CopilotThread />
       )}
     </div>
   );
