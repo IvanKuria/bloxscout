@@ -32,15 +32,23 @@ export function SiteHeader() {
           </a>
         </nav>
 
-        <a
-          href={site.github}
-          target="_blank"
-          rel="noreferrer noopener"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <span>GitHub</span>
-          <ArrowUpRight className="h-3.5 w-3.5" />
-        </a>
+        <div className="flex items-center gap-5">
+          <a
+            href={site.github}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <span>GitHub</span>
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </a>
+          <Link
+            href="/login"
+            className="inline-flex items-center rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent-hover"
+          >
+            Sign in
+          </Link>
+        </div>
       </div>
     </header>
   );
