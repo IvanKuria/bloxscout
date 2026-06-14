@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
+import { isCopilotPreview } from "@/lib/preview";
 import { site } from "@/lib/site";
 import { createClient } from "@/lib/supabase/server";
 
@@ -16,48 +17,54 @@ export default async function AppLayout({
 }) {
   // Defense-in-depth: the proxy already gates /app, but we re-check at the
   // data source per the Next.js auth guidance (don't rely on proxy alone).
+  // NOTE: redirect() throws (NEXT_REDIRECT) and must live OUTSIDE the try/catch
+  // so it isn't swallowed.
+  const preview = isCopilotPreview();
   let email: string | null = null;
+  let authed = false;
   try {
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) redirect("/login?redirectedFrom=/app");
-    email = user.email ?? null;
+    if (user) {
+      authed = true;
+      email = user.email ?? null;
+    }
   } catch {
-    // Auth not configured on this deployment.
-    redirect("/login?error=not_configured");
+    // Auth not configured on this deployment — fall through to the gate below.
   }
+  if (!authed && !preview) redirect("/login?redirectedFrom=/app");
 
   return (
-    <div className="flex min-h-svh flex-col bg-console text-console-foreground">
-      <header className="sticky top-0 z-50 border-b border-console-border bg-console/85 backdrop-blur-sm">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
+    <div className="flex h-svh flex-col bg-background text-foreground">
+      <header className="z-30 shrink-0 border-b border-border bg-background">
+        <div className="flex h-14 items-center justify-between px-4 sm:px-6">
           <Link
             href="/app"
-            className="inline-flex items-center gap-2 font-mono text-sm font-semibold tracking-tight text-console-foreground"
+            className="inline-flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground"
           >
             <span
-              className="recon-pulse inline-block h-2 w-2 rounded-full bg-accent"
+              className="recon-pulse inline-block size-2 rounded-full bg-accent"
               aria-hidden
             />
             {site.name}
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-console-muted">
-              / console
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              / agent
             </span>
           </Link>
 
-          <div className="flex items-center gap-4">
-            <span className="hidden font-mono text-xs text-console-muted sm:inline">
+          <div className="flex items-center gap-3 sm:gap-4">
+            {preview && !authed && (
+              <span className="rounded-md border border-accent/40 bg-accent/5 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
+                preview · auth bypassed
+              </span>
+            )}
+            <span className="hidden text-xs text-muted-foreground sm:inline">
               {email}
             </span>
             <form action={signOut}>
-              <Button
-                type="submit"
-                variant="ghost"
-                size="sm"
-                className="text-console-muted hover:bg-white/5 hover:text-console-foreground"
-              >
+              <Button type="submit" variant="ghost" size="sm">
                 Sign out
               </Button>
             </form>
@@ -65,9 +72,7 @@ export default async function AppLayout({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
-        {children}
-      </main>
+      <main className="min-h-0 flex-1">{children}</main>
     </div>
   );
 }

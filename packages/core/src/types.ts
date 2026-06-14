@@ -159,6 +159,20 @@ export interface GameIcon {
 export type GameIconSize = "512x512" | "256x256" | "150x150" | "128x128" | "100x100" | "50x50";
 
 /**
+ * A monetization game pass for a universe.
+ *
+ * Normalized from Roblox's game-passes listing. `price` is in Robux and is
+ * `null` for passes that are off-sale / unpriced. Source endpoint shape is
+ * documented on `RobloxClient.getGamePasses`.
+ */
+export interface GamePass {
+  id: number;
+  name: string;
+  /** Price in Robux, or `null` when off-sale / not for sale. */
+  price: number | null;
+}
+
+/**
  * Game published by a user, returned by `games.roblox.com/v2/users/{userId}/games`.
  */
 export interface CreatorGame {

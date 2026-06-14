@@ -52,6 +52,64 @@ describe("applyIngestResults", () => {
     expect(entry?.genre).toBe("Simulation");
     expect(entry?.lastSeenAt).toBe(NOW);
   });
+
+  it("records createdAt once and seeds updateCount at 0 on first sighting", () => {
+    const registry = emptyRegistry(EIGHT_DAYS_AGO);
+    upsertDiscovered(registry, [{ universeId: 42, name: "G" }], EIGHT_DAYS_AGO);
+    applyIngestResults(
+      registry,
+      [
+        {
+          id: 42,
+          name: "G",
+          genre: "Sim",
+          created: "2020-01-01T00:00:00.000Z",
+          updated: "2026-06-01T00:00:00.000Z",
+        },
+      ],
+      NOW,
+    );
+    const entry = registry.games["42"];
+    expect(entry?.createdAt).toBe("2020-01-01T00:00:00.000Z");
+    expect(entry?.lastUpdatedAt).toBe("2026-06-01T00:00:00.000Z");
+    expect(entry?.updateCount).toBe(0);
+  });
+
+  it("increments updateCount when the game's updated timestamp changes", () => {
+    const registry = emptyRegistry(EIGHT_DAYS_AGO);
+    upsertDiscovered(registry, [{ universeId: 42, name: "G" }], EIGHT_DAYS_AGO);
+    const base = {
+      id: 42,
+      name: "G",
+      genre: "Sim",
+      created: "2020-01-01T00:00:00.000Z",
+    };
+    applyIngestResults(
+      registry,
+      [{ ...base, updated: "2026-06-01T00:00:00.000Z" }],
+      EIGHT_DAYS_AGO,
+    );
+    // Same updated timestamp again — no new ship, count stays.
+    applyIngestResults(registry, [{ ...base, updated: "2026-06-01T00:00:00.000Z" }], NOW);
+    expect(registry.games["42"]?.updateCount).toBe(0);
+    // A newer updated timestamp — counts as one observed ship.
+    applyIngestResults(registry, [{ ...base, updated: "2026-06-10T00:00:00.000Z" }], NOW);
+    const entry = registry.games["42"];
+    expect(entry?.updateCount).toBe(1);
+    expect(entry?.lastUpdatedAt).toBe("2026-06-10T00:00:00.000Z");
+    // createdAt never drifts.
+    expect(entry?.createdAt).toBe("2020-01-01T00:00:00.000Z");
+  });
+
+  it("leaves cadence fields untouched when created/updated are absent", () => {
+    const registry = emptyRegistry(EIGHT_DAYS_AGO);
+    upsertDiscovered(registry, [{ universeId: 42, name: "G" }], EIGHT_DAYS_AGO);
+    applyIngestResults(registry, [{ id: 42, name: "G", genre: "Sim" }], NOW);
+    const entry = registry.games["42"];
+    expect(entry?.createdAt).toBeUndefined();
+    expect(entry?.lastUpdatedAt).toBeUndefined();
+    expect(entry?.updateCount).toBeUndefined();
+  });
 });
 
 describe("markDormant", () => {

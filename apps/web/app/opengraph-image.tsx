@@ -72,7 +72,7 @@ export default async function Image() {
             color: "#6B7280",
           }}
         >
-          claude mcp add bloxscout -- npx -y bloxscout-mcp
+          Live Roblox data · refreshed every ~30 min
         </div>
       </div>
     ),

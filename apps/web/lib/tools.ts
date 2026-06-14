@@ -1,174 +1,153 @@
 import {
   Compass,
-  BarChart3,
-  Users,
-  Calculator,
-  Camera,
-  FileText,
+  Radar,
+  Rocket,
+  Lightbulb,
+  Activity,
+  LineChart,
   type LucideIcon,
 } from "lucide-react";
 
-export type Tool = {
-  name: string;
-  description: string;
+/** A thing you can ask the agent — phrased the way a developer would say it. */
+export type Capability = {
+  /** A real prompt a developer would type. */
+  prompt: string;
+  /** The shape of the answer the agent gives back. */
+  answer: string;
 };
 
-export type ToolCategory = {
+export type CapabilityGroup = {
   slug:
-    | "discovery"
+    | "niches"
+    | "saturation"
+    | "breakouts"
+    | "ideas"
     | "intelligence"
-    | "creator"
-    | "calculators"
-    | "operational"
-    | "reports";
+    | "trends";
   name: string;
   blurb: string;
   icon: LucideIcon;
-  tools: Tool[];
+  capabilities: Capability[];
 };
 
-export const toolCategories: ToolCategory[] = [
+export const capabilityGroups: CapabilityGroup[] = [
   {
-    slug: "discovery",
-    name: "Discovery",
-    blurb: "Find what is trending, growing, or under-served on Roblox.",
+    slug: "niches",
+    name: "Find emergent niches",
+    blurb:
+      "Surface the niches gaining players before they're obvious — while there's still room to enter.",
     icon: Compass,
-    tools: [
+    capabilities: [
       {
-        name: "search_games",
-        description:
-          "Search Roblox's catalog by keyword with optional genre and sort filters.",
+        prompt: "What niches are heating up right now?",
+        answer:
+          "Ranked emergent niches with momentum and how crowded each one already is.",
       },
       {
-        name: "get_trending_games",
-        description:
-          "Return games trending now, optionally filtered by genre.",
+        prompt: "Show me under-served corners of the simulator space.",
+        answer:
+          "Sub-niches with real player demand and few games competing for it.",
+      },
+    ],
+  },
+  {
+    slug: "saturation",
+    name: "Gauge a niche",
+    blurb:
+      "Ask whether any niche is saturated or still winnable — scored on live competition, not vibes.",
+    icon: Radar,
+    capabilities: [
+      {
+        prompt: "Is tower defense saturated?",
+        answer:
+          "A verdict (open / contested / locked), the top-game dominance, and whether there's white space to enter.",
       },
       {
-        name: "get_top_by_genre",
-        description:
-          "List the top games within a specific genre ranked by CCU or visits.",
+        prompt: "Is anime fighting too crowded to break into?",
+        answer:
+          "Live cohort size, total demand, and how much of it the leaders already own.",
+      },
+    ],
+  },
+  {
+    slug: "breakouts",
+    name: "Spot breakout games",
+    blurb:
+      "Catch the games growing fastest right now — the ones defining what comes next.",
+    icon: Rocket,
+    capabilities: [
+      {
+        prompt: "Which games are breaking out this week?",
+        answer:
+          "Fastest-growing games by live player momentum, with the niche each one is pulling.",
       },
       {
-        name: "get_up_and_coming",
-        description:
-          "Surface smaller games with unusually strong recent growth.",
+        prompt: "What's gaining players faster than the genre around it?",
+        answer:
+          "Outliers beating their cohort's growth — early signal on where attention is moving.",
+      },
+    ],
+  },
+  {
+    slug: "ideas",
+    name: "Decide what to build",
+    blurb:
+      "Turn live market signal into a concrete answer to the only question that matters.",
+    icon: Lightbulb,
+    capabilities: [
+      {
+        prompt: "What should I build next?",
+        answer:
+          "Idea directions matched to demand you can realistically win, with the reasoning behind each.",
       },
       {
-        name: "discover_underserved_genres",
-        description:
-          "Identify genres with high player demand and low developer supply.",
+        prompt: "I'm a solo dev — where's my best shot?",
+        answer:
+          "Niches sized to a small team: real players, fragmented leaders, room to enter.",
       },
     ],
   },
   {
     slug: "intelligence",
-    name: "Game Intelligence",
-    blurb: "Deep stats on a game, its history, and its cohort.",
-    icon: BarChart3,
-    tools: [
-      {
-        name: "get_game",
-        description:
-          "Fetch a single game's full metadata: name, description, creator, stats, thumbnails.",
-      },
-      {
-        name: "get_game_player_count",
-        description:
-          "Return current CCU and total visits for a given universe ID.",
-      },
-      {
-        name: "get_game_history",
-        description:
-          "Read locally-stored historical snapshots for a game's CCU, visits, and likes.",
-      },
-      {
-        name: "compare_games",
-        description:
-          "Side-by-side comparison of up to N games on the same metrics.",
-      },
-      {
-        name: "analyze_game_vs_genre",
-        description:
-          "Compare one game against the median or percentile of its genre cohort.",
-      },
-    ],
-  },
-  {
-    slug: "creator",
-    name: "Creator & Community",
-    blurb: "Look up creators, groups, and the people behind the games.",
-    icon: Users,
-    tools: [
-      {
-        name: "get_creator",
-        description:
-          "Look up a user or group creator with bio, follower count, and verification status.",
-      },
-      {
-        name: "get_group",
-        description:
-          "Fetch a group's metadata, member count, and recent activity.",
-      },
-      {
-        name: "get_top_creators_by_genre",
-        description:
-          "Identify the most successful creators within a specific genre.",
-      },
-    ],
-  },
-  {
-    slug: "calculators",
-    name: "Calculators",
-    blurb: "Robux-to-USD math and revenue estimates without the spreadsheet.",
-    icon: Calculator,
-    tools: [
-      {
-        name: "calculate_devex",
-        description: "Convert Robux to USD via the current DevEx rate.",
-      },
-      {
-        name: "estimate_game_revenue",
-        description:
-          "Estimate gross Robux revenue from visits, CCU, and monetization assumptions.",
-      },
-    ],
-  },
-  {
-    slug: "operational",
-    name: "Operational",
+    name: "Read any game or genre",
     blurb:
-      "Build your own historical record. Roblox does not expose time-series — you do.",
-    icon: Camera,
-    tools: [
+      "Pull live stats on a game, its cohort, and the creators winning a space.",
+    icon: LineChart,
+    capabilities: [
       {
-        name: "snapshot_game",
-        description:
-          "Capture a point-in-time snapshot of a game into the local SQLite store.",
+        prompt: "How does this game compare to its genre?",
+        answer:
+          "Live CCU, visits and growth against the genre median and percentiles.",
       },
       {
-        name: "watch_games",
-        description:
-          "Schedule recurring snapshots for a set of games to build time-series.",
+        prompt: "Who are the top creators in RPG right now?",
+        answer:
+          "The studios winning a niche, ranked by the live performance of their games.",
       },
     ],
   },
   {
-    slug: "reports",
-    name: "Reports",
-    blurb: "Structured Markdown and JSON reports your agent can act on.",
-    icon: FileText,
-    tools: [
+    slug: "trends",
+    name: "Always-live data",
+    blurb:
+      "Every answer is grounded in live Roblox player data, refreshed every ~30 minutes.",
+    icon: Activity,
+    capabilities: [
       {
-        name: "generate_market_report",
-        description:
-          "Produce a structured market report (Markdown and JSON) for a genre or watchlist.",
+        prompt: "How many people are playing this right now?",
+        answer:
+          "Current concurrents and visits, timestamped — not a stale training-data guess.",
+      },
+      {
+        prompt: "What's the trend over the last 7 days?",
+        answer:
+          "Recent momentum from continuously captured snapshots, so the trend is real.",
       },
     ],
   },
 ];
 
-export const totalToolCount = toolCategories.reduce(
-  (acc, c) => acc + c.tools.length,
+export const totalCapabilityCount = capabilityGroups.reduce(
+  (acc, g) => acc + g.capabilities.length,
   0,
 );

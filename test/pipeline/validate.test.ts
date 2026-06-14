@@ -1,7 +1,7 @@
-import type { RawRunFile } from "@bloxscout/core/hosted-format";
+import type { GamePassFile, RawRunFile } from "@bloxscout/core/hosted-format";
 import { HOSTED_SCHEMA_VERSION } from "@bloxscout/core/hosted-format";
 import { describe, expect, it } from "vitest";
-import { validateRunOutputs } from "../../pipeline/validate.js";
+import { validateGamePassFile, validateRunOutputs } from "../../pipeline/validate.js";
 
 const NOW_ISO = "2026-06-12T12:00:00.000Z";
 
@@ -60,5 +60,25 @@ describe("validateRunOutputs", () => {
     };
     const errors = validateRunOutputs({ run: run(500), requestedCount: 600, views: badViews });
     expect(errors.some((e) => e.includes("trending"))).toBe(true);
+  });
+});
+
+describe("validateGamePassFile", () => {
+  const good: GamePassFile = {
+    schemaVersion: HOSTED_SCHEMA_VERSION,
+    date: "2026-06-13",
+    sampledAt: NOW_ISO,
+    games: { "42": [[100, "VIP", 199]], "7": [] },
+  };
+
+  it("accepts a conforming gamepass file", () => {
+    expect(validateGamePassFile(good)).toEqual([]);
+  });
+
+  it("rejects a malformed gamepass row", () => {
+    const bad = { ...good, games: { "42": [[100, "VIP", "not-a-number"]] } } as never;
+    const errors = validateGamePassFile(bad);
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0]).toMatch(/gamepass/i);
   });
 });

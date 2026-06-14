@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Tailwind v4 doesn't scan node_modules — include Streamdown's dist so its
+   streamed-markdown prose classes aren't tree-shaken. Path is relative to this
+   file: apps/web/app → apps/web/node_modules. */
+@source "../node_modules/streamdown/dist/*.js";
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -42,36 +47,41 @@
 }
 
 :root {
+  /* Light & airy base. Near-white canvas, near-black ink, hairline borders,
+     soft off-white panels; the brand red is a sparing accent only. */
   --background: #ffffff;
-  --foreground: #0a0a0a;
+  --foreground: #14151a;
   --muted: #6b7280;
   --muted-foreground: #6b7280;
-  --muted-surface: #f5f5f0;
-  --border: #e5e5e5;
-  --input: #e5e5e5;
+  --muted-surface: #f6f7f8;
+  --border: #ececee;
+  --input: #e4e5e8;
   --ring: #e2231a;
   --accent: #e2231a;
   --accent-foreground: #ffffff;
   --accent-hover: #c41e16;
   --card: #ffffff;
-  --card-foreground: #0a0a0a;
+  --card-foreground: #14151a;
   --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
-  --primary: #0a0a0a;
+  --popover-foreground: #14151a;
+  --primary: #14151a;
   --primary-foreground: #ffffff;
-  --secondary: #f5f5f0;
-  --secondary-foreground: #0a0a0a;
+  --secondary: #f6f7f8;
+  --secondary-foreground: #14151a;
   --destructive: #e2231a;
   --destructive-foreground: #ffffff;
-  --radius: 0.5rem;
+  --radius: 0.75rem;
 
-  /* Recon console surface — near-black with a faint cool cast. */
-  --console: #0b0e0f;
-  --console-foreground: #e9edf0;
-  --console-muted: #7e8a91;
-  --console-border: #1d2528;
-  --console-grid: rgba(233, 237, 240, 0.045);
-  --positive: #1faa6b;
+  /* "console" tokens were the old dark data-surface — now remapped LIGHT so
+     no surface renders dark. They read as a soft elevated panel on white.
+     (Components are being re-skinned to plain light classes; this is the
+     safety net so nothing is a black hole in the meantime.) */
+  --console: #fbfbfc;
+  --console-foreground: #14151a;
+  --console-muted: #6b7280;
+  --console-border: #ececee;
+  --console-grid: rgba(20, 21, 26, 0.035);
+  --positive: #15a06a;
   --negative: #e2231a;
 }
 

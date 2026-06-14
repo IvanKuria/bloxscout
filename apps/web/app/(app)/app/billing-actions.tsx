@@ -59,7 +59,7 @@ export function UpgradeButton({
         className={
           variant === "default"
             ? "bg-accent text-accent-foreground hover:bg-accent-hover"
-            : "border-console-border bg-transparent text-console-foreground hover:bg-white/5 hover:text-console-foreground"
+            : undefined
         }
       >
         {loading ? (
@@ -103,7 +103,6 @@ export function ManageButton() {
         disabled={loading}
         variant="outline"
         size="sm"
-        className="border-console-border bg-transparent text-console-foreground hover:bg-white/5 hover:text-console-foreground"
       >
         {loading ? (
           <LoaderCircle className="size-3.5 animate-spin" />
