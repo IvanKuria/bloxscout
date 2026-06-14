@@ -72,7 +72,7 @@ export async function streamChat(
     });
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") throw err;
-    handlers.onError("The copilot is unreachable.");
+    handlers.onError("The agent is unreachable.");
     return;
   }
 
@@ -80,7 +80,7 @@ export async function streamChat(
   if (convId) handlers.onConversationId?.(convId);
 
   if (!res.ok || !res.body) {
-    let detail = "The copilot is unavailable.";
+    let detail = "The agent is unavailable.";
     try {
       const j = (await res.json()) as { error?: string };
       if (j.error) detail = j.error;
@@ -148,7 +148,7 @@ export async function streamChat(
       }
       throw err;
     }
-    handlers.onError("The copilot stream was interrupted.");
+    handlers.onError("The agent stream was interrupted.");
     return;
   }
 

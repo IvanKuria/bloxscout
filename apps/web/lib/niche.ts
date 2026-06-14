@@ -16,6 +16,7 @@ import "server-only";
 import { cache } from "react";
 import { herfindahlIndex, topNShare } from "@bloxscout/core/concentration";
 import { RobloxClient } from "@bloxscout/core/roblox-client";
+import { getThumbnails } from "@/lib/thumbnails";
 
 const roblox = new RobloxClient();
 
@@ -27,6 +28,10 @@ export interface NicheGameRow {
   creatorName: string | null;
   /** Share of the niche's total live CCU, 0..1. */
   share: number;
+  /** One-line game description (from the live search result; may be empty). */
+  description: string;
+  /** 150×150 game icon URL, or null when unavailable. */
+  thumbnailUrl: string | null;
 }
 
 /** open = room to win · contested = a few big players · locked = one game owns it · thin = no real market. */
@@ -72,9 +77,21 @@ function clamp01(n: number): number {
   return Math.max(0, Math.min(1, n));
 }
 
+/** Trim a Roblox description to a single tidy line for the widget row. */
+function oneLine(description: string | null | undefined): string {
+  return (description ?? "").replace(/\s+/g, " ").trim();
+}
+
 function toRow(
-  g: { universeId: number; name: string; playerCount: number; creatorName: string },
+  g: {
+    universeId: number;
+    name: string;
+    playerCount: number;
+    creatorName: string;
+    description?: string;
+  },
   total: number,
+  thumbnails: Map<number, string | null>,
 ): NicheGameRow {
   const playing = Math.max(0, g.playerCount);
   return {
@@ -83,6 +100,8 @@ function toRow(
     playing,
     creatorName: g.creatorName ?? null,
     share: total > 0 ? playing / total : 0,
+    description: oneLine(g.description),
+    thumbnailUrl: thumbnails.get(g.universeId) ?? null,
   };
 }
 
@@ -133,11 +152,15 @@ export const analyzeNiche = cache(
     const gameCount = ranked.length;
 
     if (gameCount < MIN_GAMES || totalPlaying < MIN_DEMAND) {
+      const thinLeaders = ranked.slice(0, 6);
+      const thinThumbs = await getThumbnails(
+        thinLeaders.map((g) => g.universeId),
+      );
       return {
         ...base,
         gameCount,
         totalPlaying,
-        leaders: ranked.slice(0, 6).map((g) => toRow(g, totalPlaying)),
+        leaders: thinLeaders.map((g) => toRow(g, totalPlaying, thinThumbs)),
         note:
           gameCount === 0
             ? `No live games matched "${q}". Try a broader phrasing, or it may not be an established niche on Roblox.`
@@ -156,6 +179,11 @@ export const analyzeNiche = cache(
       top1Share >= 0.6 ? "locked" : top3Share >= 0.75 ? "contested" : "open";
     const whiteSpace = verdict === "open" && tailGames >= 3;
 
+    const topLeaders = ranked.slice(0, 8);
+    const thumbnails = await getThumbnails(
+      topLeaders.map((g) => g.universeId),
+    );
+
     return {
       ok: true,
       query: q,
@@ -168,7 +196,7 @@ export const analyzeNiche = cache(
       saturationScore,
       verdict,
       whiteSpace,
-      leaders: ranked.slice(0, 8).map((g) => toRow(g, totalPlaying)),
+      leaders: topLeaders.map((g) => toRow(g, totalPlaying, thumbnails)),
       tailGames,
     };
   },

@@ -1,9 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Tailwind v4 doesn't scan node_modules — let it generate Streamdown's prose
-   classes (the AI agent renders streamed markdown via <Streamdown>). */
-@source "../../node_modules/streamdown/dist/*.js";
+/* Tailwind v4 doesn't scan node_modules — include Streamdown's dist so its
+   streamed-markdown prose classes aren't tree-shaken. Path is relative to this
+   file: apps/web/app → apps/web/node_modules. */
+@source "../node_modules/streamdown/dist/*.js";
 
 @theme inline {
   --color-background: var(--background);

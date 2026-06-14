@@ -75,17 +75,17 @@ export function renderWidget(
 export function WidgetRunning({ toolName }: { toolName: string }) {
   const label = RUNNING_LABEL[toolName] ?? "Working";
   return (
-    <div className="recon-grid relative overflow-hidden rounded-xl border border-console-border bg-console">
-      <div className="flex items-center gap-2 border-b border-console-border px-4 py-3">
-        <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
-        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-console-muted">
+    <div className="relative overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+      <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+        <span className="inline-block size-1.5 animate-pulse rounded-full bg-accent" />
+        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
           {label}…
         </span>
       </div>
       <div className="flex flex-col gap-2 p-4">
-        <Skeleton className="h-4 w-2/3 text-console-foreground" />
-        <Skeleton className="h-4 w-1/2 text-console-foreground" />
-        <Skeleton className="h-4 w-3/5 text-console-foreground" />
+        <Skeleton className="h-4 w-2/3" />
+        <Skeleton className="h-4 w-1/2" />
+        <Skeleton className="h-4 w-3/5" />
       </div>
     </div>
   );

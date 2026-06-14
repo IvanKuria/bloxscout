@@ -48,7 +48,7 @@ interface ChatRequestBody {
 export async function POST(request: NextRequest) {
   if (!isCopilotConfigured()) {
     return NextResponse.json(
-      { error: "Copilot is not configured (missing ANTHROPIC_API_KEY)." },
+      { error: "The agent is not configured (missing ANTHROPIC_API_KEY)." },
       { status: 503 },
     );
   }
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
   const client = getAnthropic();
   if (!client) {
     return NextResponse.json(
-      { error: "Copilot is not configured." },
+      { error: "The agent is not configured." },
       { status: 503 },
     );
   }
@@ -226,7 +226,7 @@ export async function POST(request: NextRequest) {
         send({
           type: "error",
           message:
-            err instanceof Error ? err.message : "The copilot hit an error.",
+            err instanceof Error ? err.message : "The agent hit an error.",
         });
       } finally {
         controller.close();

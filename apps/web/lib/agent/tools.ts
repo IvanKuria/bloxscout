@@ -29,6 +29,7 @@ import {
 import { genreSlug } from "@/lib/format";
 import { analyzeNiche } from "@/lib/niche";
 import type { NicheAnalysisResult } from "@/lib/niche";
+import { getThumbnails } from "@/lib/thumbnails";
 
 // Re-export the niche-scan result types so the widget layer imports its props
 // from the same place as the other tool results (type-only; erased at build).
@@ -74,6 +75,8 @@ export interface RankRow {
   growth24hPct: number | null;
   growth7dPct: number | null;
   zScore24h: number | null;
+  /** 150×150 game icon URL, or null when unavailable. */
+  thumbnailUrl: string | null;
 }
 
 export interface RankingResult {
@@ -138,15 +141,18 @@ function clampLimit(input: unknown, fallback: number, max: number): number {
   return Math.max(1, Math.min(max, Math.round(n)));
 }
 
-function toRankRow(e: {
-  universeId: number;
-  name: string | null;
-  genre: string | null;
-  playing: number;
-  growth24hPct: number | null;
-  growth7dPct: number | null;
-  zScore24h: number | null;
-}): RankRow {
+function toRankRow(
+  e: {
+    universeId: number;
+    name: string | null;
+    genre: string | null;
+    playing: number;
+    growth24hPct: number | null;
+    growth7dPct: number | null;
+    zScore24h: number | null;
+  },
+  thumbnails: Map<number, string | null>,
+): RankRow {
   return {
     universeId: e.universeId,
     name: e.name,
@@ -155,7 +161,15 @@ function toRankRow(e: {
     growth24hPct: e.growth24hPct,
     growth7dPct: e.growth7dPct,
     zScore24h: e.zScore24h,
+    thumbnailUrl: thumbnails.get(e.universeId) ?? null,
   };
+}
+
+/** One batched, cache()d icons fetch for a set of ranking rows. */
+async function thumbsFor(
+  entries: ReadonlyArray<{ universeId: number }>,
+): Promise<Map<number, string | null>> {
+  return getThumbnails(entries.map((e) => e.universeId));
 }
 
 function toGauge(e: {
@@ -240,11 +254,12 @@ export const COPILOT_TOOLS: CopilotTool[] = [
           (e) => e.genre && genreSlug(e.genre) === want,
         );
       }
-      const rows = entries
+      const top = entries
         .slice()
         .sort((a, b) => b.playing - a.playing)
-        .slice(0, limit)
-        .map(toRankRow);
+        .slice(0, limit);
+      const thumbs = await thumbsFor(top);
+      const rows = top.map((e) => toRankRow(e, thumbs));
       return {
         ...base,
         rows,
@@ -285,12 +300,14 @@ export const COPILOT_TOOLS: CopilotTool[] = [
           note: EMPTY_NOTE,
         };
       }
+      const top = view.entries.slice(0, limit);
+      const thumbs = await thumbsFor(top);
       return {
         ok: true,
         kind: "breakouts",
         title: "Breakout games",
         generatedAt: view.generatedAt,
-        rows: view.entries.slice(0, limit).map(toRankRow),
+        rows: top.map((e) => toRankRow(e, thumbs)),
       };
     },
   },

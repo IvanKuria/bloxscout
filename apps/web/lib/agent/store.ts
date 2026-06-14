@@ -145,6 +145,37 @@ export async function listConversations(): Promise<StoredConversation[]> {
   }
 }
 
+/** Rename a thread (owner-only via RLS). No-op when unconfigured. */
+export async function renameConversation(
+  conversationId: string,
+  title: string,
+): Promise<void> {
+  const supabase = await db();
+  if (!supabase) return;
+  const clean = title.trim().replace(/\s+/g, " ").slice(0, 80) || "New thread";
+  try {
+    await supabase
+      .from("conversations")
+      .update({ title: clean })
+      .eq("id", conversationId);
+  } catch {
+    // ignore — best effort
+  }
+}
+
+/** Delete a thread + its messages (cascade). No-op when unconfigured. */
+export async function deleteConversation(
+  conversationId: string,
+): Promise<void> {
+  const supabase = await db();
+  if (!supabase) return;
+  try {
+    await supabase.from("conversations").delete().eq("id", conversationId);
+  } catch {
+    // ignore — best effort
+  }
+}
+
 /** Load a thread's messages in order, for replay. Empty when unconfigured. */
 export async function loadMessages(
   conversationId: string,
