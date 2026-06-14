@@ -19,6 +19,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${site.url}/trending`, lastModified: generatedAt, changeFrequency: "hourly", priority: 0.8 },
     { url: `${site.url}/trending/day`, lastModified: generatedAt, changeFrequency: "hourly", priority: 0.7 },
     { url: `${site.url}/trending/month`, lastModified: generatedAt, changeFrequency: "hourly", priority: 0.7 },
+    // Platform statistics hub (authority / citation page).
+    { url: `${site.url}/roblox-statistics`, lastModified: generatedAt, changeFrequency: "hourly", priority: 0.8 },
     // Cluster-A opportunity / money pages (highest commercial intent).
     { url: `${site.url}/best-roblox-games-to-make-2026`, lastModified: generatedAt, changeFrequency: "daily", priority: 0.9 },
     { url: `${site.url}/most-profitable-roblox-game-genres`, lastModified: generatedAt, changeFrequency: "daily", priority: 0.9 },
