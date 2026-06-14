@@ -48,6 +48,12 @@ export default async function AppLayout({
           </Link>
 
           <div className="flex items-center gap-4">
+            <Link
+              href="/app/copilot"
+              className="font-mono text-xs uppercase tracking-[0.14em] text-console-muted transition-colors hover:text-console-foreground"
+            >
+              Copilot
+            </Link>
             <span className="hidden font-mono text-xs text-console-muted sm:inline">
               {email}
             </span>
