@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getFreshness, getGenres, getTrending } from "@/lib/data";
+import { topMatchups } from "@/lib/compare";
 import { genreSlug as toGenreSlug, slugify } from "@/lib/format";
 import { site } from "@/lib/site";
 
@@ -47,16 +48,41 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ];
   });
 
-  const gamePages: MetadataRoute.Sitemap = (trending?.entries ?? [])
+  const topGames = (trending?.entries ?? [])
     .slice()
     .sort((a, b) => b.playing - a.playing)
-    .slice(0, GAME_URL_CAP)
-    .map((e) => ({
-      url: `${site.url}/game/${e.universeId}/${slugify(e.name)}`,
-      lastModified: generatedAt,
-      changeFrequency: "hourly" as const,
-      priority: 0.6,
-    }));
+    .slice(0, GAME_URL_CAP);
 
-  return [...staticPages, ...genrePages, ...gamePages];
+  const gamePages: MetadataRoute.Sitemap = topGames.map((e) => ({
+    url: `${site.url}/game/${e.universeId}/${slugify(e.name)}`,
+    lastModified: generatedAt,
+    changeFrequency: "hourly" as const,
+    priority: 0.6,
+  }));
+
+  // Per-game revenue pages ("how much money does <game> make").
+  const revenuePages: MetadataRoute.Sitemap = topGames.map((e) => ({
+    url: `${site.url}/game/${e.universeId}/${slugify(e.name)}/revenue`,
+    lastModified: generatedAt,
+    changeFrequency: "daily" as const,
+    priority: 0.6,
+  }));
+
+  // Head-to-head comparison pages ("<game> vs <game>").
+  const comparePages: MetadataRoute.Sitemap = (await topMatchups()).map(
+    (matchup) => ({
+      url: `${site.url}/compare/${matchup}`,
+      lastModified: generatedAt,
+      changeFrequency: "daily" as const,
+      priority: 0.5,
+    }),
+  );
+
+  return [
+    ...staticPages,
+    ...genrePages,
+    ...gamePages,
+    ...revenuePages,
+    ...comparePages,
+  ];
 }
