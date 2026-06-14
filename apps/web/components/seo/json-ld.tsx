@@ -6,14 +6,18 @@ import { faqs } from "@/lib/faqs";
 // JSON string into a <script> tag. Roblox game names / FAQ text are
 // attacker-controllable and flow into JSON-LD, so an unescaped "</script>" (or a
 // U+2028/U+2029 line separator, which is invalid in a JS string literal) could
-// break out of the script element. These escapes stay valid JSON.
+// break out of the script element. The \uXXXX escapes below remain valid JSON.
+// U+2028/U+2029 are matched via fromCharCode so no raw separator is in source.
+const LINE_SEPARATOR = String.fromCharCode(0x2028);
+const PARAGRAPH_SEPARATOR = String.fromCharCode(0x2029);
+
 function serializeJsonLd(data: Record<string, unknown>): string {
   return JSON.stringify(data)
-    .replace(/</g, "\\u003c")
-    .replace(/>/g, "\\u003e")
-    .replace(/&/g, "\\u0026")
-    .replace(/ /g, "\\u2028")
-    .replace(/ /g, "\\u2029");
+    .replace(/[<>&]/g, (ch) => `\\u${ch.charCodeAt(0).toString(16).padStart(4, "0")}`)
+    .split(LINE_SEPARATOR)
+    .join("\\u2028")
+    .split(PARAGRAPH_SEPARATOR)
+    .join("\\u2029");
 }
 
 export function JsonLd({ data }: { data: Record<string, unknown> }) {
