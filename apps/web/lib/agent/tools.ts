@@ -31,6 +31,8 @@ import { analyzeNiche } from "@/lib/niche";
 import type { NicheAnalysisResult } from "@/lib/niche";
 import { mapCompetitors } from "@/lib/competitors";
 import type { CompetitorMapResult } from "@/lib/competitors";
+import { analyzeIcon } from "@/lib/icon-analysis";
+import type { IconAnalysisResult } from "@/lib/icon-analysis";
 import { teardownMonetization } from "@/lib/monetization";
 import type { MonetizationResult } from "@/lib/monetization";
 import { analyzeGameQuality } from "@/lib/quality";
@@ -57,6 +59,7 @@ export type {
 } from "@/lib/monetization";
 export type { CompetitorMapResult, CompetitorRow } from "@/lib/competitors";
 export type { RetentionResult, RetentionStep } from "@/lib/retention";
+export type { IconAnalysisResult, IconTraits } from "@/lib/icon-analysis";
 
 /** A JSON-Schema-ish object the Anthropic SDK accepts as `input_schema`. */
 type JsonSchema = {
@@ -692,6 +695,43 @@ export const COPILOT_TOOLS: CopilotTool[] = [
     },
     async execute(input): Promise<RetentionResult> {
       return estimateRetention({
+        gameName:
+          typeof input.gameName === "string" ? input.gameName : undefined,
+        universeId:
+          typeof input.universeId === "number" ? input.universeId : undefined,
+      });
+    },
+  },
+
+  {
+    def: {
+      name: "analyze_icon",
+      description:
+        "Analyze a game's ICON/thumbnail art direction using vision — its " +
+        "colour palette, focal subject, whether it uses text/a face, contrast, " +
+        "and style — then give concrete suggestions to improve it. Call this " +
+        "when the user asks about their icon, thumbnail, art, or how to make a " +
+        "game stand out visually in search/discovery. Pass `gameName` or " +
+        "`universeId`. NOTE: this is a paid (Pro) feature — if it returns a " +
+        "locked result, tell the user icon analysis is on the Pro plan; don't " +
+        "fabricate an analysis. Renders an icon-analysis widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          gameName: {
+            type: "string",
+            description: "A game's name (e.g. 'Blox Fruits'). Resolved live.",
+          },
+          universeId: {
+            type: "integer",
+            description: "A game's Roblox universe id (alternative to gameName).",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<IconAnalysisResult> {
+      return analyzeIcon({
         gameName:
           typeof input.gameName === "string" ? input.gameName : undefined,
         universeId:

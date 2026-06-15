@@ -14,6 +14,7 @@
  */
 import * as React from "react";
 import { CompetitorMap } from "@/components/copilot/competitor-map";
+import { IconAnalysis } from "@/components/copilot/icon-analysis";
 import { MonetizationTeardown } from "@/components/copilot/monetization-teardown";
 import { NicheCard } from "@/components/copilot/niche-card";
 import { NicheScan } from "@/components/copilot/niche-scan";
@@ -26,6 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type {
   CompetitorMapResult,
   GameQualityResult,
+  IconAnalysisResult,
   MonetizationResult,
   NicheAnalysisResult,
   RankingResult,
@@ -72,6 +74,9 @@ export const WIDGET_BY_TOOL: Record<string, WidgetRenderer> = {
   estimate_retention: (result) => (
     <RetentionFunnel result={result as RetentionResult} />
   ),
+  analyze_icon: (result) => (
+    <IconAnalysis result={result as IconAnalysisResult} />
+  ),
 };
 
 /** Human label for the running-tool indicator, keyed by tool name. */
@@ -86,6 +91,7 @@ const RUNNING_LABEL: Record<string, string> = {
   teardown_monetization: "Tearing down monetization",
   map_competitors: "Mapping competitors",
   estimate_retention: "Reading the badge funnel",
+  analyze_icon: "Looking at the icon",
 };
 
 /**
