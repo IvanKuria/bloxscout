@@ -1,30 +1,126 @@
 "use client";
 
 /**
- * AgentDemo — a polished, fully-scripted recreation of a real bloxscout answer,
- * restyled monochrome in the twenty.com idiom. Replays a canned exchange ("is
- * tower defense saturated?"): a typed prompt, a brief think, a streamed verdict,
- * and a light/monochrome recreation of the niche-scan widget (verdict, headline
- * read-outs, ranked TEXT leaderboard with thin share bars — no icons).
+ * AgentDemo — a fully-scripted recreation of real bloxscout exchanges that
+ * rotates through THREE of the agent's tools (revenue, competitors, niche
+ * saturation). Crucially it renders the ACTUAL product widgets (RevenueCard,
+ * CompetitorMap, NicheScan) with canned fixtures — so the marketing demo is
+ * pixel-identical to the live agent and can never drift from it again.
  *
- * Everything is timer-driven and respects prefers-reduced-motion (shown resolved
- * immediately). SSR-safe: no window access at render.
+ * Each scene plays: a typed prompt → a brief think → a streamed one-line
+ * verdict → the real widget. Scenes auto-advance and loop; the tab row lets you
+ * jump between them (which pauses the rotation). prefers-reduced-motion shows a
+ * scene fully resolved with no animation, and the tabs still switch it.
  */
 import * as React from "react";
 import { ArrowUp } from "lucide-react";
+import { CompetitorMap } from "@/components/copilot/competitor-map";
+import { NicheScan } from "@/components/copilot/niche-scan";
+import { RevenueCard } from "@/components/copilot/revenue-card";
+import type {
+  CompetitorMapResult,
+  NicheAnalysisResult,
+  RevenueResult,
+} from "@/lib/agent/tools";
 
-const PROMPT = "is tower defense saturated?";
+// ── Fixtures — real shapes, realistic numbers (from live agent runs) ─────────
 
-const LEADERS = [
-  { name: "Tower Defense Simulator", playing: "121k", share: 44, pct: 100 },
-  { name: "Toilet Tower Defense", playing: "58k", share: 21, pct: 48 },
-  { name: "Ultimate Tower Defense", playing: "27k", share: 10, pct: 22 },
-  { name: "Anime Defenders", playing: "19k", share: 7, pct: 16 },
-  { name: "All Star Tower Defense", playing: "14k", share: 5, pct: 12 },
+const REVENUE: RevenueResult = {
+  ok: true,
+  mode: "game",
+  title: "Grow a Garden · revenue estimate",
+  generatedAt: null,
+  confidence: "low",
+  assumptions: {
+    conversionRate: 0.02,
+    averageRobuxPerPayingUser: 100,
+    daysActive: 30,
+    rateUsdPerRobux: 0.0038,
+  },
+  disclaimer:
+    "Heuristic estimate based on platform averages. Actual revenue varies by 5–10x depending on monetization design, gamepass pricing, and conversion.",
+  game: {
+    universeId: 7436755782,
+    name: "Grow a Garden",
+    genre: "Simulator",
+    playing: 67334,
+    estMonthlyUsd: 15352.15,
+    estMonthlyRobux: 4040040,
+    assumptionsOverridden: false,
+    thumbnailUrl: null,
+  },
+};
+
+const COMPETITORS: CompetitorMapResult = {
+  ok: true,
+  universeId: 994732206,
+  anchorName: "Blox Fruits",
+  totalPlaying: 651510,
+  rows: [
+    { universeId: 1, name: "RIVALS", playing: 250982, likeRatio: 0.94, totalVotes: 480000, creatorName: null, genre: null, thumbnailUrl: null },
+    { universeId: 2, name: "Jujutsu Shenanigans", playing: 168383, likeRatio: 0.87, totalVotes: 220000, creatorName: null, genre: null, thumbnailUrl: null },
+    { universeId: 3, name: "Kick a Lucky Block", playing: 105398, likeRatio: 0.96, totalVotes: 140000, creatorName: null, genre: null, thumbnailUrl: null },
+    { universeId: 4, name: "The Strongest Battlegrounds", playing: 72537, likeRatio: 0.84, totalVotes: 610000, creatorName: null, genre: null, thumbnailUrl: null },
+    { universeId: 5, name: "Anime Vanguards", playing: 54210, likeRatio: 0.9, totalVotes: 300000, creatorName: null, genre: null, thumbnailUrl: null },
+  ],
+};
+
+const NICHE: NicheAnalysisResult = {
+  ok: true,
+  query: "tower defense",
+  title: "Tower defense · niche scan",
+  gameCount: 30,
+  totalPlaying: 274000,
+  top1Share: 0.44,
+  top3Share: 0.75,
+  hhi: 0.28,
+  saturationScore: 58,
+  verdict: "contested",
+  whiteSpace: true,
+  leaders: [
+    { universeId: 1, name: "Tower Defense Simulator", playing: 121000, creatorName: null, share: 0.44, description: "", thumbnailUrl: null },
+    { universeId: 2, name: "Toilet Tower Defense", playing: 58000, creatorName: null, share: 0.21, description: "", thumbnailUrl: null },
+    { universeId: 3, name: "Ultimate Tower Defense", playing: 27000, creatorName: null, share: 0.1, description: "", thumbnailUrl: null },
+    { universeId: 4, name: "Anime Defenders", playing: 19000, creatorName: null, share: 0.07, description: "", thumbnailUrl: null },
+    { universeId: 5, name: "All Star Tower Defense", playing: 14000, creatorName: null, share: 0.05, description: "", thumbnailUrl: null },
+  ],
+  tailGames: 9,
+};
+
+interface Scene {
+  tab: string;
+  prompt: string;
+  thinking: string;
+  answer: string;
+  widget: React.ReactNode;
+}
+
+const SCENES: Scene[] = [
+  {
+    tab: "Revenue",
+    prompt: "how much does Grow a Garden make?",
+    thinking: "running the revenue model · live CCU",
+    answer:
+      "Roughly $15k/month at ~67k live players — but read it as a band, not a number: real earnings swing 5–10× on monetization design.",
+    widget: <RevenueCard result={REVENUE} />,
+  },
+  {
+    tab: "Competitors",
+    prompt: "who competes with Blox Fruits?",
+    thinking: "reading Roblox's recommendation graph",
+    answer:
+      "Roblox's own graph places it next to battlegrounds and anime fighters. RIVALS leads the neighbourhood at 251k — and every rival's like-ratio is right there to judge.",
+    widget: <CompetitorMap result={COMPETITORS} />,
+  },
+  {
+    tab: "Saturation",
+    prompt: "is tower defense saturated?",
+    thinking: "scanning 30 live games · tower defense",
+    answer:
+      "Contested, not locked. The leader holds 44%, but a long tail of smaller titles still pulls real players — that tail is your white space.",
+    widget: <NicheScan result={NICHE} />,
+  },
 ];
-
-const ANSWER =
-  "Contested, but not locked. 30 live games, 274k players. Tower Defense Simulator alone holds 44%, yet 9 smaller titles are still pulling real CCU. That tail is your white space: a sharp twist on the format can win a slice without unseating the leader.";
 
 type Phase = "typing" | "thinking" | "answering" | "done";
 
@@ -35,33 +131,59 @@ function prefersReducedMotion(): boolean {
 
 export function AgentDemo() {
   const [reduced] = React.useState(prefersReducedMotion);
-  const [typed, setTyped] = React.useState(reduced ? PROMPT : "");
+  const [scene, setScene] = React.useState(0);
   const [phase, setPhase] = React.useState<Phase>(reduced ? "done" : "typing");
-  const [streamed, setStreamed] = React.useState(reduced ? ANSWER : "");
+  const [typed, setTyped] = React.useState(reduced ? SCENES[0].prompt : "");
+  const [streamed, setStreamed] = React.useState(reduced ? SCENES[0].answer : "");
+  const [paused, setPaused] = React.useState(false);
 
+  const current = SCENES[scene];
+
+  // Jump to a scene (tab click) — pauses the auto-rotation.
+  const jumpTo = React.useCallback(
+    (i: number) => {
+      setPaused(true);
+      setScene(i);
+      if (reduced) {
+        setTyped(SCENES[i].prompt);
+        setStreamed(SCENES[i].answer);
+        setPhase("done");
+      } else {
+        setTyped("");
+        setStreamed("");
+        setPhase("typing");
+      }
+    },
+    [reduced],
+  );
+
+  // Typing
   React.useEffect(() => {
     if (reduced || phase !== "typing") return;
+    const prompt = SCENES[scene].prompt;
     let i = 0;
     const id = window.setInterval(() => {
       i += 1;
-      setTyped(PROMPT.slice(0, i));
-      if (i >= PROMPT.length) {
+      setTyped(prompt.slice(0, i));
+      if (i >= prompt.length) {
         window.clearInterval(id);
         setPhase("thinking");
       }
-    }, 55);
+    }, 45);
     return () => window.clearInterval(id);
-  }, [reduced, phase]);
+  }, [reduced, phase, scene]);
 
+  // Thinking
   React.useEffect(() => {
     if (phase !== "thinking") return;
-    const id = window.setTimeout(() => setPhase("answering"), 1100);
+    const id = window.setTimeout(() => setPhase("answering"), 950);
     return () => window.clearTimeout(id);
   }, [phase]);
 
+  // Answering (word stream)
   React.useEffect(() => {
     if (phase !== "answering") return;
-    const words = ANSWER.split(" ");
+    const words = SCENES[scene].answer.split(" ");
     let i = 0;
     const id = window.setInterval(() => {
       i += 1;
@@ -70,146 +192,112 @@ export function AgentDemo() {
         window.clearInterval(id);
         setPhase("done");
       }
-    }, 42);
+    }, 38);
     return () => window.clearInterval(id);
-  }, [phase]);
+  }, [phase, scene]);
+
+  // Auto-advance to the next scene (unless paused / reduced)
+  React.useEffect(() => {
+    if (reduced || paused || phase !== "done") return;
+    const id = window.setTimeout(() => {
+      setScene((s) => (s + 1) % SCENES.length);
+      setTyped("");
+      setStreamed("");
+      setPhase("typing");
+    }, 3000);
+    return () => window.clearTimeout(id);
+  }, [reduced, paused, phase]);
 
   const showWidget = phase === "answering" || phase === "done";
 
   return (
-    <div className="relative">
-      <div className="relative overflow-hidden rounded-lg border border-foreground/12 bg-background shadow-[0_1px_0_0_rgba(28,28,28,0.03),0_30px_70px_-40px_rgba(28,28,28,0.3)]">
-        {/* window chrome */}
-        <div className="flex items-center justify-between border-b border-foreground/10 bg-muted-surface px-4 py-2.5">
-          <div className="flex items-center gap-2.5">
-            <span className="flex gap-1.5" aria-hidden>
-              <span className="h-2.5 w-2.5 rounded-full border border-foreground/15" />
-              <span className="h-2.5 w-2.5 rounded-full border border-foreground/15" />
-              <span className="h-2.5 w-2.5 rounded-full border border-foreground/15" />
-            </span>
-            <span className="font-mono text-[10px] tracking-[0.14em] text-foreground/45 uppercase">
-              bloxscout agent
-            </span>
-          </div>
+    <div className="relative overflow-hidden rounded-lg border border-foreground/12 bg-background shadow-[0_1px_0_0_rgba(28,28,28,0.03),0_30px_70px_-40px_rgba(28,28,28,0.3)]">
+      {/* window chrome + scene tabs */}
+      <div className="flex items-center justify-between border-b border-foreground/10 bg-muted-surface px-4 py-2.5">
+        <div className="flex items-center gap-2.5">
+          <span className="flex gap-1.5" aria-hidden>
+            <span className="h-2.5 w-2.5 rounded-full border border-foreground/15" />
+            <span className="h-2.5 w-2.5 rounded-full border border-foreground/15" />
+            <span className="h-2.5 w-2.5 rounded-full border border-foreground/15" />
+          </span>
+          <span className="font-mono text-[10px] tracking-[0.14em] text-foreground/45 uppercase">
+            bloxscout agent
+          </span>
         </div>
-
-        <div className="flex flex-col gap-4 px-4 py-5 sm:px-5">
-          {/* user prompt */}
-          <div className="flex justify-end">
-            <div className="max-w-[85%] rounded-md border border-foreground/10 bg-muted-surface px-3.5 py-2 text-[13px] text-foreground">
-              <span className="font-mono">{typed}</span>
-              {phase === "typing" && (
-                <span className="ml-px inline-block h-3.5 w-px translate-y-0.5 animate-pulse bg-foreground/70" />
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            {phase === "thinking" && (
-              <div className="flex items-center gap-2 font-mono text-[11px] text-foreground/55">
-                <span className="flex gap-1" aria-hidden>
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-foreground/40 [animation-delay:-0.2s]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-foreground/40 [animation-delay:-0.1s]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-foreground/40" />
-                </span>
-                scanning 30 live games · tower defense
-              </div>
-            )}
-
-            {showWidget && <NicheWidget />}
-
-            {(phase === "answering" || phase === "done") && (
-              <p className="text-[13px] leading-relaxed text-foreground/85">
-                {streamed}
-                {phase === "answering" && (
-                  <span className="ml-px inline-block h-3.5 w-1 translate-y-0.5 animate-pulse bg-foreground" />
-                )}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* faux composer */}
-        <div className="border-t border-foreground/10 bg-muted-surface px-4 py-3 sm:px-5">
-          <div className="flex items-center gap-2 rounded-md border border-foreground/10 bg-background px-3 py-2">
-            <span className="flex-1 font-mono text-[12px] text-foreground/40 select-none">
-              Ask about any niche, game, or trend…
-            </span>
-            <span
-              className="inline-flex h-7 w-7 items-center justify-center rounded bg-foreground text-background"
-              aria-hidden
+        <div className="flex items-center gap-1">
+          {SCENES.map((s, i) => (
+            <button
+              key={s.tab}
+              type="button"
+              onClick={() => jumpTo(i)}
+              className={`relative rounded-md px-2 py-1 font-mono text-[10px] tracking-[0.08em] uppercase transition-colors ${
+                i === scene
+                  ? "text-foreground"
+                  : "text-foreground/35 hover:text-foreground/60"
+              }`}
             >
-              <ArrowUp className="h-4 w-4" strokeWidth={2.2} />
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** Monochrome recreation of the niche-scan widget. */
-function NicheWidget() {
-  const maxPct = Math.max(...LEADERS.map((l) => l.pct));
-  return (
-    <div className="overflow-hidden rounded-md border border-foreground/10 bg-background">
-      <div className="flex items-center justify-between border-b border-foreground/10 bg-muted-surface px-3.5 py-2">
-        <span className="font-mono text-[10px] tracking-[0.16em] text-foreground uppercase">
-          Tower defense · niche scan
-        </span>
-        <span className="font-mono text-[9px] tracking-[0.16em] text-foreground/45 uppercase tabular-nums">
-          30 games
-        </span>
-      </div>
-
-      <div className="flex flex-col gap-3 px-3.5 py-3">
-        <span className="inline-flex w-fit items-center gap-2 rounded-md border border-accent/25 bg-accent/[0.08] px-2.5 py-1 text-[13px] font-medium tracking-[-0.01em] text-accent">
-          Contested · white space in the tail
-        </span>
-        <div className="grid grid-cols-4 gap-x-3 gap-y-2">
-          {[
-            ["games", "30"],
-            ["total ccu", "274k"],
-            ["top-1", "44%"],
-            ["top-3", "75%"],
-          ].map(([label, value]) => (
-            <div key={label} className="flex flex-col gap-0.5">
-              <span className="font-mono text-[9px] tracking-[0.14em] text-foreground/45 uppercase">
-                {label}
-              </span>
-              <span className="tabular font-mono text-sm text-foreground">
-                {value}
-              </span>
-            </div>
+              {s.tab}
+              {i === scene ? (
+                <span
+                  className="absolute inset-x-2 -bottom-px h-px bg-accent"
+                  aria-hidden
+                />
+              ) : null}
+            </button>
           ))}
         </div>
       </div>
 
-      <div className="border-t border-foreground/10 px-3.5 py-1.5 font-mono text-[9px] tracking-[0.14em] text-foreground/40 uppercase">
-        who&apos;s winning the niche now
+      <div className="flex min-h-[26rem] flex-col gap-4 px-4 py-5 sm:px-5">
+        {/* user prompt */}
+        <div className="flex justify-end">
+          <div className="max-w-[85%] rounded-md border border-foreground/10 bg-muted-surface px-3.5 py-2 text-[13px] text-foreground">
+            <span className="font-mono">{typed}</span>
+            {phase === "typing" && (
+              <span className="ml-px inline-block h-3.5 w-px translate-y-0.5 animate-pulse bg-foreground/70" />
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          {phase === "thinking" && (
+            <div className="flex items-center gap-2 font-mono text-[11px] text-foreground/55">
+              <span className="flex gap-1" aria-hidden>
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-foreground/40 [animation-delay:-0.2s]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-foreground/40 [animation-delay:-0.1s]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-foreground/40" />
+              </span>
+              {current.thinking}
+            </div>
+          )}
+
+          {showWidget && current.widget}
+
+          {showWidget && (
+            <p className="text-[13px] leading-relaxed text-foreground/85">
+              {streamed}
+              {phase === "answering" && (
+                <span className="ml-px inline-block h-3.5 w-1 translate-y-0.5 animate-pulse bg-foreground" />
+              )}
+            </p>
+          )}
+        </div>
       </div>
-      <ul className="flex flex-col divide-y divide-foreground/[0.07]">
-        {LEADERS.map((g) => (
-          <li key={g.name} className="flex items-center gap-2.5 px-3.5 py-2">
-            <span className="w-40 shrink-0 truncate text-[12px] text-foreground/80">
-              {g.name}
-            </span>
-            <span className="h-[3px] flex-1 overflow-hidden rounded-full bg-foreground/10">
-              <span
-                className="block h-full rounded-full bg-accent"
-                style={{ width: `${(g.pct / maxPct) * 100}%` }}
-                aria-hidden
-              />
-            </span>
-            <span className="tabular w-9 shrink-0 text-right font-mono text-[11px] text-foreground/55">
-              {g.share}%
-            </span>
-            <span className="tabular w-10 shrink-0 text-right font-mono text-[11px] text-foreground">
-              {g.playing}
-            </span>
-          </li>
-        ))}
-      </ul>
+
+      {/* faux composer */}
+      <div className="border-t border-foreground/10 bg-muted-surface px-4 py-3 sm:px-5">
+        <div className="flex items-center gap-2 rounded-md border border-foreground/10 bg-background px-3 py-2">
+          <span className="flex-1 font-mono text-[12px] text-foreground/40 select-none">
+            Ask about any niche, game, or trend…
+          </span>
+          <span
+            className="inline-flex h-7 w-7 items-center justify-center rounded bg-foreground text-background"
+            aria-hidden
+          >
+            <ArrowUp className="h-4 w-4" strokeWidth={2.2} />
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
