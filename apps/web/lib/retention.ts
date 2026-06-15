@@ -15,6 +15,7 @@
 import "server-only";
 import { cache } from "react";
 import { RobloxClient } from "@bloxscout/core/roblox-client";
+import { pickGameMatch } from "@/lib/resolve-game";
 import { getThumbnails } from "@/lib/thumbnails";
 
 const roblox = new RobloxClient();
@@ -66,7 +67,7 @@ async function resolveTarget(input: RetentionInput): Promise<Target | null> {
     if (!q) return null;
     try {
       const matches = await roblox.searchGames(q, { limit: 5 });
-      universeId = matches[0]?.universeId ?? null;
+      universeId = pickGameMatch(q, matches)?.universeId ?? null;
     } catch {
       return null;
     }
