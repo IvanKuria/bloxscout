@@ -316,24 +316,54 @@ export const COPILOT_TOOLS: CopilotTool[] = [
     async execute(input): Promise<RankingResult> {
       const limit = clampLimit(input.limit, 10, 25);
       const view = await getBreakouts();
-      if (!view) {
+      let entries = view?.entries ?? [];
+      let generatedAt = view?.generatedAt ?? null;
+      let derived = false;
+
+      // Defense-in-depth: the published breakouts view is z-score-based and
+      // comes back empty on a young/gappy dataset (z-scores need several days
+      // of history). When it's empty, derive breakouts from the trending view
+      // re-ranked by 24h growth — the same growth fallback the pipeline uses —
+      // so the agent always surfaces real accelerators instead of "no rows".
+      if (entries.length === 0) {
+        const trending = await getTrending();
+        if (trending) {
+          generatedAt = trending.generatedAt;
+          entries = trending.entries
+            .filter(
+              (e) =>
+                e.playing >= 300 &&
+                e.growth24hPct !== null &&
+                e.growth24hPct >= 30,
+            )
+            .slice()
+            .sort((a, b) => (b.growth24hPct ?? 0) - (a.growth24hPct ?? 0));
+          derived = entries.length > 0;
+        }
+      }
+
+      if (entries.length === 0) {
         return {
           ok: false,
           kind: "breakouts",
           title: "Breakout games",
-          generatedAt: null,
+          generatedAt,
           rows: [],
           note: EMPTY_NOTE,
         };
       }
-      const top = view.entries.slice(0, limit);
+
+      const top = entries.slice(0, limit);
       const thumbs = await thumbsFor(top);
       return {
         ok: true,
         kind: "breakouts",
         title: "Breakout games",
-        generatedAt: view.generatedAt,
+        generatedAt,
         rows: top.map((e) => toRankRow(e, thumbs)),
+        note: derived
+          ? "Ranked by 24h growth; anomaly scoring sharpens this as more history accrues."
+          : undefined,
       };
     },
   },

@@ -1,7 +1,11 @@
-import type { HourlyFile, RawRunFile } from "@bloxscout/core/hosted-format";
+import type {
+  HourlyFile,
+  RawRunFile,
+  ViewEntry,
+} from "@bloxscout/core/hosted-format";
 import { describe, expect, it } from "vitest";
 import { emptyRegistry, upsertDiscovered } from "../../pipeline/registry.js";
-import { computeViews } from "../../pipeline/views.js";
+import { computeViews, selectBreakouts } from "../../pipeline/views.js";
 
 const NOW_ISO = "2026-06-12T12:00:00.000Z";
 const NOW = Date.parse(NOW_ISO);
@@ -174,5 +178,55 @@ describe("computeViews", () => {
     expect(sim?.topGames[0]?.universeId).toBe(21);
     // Sorted by totalPlaying: Simulation first.
     expect(views.genres.genres[0]?.genre).toBe("Simulation");
+  });
+});
+
+function viewEntry(p: Partial<ViewEntry> & { universeId: number }): ViewEntry {
+  return {
+    universeId: p.universeId,
+    name: p.name ?? `g${p.universeId}`,
+    genre: p.genre ?? null,
+    playing: p.playing ?? 0,
+    avg24h: p.avg24h ?? null,
+    peak24h: p.peak24h ?? null,
+    growth24hPct: p.growth24hPct ?? null,
+    growth7dPct: p.growth7dPct ?? null,
+    zScore24h: p.zScore24h ?? null,
+    visitsDelta24h: p.visitsDelta24h ?? null,
+  };
+}
+
+describe("selectBreakouts", () => {
+  // Regression: a young dataset has no usable z-scores, so the old z-only
+  // filter returned []. It must fall back to growth (with floors applied).
+  it("falls back to growth when no z-scores are available (young dataset)", () => {
+    const out = selectBreakouts([
+      viewEntry({ universeId: 1, playing: 18000, growth24hPct: 387 }),
+      viewEntry({ universeId: 2, playing: 1300, growth24hPct: 57 }),
+      viewEntry({ universeId: 3, playing: 50, growth24hPct: 900 }), // too small
+      viewEntry({ universeId: 4, playing: 9000, growth24hPct: 5 }), // not surging
+    ]);
+    expect(out.map((e) => e.universeId)).toEqual([1, 2]);
+  });
+
+  it("ranks by z-score when enough are available", () => {
+    const entries = Array.from({ length: 12 }, (_, i) =>
+      viewEntry({
+        universeId: 100 + i,
+        playing: 5000,
+        growth24hPct: 10,
+        zScore24h: 2 + i * 0.1,
+      }),
+    );
+    const out = selectBreakouts(entries);
+    expect(out.length).toBe(12);
+    expect(out[0]?.zScore24h ?? 0).toBeGreaterThan(out[1]?.zScore24h ?? 0);
+  });
+
+  it("never returns empty while a real accelerator exists", () => {
+    const out = selectBreakouts([
+      viewEntry({ universeId: 1, playing: 4000, growth24hPct: 120 }),
+    ]);
+    expect(out.length).toBe(1);
   });
 });
