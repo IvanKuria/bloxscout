@@ -493,6 +493,66 @@ describe("RobloxClient.getGamePasses", () => {
   });
 });
 
+describe("RobloxClient.getGameVotes", () => {
+  let agent: MockAgent;
+  let client: RobloxClient;
+
+  beforeEach(() => {
+    ({ client, agent } = makeClient());
+  });
+
+  afterEach(async () => {
+    await agent.close();
+  });
+
+  it("normalizes {id, upVotes, downVotes} to {universeId,...} in input order", async () => {
+    agent
+      .get("https://games.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/v1/games/votes") })
+      .reply(200, {
+        data: [
+          { id: 2, upVotes: 20, downVotes: 5 },
+          { id: 1, upVotes: 100, downVotes: 10 },
+        ],
+      });
+
+    const votes = await client.getGameVotes([1, 2]);
+    expect(votes).toEqual([
+      { universeId: 1, upVotes: 100, downVotes: 10 },
+      { universeId: 2, upVotes: 20, downVotes: 5 },
+    ]);
+  });
+
+  it("chunks at GAMES_BATCH_SIZE (75 ids -> 50 + 25)", async () => {
+    const pool = agent.get("https://games.roblox.com");
+    const seenIdCounts: number[] = [];
+    pool
+      .intercept({ path: (p) => p.startsWith("/v1/games/votes") })
+      .reply(200, ({ path }) => {
+        const url = new URL(path, "https://games.roblox.com");
+        const ids = url.searchParams.get("universeIds")?.split(",") ?? [];
+        seenIdCounts.push(ids.length);
+        return { data: ids.map((id) => ({ id: Number(id), upVotes: 1, downVotes: 0 })) };
+      })
+      .times(2);
+
+    const ids = Array.from({ length: 75 }, (_, i) => i + 1);
+    await client.getGameVotes(ids);
+    expect(seenIdCounts).toEqual([50, 25]);
+  });
+
+  it("defaults missing vote fields to 0 and returns [] for no ids", async () => {
+    expect(await client.getGameVotes([])).toEqual([]);
+    agent
+      .get("https://games.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/v1/games/votes") })
+      .reply(200, { data: [{ id: 9 }] });
+    expect(await client.getGameVotes([9])).toEqual([
+      { universeId: 9, upVotes: 0, downVotes: 0 },
+    ]);
+  });
+});
+
 // -----------------------------------------------------------------------------
 // Fixtures
 // -----------------------------------------------------------------------------

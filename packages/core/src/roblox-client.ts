@@ -15,6 +15,7 @@ import type {
   GamePass,
   GamePlayerCount,
   GameSummary,
+  GameVotes,
   Group,
   RobloxUniverseId,
   RobloxUserId,
@@ -282,6 +283,54 @@ export class RobloxClient {
   async getPlayerCounts(universeIds: RobloxUniverseId[]): Promise<GamePlayerCount[]> {
     const games = await this.getGames(universeIds);
     return games.map((g) => ({ universeId: g.id, playing: g.playing, visits: g.visits }));
+  }
+
+  /**
+   * Up/down vote totals per universe via `GET /v1/games/votes?universeIds=...`.
+   * Same per-request id cap as `getGames`, so we chunk transparently at
+   * `GAMES_BATCH_SIZE`. The like-ratio derived from this is the cheapest
+   * quality signal Roblox exposes unauthenticated. Cached on the SLOW bucket —
+   * vote tallies move slowly relative to CCU. Results follow input order;
+   * missing ids are simply absent.
+   */
+  async getGameVotes(universeIds: RobloxUniverseId[]): Promise<GameVotes[]> {
+    if (universeIds.length === 0) return [];
+    const unique = [...new Set(universeIds)];
+    const chunks: number[][] = [];
+    for (let i = 0; i < unique.length; i += GAMES_BATCH_SIZE) {
+      chunks.push(unique.slice(i, i + GAMES_BATCH_SIZE));
+    }
+
+    const byId = new Map<RobloxUniverseId, GameVotes>();
+    for (const chunk of chunks) {
+      const url = new URL("/v1/games/votes", ROBLOX_ENDPOINTS.games);
+      url.searchParams.set("universeIds", chunk.join(","));
+      const data = await this.fetchJson<{
+        data?: Array<{ id?: number; upVotes?: number; downVotes?: number }>;
+      }>(url, {
+        label: "GET /v1/games/votes",
+        ttlSeconds: CACHE_TTL.SLOW,
+        cacheKey: `votes:${chunk
+          .slice()
+          .sort((a, b) => a - b)
+          .join(",")}`,
+      });
+      for (const v of data.data ?? []) {
+        if (typeof v.id !== "number") continue;
+        byId.set(v.id, {
+          universeId: v.id,
+          upVotes: typeof v.upVotes === "number" ? v.upVotes : 0,
+          downVotes: typeof v.downVotes === "number" ? v.downVotes : 0,
+        });
+      }
+    }
+
+    const ordered: GameVotes[] = [];
+    for (const id of universeIds) {
+      const v = byId.get(id);
+      if (v !== undefined) ordered.push(v);
+    }
+    return ordered;
   }
 
   /**

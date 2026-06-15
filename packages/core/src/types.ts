@@ -96,6 +96,20 @@ export interface GamePlayerCount {
 }
 
 /**
+ * Up/down vote totals for a game.
+ *
+ * Verified shape for `GET https://games.roblox.com/v1/games/votes?universeIds=...`
+ * — `{ data: [{ id, upVotes, downVotes }] }` where `id` is the universe id. The
+ * like-ratio (`upVotes / (upVotes + downVotes)`) is the cheapest quality signal
+ * Roblox exposes unauthenticated.
+ */
+export interface GameVotes {
+  universeId: RobloxUniverseId;
+  upVotes: number;
+  downVotes: number;
+}
+
+/**
  * User profile.
  *
  * Verified shape (2026-05) for `GET https://users.roblox.com/v1/users/{userId}`.

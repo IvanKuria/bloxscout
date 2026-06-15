@@ -29,6 +29,8 @@ import {
 import { genreSlug } from "@/lib/format";
 import { analyzeNiche } from "@/lib/niche";
 import type { NicheAnalysisResult } from "@/lib/niche";
+import { analyzeGameQuality } from "@/lib/quality";
+import type { GameQualityResult } from "@/lib/quality";
 import { estimateRevenue } from "@/lib/revenue";
 import type { RevenueResult } from "@/lib/revenue";
 import { getThumbnails } from "@/lib/thumbnails";
@@ -41,6 +43,7 @@ export type {
   RevenueGame,
   RevenueAssumptions,
 } from "@/lib/revenue";
+export type { GameQualityResult, QualityBand } from "@/lib/quality";
 
 /** A JSON-Schema-ish object the Anthropic SDK accepts as `input_schema`. */
 type JsonSchema = {
@@ -528,6 +531,42 @@ export const COPILOT_TOOLS: CopilotTool[] = [
           typeof input.universeId === "number" ? input.universeId : undefined,
         genre: typeof input.genre === "string" ? input.genre : undefined,
         limit: typeof input.limit === "number" ? input.limit : undefined,
+      });
+    },
+  },
+
+  {
+    def: {
+      name: "get_game_quality",
+      description:
+        "Measure a game's QUALITY (not popularity) from its like-ratio — the " +
+        "share of up-votes among all votes. Call this when the user asks if a " +
+        "game is good, well-reviewed, well-liked, or how players rate it. " +
+        "Quality is distinct from CCU: a huge game can be divisive, a small one " +
+        "beloved — never infer quality from player count. Pass `gameName` or " +
+        "`universeId`. Returns up/down votes, like-ratio, and a band " +
+        "(loved/mixed/poor). Renders a quality gauge widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          gameName: {
+            type: "string",
+            description: "A game's name (e.g. 'Blox Fruits'). Resolved live.",
+          },
+          universeId: {
+            type: "integer",
+            description: "A game's Roblox universe id (alternative to gameName).",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<GameQualityResult> {
+      return analyzeGameQuality({
+        gameName:
+          typeof input.gameName === "string" ? input.gameName : undefined,
+        universeId:
+          typeof input.universeId === "number" ? input.universeId : undefined,
       });
     },
   },
