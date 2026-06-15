@@ -13,6 +13,8 @@
  * here keyed on the same tool name.
  */
 import * as React from "react";
+import { CompetitorMap } from "@/components/copilot/competitor-map";
+import { MonetizationTeardown } from "@/components/copilot/monetization-teardown";
 import { NicheCard } from "@/components/copilot/niche-card";
 import { NicheScan } from "@/components/copilot/niche-scan";
 import { QualityGauge } from "@/components/copilot/quality-gauge";
@@ -21,7 +23,9 @@ import { RevenueCard } from "@/components/copilot/revenue-card";
 import { RisingList } from "@/components/copilot/rising-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import type {
+  CompetitorMapResult,
   GameQualityResult,
+  MonetizationResult,
   NicheAnalysisResult,
   RankingResult,
   RevenueResult,
@@ -57,6 +61,12 @@ export const WIDGET_BY_TOOL: Record<string, WidgetRenderer> = {
   get_game_quality: (result) => (
     <QualityGauge result={result as GameQualityResult} />
   ),
+  teardown_monetization: (result) => (
+    <MonetizationTeardown result={result as MonetizationResult} />
+  ),
+  map_competitors: (result) => (
+    <CompetitorMap result={result as CompetitorMapResult} />
+  ),
 };
 
 /** Human label for the running-tool indicator, keyed by tool name. */
@@ -68,6 +78,8 @@ const RUNNING_LABEL: Record<string, string> = {
   analyze_niche: "Scanning the niche live",
   estimate_revenue: "Estimating revenue",
   get_game_quality: "Checking the like-ratio",
+  teardown_monetization: "Tearing down monetization",
+  map_competitors: "Mapping competitors",
 };
 
 /**

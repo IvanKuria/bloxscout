@@ -14,6 +14,7 @@ import type {
   GameIconSize,
   GamePass,
   GamePlayerCount,
+  GameRecommendation,
   GameSummary,
   GameVotes,
   Group,
@@ -331,6 +332,67 @@ export class RobloxClient {
       if (v !== undefined) ordered.push(v);
     }
     return ordered;
+  }
+
+  /**
+   * Roblox's own "similar games" recommendations for a universe via
+   * `GET /v1/games/recommendations/game/{universeId}?maxRows=N`. Unauthenticated
+   * (confirmed 2026-06). Each entry carries live CCU + vote totals + creator
+   * inline, so this single request yields a full competitor cohort. Cached on
+   * the DEFAULT bucket — the graph shifts on the order of hours, not minutes.
+   * Sponsored rows are dropped (they're ad placements, not true neighbours).
+   */
+  async getRecommendations(
+    universeId: RobloxUniverseId,
+    opts: { maxRows?: number } = {},
+  ): Promise<GameRecommendation[]> {
+    if (!Number.isInteger(universeId) || universeId < 1) {
+      throw new BloxscoutError(
+        "getRecommendations: universeId must be a positive integer",
+        "VALIDATION_ERROR",
+      );
+    }
+    const maxRows = Math.max(1, Math.min(50, Math.round(opts.maxRows ?? 20)));
+    const url = new URL(
+      `/v1/games/recommendations/game/${universeId}`,
+      ROBLOX_ENDPOINTS.games,
+    );
+    url.searchParams.set("maxRows", String(maxRows));
+    const data = await this.fetchJson<{
+      games?: Array<{
+        universeId?: number;
+        name?: string;
+        playerCount?: number;
+        totalUpVotes?: number;
+        totalDownVotes?: number;
+        creatorName?: string;
+        creatorType?: string;
+        genre?: string;
+        canonicalUrlPath?: string;
+        isSponsored?: boolean;
+      }>;
+    }>(url, {
+      label: "GET /v1/games/recommendations/game/{id}",
+      ttlSeconds: CACHE_TTL.DEFAULT,
+      cacheKey: `recommendations:${universeId}:${maxRows}`,
+    });
+
+    const out: GameRecommendation[] = [];
+    for (const g of data.games ?? []) {
+      if (typeof g.universeId !== "number" || g.isSponsored) continue;
+      out.push({
+        universeId: g.universeId,
+        name: g.name ?? "",
+        playerCount: typeof g.playerCount === "number" ? g.playerCount : 0,
+        totalUpVotes: typeof g.totalUpVotes === "number" ? g.totalUpVotes : 0,
+        totalDownVotes: typeof g.totalDownVotes === "number" ? g.totalDownVotes : 0,
+        creatorName: g.creatorName ?? "",
+        creatorType: g.creatorType ?? "",
+        genre: g.genre ?? "",
+        ...(g.canonicalUrlPath ? { canonicalUrlPath: g.canonicalUrlPath } : {}),
+      });
+    }
+    return out;
   }
 
   /**

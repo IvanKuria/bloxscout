@@ -110,6 +110,27 @@ export interface GameVotes {
 }
 
 /**
+ * A "similar game" from Roblox's own recommendations graph.
+ *
+ * Verified shape for `GET https://games.roblox.com/v1/games/recommendations/game/{universeId}`
+ * (unauthenticated, 2026-06) — `{ games: [...] }`. Each entry carries live CCU
+ * AND vote totals AND creator inline, so one request yields a full competitor
+ * cohort with no enrichment fetch. This is Roblox's own "what's adjacent to X"
+ * graph — effectively free competitor mapping.
+ */
+export interface GameRecommendation {
+  universeId: RobloxUniverseId;
+  name: string;
+  playerCount: number;
+  totalUpVotes: number;
+  totalDownVotes: number;
+  creatorName: string;
+  creatorType: string;
+  genre: string;
+  canonicalUrlPath?: string;
+}
+
+/**
  * User profile.
  *
  * Verified shape (2026-05) for `GET https://users.roblox.com/v1/users/{userId}`.

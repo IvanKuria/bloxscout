@@ -29,6 +29,10 @@ import {
 import { genreSlug } from "@/lib/format";
 import { analyzeNiche } from "@/lib/niche";
 import type { NicheAnalysisResult } from "@/lib/niche";
+import { mapCompetitors } from "@/lib/competitors";
+import type { CompetitorMapResult } from "@/lib/competitors";
+import { teardownMonetization } from "@/lib/monetization";
+import type { MonetizationResult } from "@/lib/monetization";
 import { analyzeGameQuality } from "@/lib/quality";
 import type { GameQualityResult } from "@/lib/quality";
 import { estimateRevenue } from "@/lib/revenue";
@@ -44,6 +48,12 @@ export type {
   RevenueAssumptions,
 } from "@/lib/revenue";
 export type { GameQualityResult, QualityBand } from "@/lib/quality";
+export type {
+  MonetizationResult,
+  MonetizationPass,
+  MonetizationStyle,
+} from "@/lib/monetization";
+export type { CompetitorMapResult, CompetitorRow } from "@/lib/competitors";
 
 /** A JSON-Schema-ish object the Anthropic SDK accepts as `input_schema`. */
 type JsonSchema = {
@@ -567,6 +577,84 @@ export const COPILOT_TOOLS: CopilotTool[] = [
           typeof input.gameName === "string" ? input.gameName : undefined,
         universeId:
           typeof input.universeId === "number" ? input.universeId : undefined,
+      });
+    },
+  },
+
+  {
+    def: {
+      name: "teardown_monetization",
+      description:
+        "Tear down how a game makes money — its gamepass pricing ladder, how " +
+        "many passes it sells, the price range, and its monetization style " +
+        "(gamepass-heavy / gamepass-light / none). Call this when the user asks " +
+        "how a game monetizes, what it charges, what gamepasses it has, or " +
+        "what to price their own game at by example. Pass `gameName` or " +
+        "`universeId`. NOTE: covers gamepasses only — developer products aren't " +
+        "publicly listable, so say the picture may be larger. Renders a " +
+        "monetization teardown widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          gameName: {
+            type: "string",
+            description: "A game's name (e.g. 'Blox Fruits'). Resolved live.",
+          },
+          universeId: {
+            type: "integer",
+            description: "A game's Roblox universe id (alternative to gameName).",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<MonetizationResult> {
+      return teardownMonetization({
+        gameName:
+          typeof input.gameName === "string" ? input.gameName : undefined,
+        universeId:
+          typeof input.universeId === "number" ? input.universeId : undefined,
+      });
+    },
+  },
+
+  {
+    def: {
+      name: "map_competitors",
+      description:
+        "Map a game's real competitors using Roblox's OWN recommendations " +
+        "graph — the games the platform itself treats as adjacent, each with " +
+        "its live players and like-ratio. Call this when the user asks who " +
+        "competes with a game, what games are similar to it, or who the rivals " +
+        "in its space are. More authoritative than a keyword search because " +
+        "it's Roblox's actual 'players who like X also play' graph. Pass " +
+        "`gameName` or `universeId`. Renders a competitor map widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          gameName: {
+            type: "string",
+            description: "The anchor game's name (e.g. 'Blox Fruits'). Resolved live.",
+          },
+          universeId: {
+            type: "integer",
+            description: "The anchor game's universe id (alternative to gameName).",
+          },
+          limit: {
+            type: "integer",
+            description: "How many competitors to map (1-25). Default 12.",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<CompetitorMapResult> {
+      return mapCompetitors({
+        gameName:
+          typeof input.gameName === "string" ? input.gameName : undefined,
+        universeId:
+          typeof input.universeId === "number" ? input.universeId : undefined,
+        limit: typeof input.limit === "number" ? input.limit : undefined,
       });
     },
   },

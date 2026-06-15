@@ -553,6 +553,64 @@ describe("RobloxClient.getGameVotes", () => {
   });
 });
 
+describe("RobloxClient.getRecommendations", () => {
+  let agent: MockAgent;
+  let client: RobloxClient;
+
+  beforeEach(() => {
+    ({ client, agent } = makeClient());
+  });
+
+  afterEach(async () => {
+    await agent.close();
+  });
+
+  it("maps the {games:[...]} envelope and drops sponsored rows", async () => {
+    agent
+      .get("https://games.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/v1/games/recommendations/game/1") })
+      .reply(200, {
+        games: [
+          {
+            universeId: 11,
+            name: "Neighbour",
+            playerCount: 500,
+            totalUpVotes: 90,
+            totalDownVotes: 10,
+            creatorName: "Studio",
+            creatorType: "Group",
+            genre: "Fighting",
+            canonicalUrlPath: "/games/22/Neighbour",
+            isSponsored: false,
+          },
+          { universeId: 99, name: "Ad", isSponsored: true },
+        ],
+      });
+
+    const recs = await client.getRecommendations(1);
+    expect(recs).toHaveLength(1);
+    expect(recs[0]).toMatchObject({
+      universeId: 11,
+      name: "Neighbour",
+      playerCount: 500,
+      totalUpVotes: 90,
+      totalDownVotes: 10,
+    });
+  });
+
+  it("rejects a non-positive universeId without a request", async () => {
+    await expect(client.getRecommendations(0)).rejects.toBeInstanceOf(BloxscoutError);
+  });
+
+  it("returns [] when the graph has no neighbours", async () => {
+    agent
+      .get("https://games.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/v1/games/recommendations/game/5") })
+      .reply(200, { games: [] });
+    expect(await client.getRecommendations(5)).toEqual([]);
+  });
+});
+
 // -----------------------------------------------------------------------------
 // Fixtures
 // -----------------------------------------------------------------------------
