@@ -1,78 +1,79 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { site } from "@/lib/site";
-import { IconTrailLayer } from "./icon-trail";
+import { CtaLink } from "./cta-link";
 
 /**
- * Site footer. The closing CTA band hosts a tasteful cursor flourish: real game
- * icons trail the pointer (vendored fancycomponents `ImageTrail`), disabled on
- * touch + reduced-motion. `trailIcons` are fetched server-side by the homepage;
- * other pages render the band without the flourish (empty array).
+ * Site footer. A dark closing CTA band (the page's final note) over a clean,
+ * column-based footer on the muted scheme. No icon trail, no decoration — just
+ * type, hairline dividers, and whitespace.
  */
-export function SiteFooter({ trailIcons = [] }: { trailIcons?: string[] }) {
+export function SiteFooter() {
   return (
-    <footer className="bg-background">
-      {/* Closing CTA band */}
-      <div className="relative overflow-hidden border-b border-border bg-secondary/40">
-        <IconTrailLayer icons={trailIcons} />
-        <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-start gap-6 px-6 py-16 sm:flex-row sm:items-center sm:justify-between sm:py-20">
-          <h2 className="font-heading text-2xl font-semibold tracking-[-0.01em] text-foreground sm:text-3xl">
+    <footer>
+      {/* Closing CTA band — dark scheme */}
+      <div data-scheme="dark" className="border-t border-border">
+        <div className="mx-auto flex max-w-6xl flex-col items-start gap-8 px-6 py-20 sm:flex-row sm:items-center sm:justify-between sm:py-24">
+          <h2 className="max-w-md text-[1.9rem] leading-[1.1] font-light tracking-[-0.04em] text-foreground sm:text-[2.5rem]">
             Find your next winning idea.
           </h2>
-          <Link
-            href="/signup"
-            className="group inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-medium text-accent-foreground shadow-[0_10px_24px_-12px_rgba(226,35,26,0.7)] transition-colors hover:bg-accent-hover"
-          >
+          <CtaLink href="/signup" size="lg">
             Start free
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
+          </CtaLink>
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12 sm:flex-row sm:items-start sm:justify-between">
-        <div className="max-w-md text-sm leading-relaxed text-muted-foreground">
-          <p className="mb-2 inline-flex items-center gap-2 font-mono text-xs font-medium tracking-tight text-foreground">
-            <span className="inline-block h-2 w-2 rounded-full bg-accent" aria-hidden />
-            {site.name}
-          </p>
-          <p>
-            An independent AI agent for Roblox developers. Not affiliated with,
-            endorsed by, or sponsored by Roblox Corporation. Answers are grounded
-            in Roblox&apos;s public player data.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-sm text-muted-foreground">
-          <div className="flex flex-col gap-2">
-            <span className="font-mono text-[10px] tracking-[0.16em] text-muted-foreground/60 uppercase">
-              Product
-            </span>
-            <Link href="/signup" className="transition-colors hover:text-foreground">
-              Start free
-            </Link>
-            <Link href="/pricing" className="transition-colors hover:text-foreground">
-              Pricing
-            </Link>
-            <Link href="/login" className="transition-colors hover:text-foreground">
-              Sign in
-            </Link>
-            <Link href="/games" className="transition-colors hover:text-foreground">
-              Top games
-            </Link>
+      {/* Footer columns — muted scheme */}
+      <div data-scheme="muted" className="border-t border-border">
+        <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-14 sm:flex-row sm:items-start sm:justify-between">
+          <div className="max-w-sm">
+            <p className="mb-3 font-mono text-[15px] font-medium tracking-[-0.01em] text-foreground">
+              {site.name}
+            </p>
+            <p className="text-[13px] leading-relaxed text-foreground/55">
+              An independent AI agent for Roblox developers. Not affiliated
+              with, endorsed by, or sponsored by Roblox Corporation. Answers are
+              grounded in Roblox&apos;s public player data.
+            </p>
           </div>
-          <div className="flex flex-col gap-2">
-            <span className="font-mono text-[10px] tracking-[0.16em] text-muted-foreground/60 uppercase">
-              Company
-            </span>
-            <Link
-              href="/about/methodology"
-              className="transition-colors hover:text-foreground"
-            >
-              Methodology
-            </Link>
-            <Link href="/trending" className="transition-colors hover:text-foreground">
-              Trending
-            </Link>
+
+          <div className="grid grid-cols-2 gap-x-14 gap-y-3">
+            <div className="flex flex-col gap-3">
+              <span className="font-mono text-[10px] tracking-[0.16em] text-foreground/40 uppercase">
+                Product
+              </span>
+              {[
+                ["/signup", "Start free"],
+                ["/pricing", "Pricing"],
+                ["/login", "Sign in"],
+                ["/games", "Top games"],
+              ].map(([href, label]) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="text-[13px] text-foreground/60 transition-colors hover:text-foreground"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+            <div className="flex flex-col gap-3">
+              <span className="font-mono text-[10px] tracking-[0.16em] text-foreground/40 uppercase">
+                Company
+              </span>
+              {[
+                ["/about/methodology", "Methodology"],
+                ["/trending", "Trending"],
+                ["/roblox-statistics", "Statistics"],
+              ].map(([href, label]) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="text-[13px] text-foreground/60 transition-colors hover:text-foreground"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -29,11 +29,37 @@ import {
 import { genreSlug } from "@/lib/format";
 import { analyzeNiche } from "@/lib/niche";
 import type { NicheAnalysisResult } from "@/lib/niche";
+import { mapCompetitors } from "@/lib/competitors";
+import type { CompetitorMapResult } from "@/lib/competitors";
+import { analyzeIcon } from "@/lib/icon-analysis";
+import type { IconAnalysisResult } from "@/lib/icon-analysis";
+import { teardownMonetization } from "@/lib/monetization";
+import type { MonetizationResult } from "@/lib/monetization";
+import { analyzeGameQuality } from "@/lib/quality";
+import type { GameQualityResult } from "@/lib/quality";
+import { estimateRetention } from "@/lib/retention";
+import type { RetentionResult } from "@/lib/retention";
+import { estimateRevenue } from "@/lib/revenue";
+import type { RevenueResult } from "@/lib/revenue";
 import { getThumbnails } from "@/lib/thumbnails";
 
 // Re-export the niche-scan result types so the widget layer imports its props
 // from the same place as the other tool results (type-only; erased at build).
 export type { NicheAnalysisResult, NicheGameRow, NicheVerdict } from "@/lib/niche";
+export type {
+  RevenueResult,
+  RevenueGame,
+  RevenueAssumptions,
+} from "@/lib/revenue";
+export type { GameQualityResult, QualityBand } from "@/lib/quality";
+export type {
+  MonetizationResult,
+  MonetizationPass,
+  MonetizationStyle,
+} from "@/lib/monetization";
+export type { CompetitorMapResult, CompetitorRow } from "@/lib/competitors";
+export type { RetentionResult, RetentionStep } from "@/lib/retention";
+export type { IconAnalysisResult, IconTraits } from "@/lib/icon-analysis";
 
 /** A JSON-Schema-ish object the Anthropic SDK accepts as `input_schema`. */
 type JsonSchema = {
@@ -472,6 +498,245 @@ export const COPILOT_TOOLS: CopilotTool[] = [
         generatedAt: view.generatedAt,
         rows,
       };
+    },
+  },
+
+  {
+    def: {
+      name: "estimate_revenue",
+      description:
+        "Estimate Roblox game revenue in USD. Call this when the user asks how " +
+        "much a game makes/earns, what a niche or genre is worth, or which " +
+        "genres are most profitable. Three modes: pass `gameName` or " +
+        "`universeId` for a SINGLE game's monthly estimate (live CCU × a " +
+        "platform-average monetization heuristic); pass `genre` for that " +
+        "genre's earning aggregate; pass nothing for a top-earning-genres " +
+        "leaderboard. The figure is a HEURISTIC that varies 5-10x by " +
+        "monetization design — ALWAYS lead with the disclaimer the result " +
+        "carries; never present it as precise. Renders a revenue card widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          gameName: {
+            type: "string",
+            description:
+              "A game's name to estimate (e.g. 'Grow a Garden'). Resolved live.",
+          },
+          universeId: {
+            type: "integer",
+            description: "A game's Roblox universe id (alternative to gameName).",
+          },
+          genre: {
+            type: "string",
+            description:
+              "A genre to estimate (e.g. 'Simulator'). Omit gameName/universeId.",
+          },
+          limit: {
+            type: "integer",
+            description: "Leaderboard size for genre/leaderboard mode (1-12). Default 6.",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<RevenueResult> {
+      return estimateRevenue({
+        gameName:
+          typeof input.gameName === "string" ? input.gameName : undefined,
+        universeId:
+          typeof input.universeId === "number" ? input.universeId : undefined,
+        genre: typeof input.genre === "string" ? input.genre : undefined,
+        limit: typeof input.limit === "number" ? input.limit : undefined,
+      });
+    },
+  },
+
+  {
+    def: {
+      name: "get_game_quality",
+      description:
+        "Measure a game's QUALITY (not popularity) from its like-ratio — the " +
+        "share of up-votes among all votes. Call this when the user asks if a " +
+        "game is good, well-reviewed, well-liked, or how players rate it. " +
+        "Quality is distinct from CCU: a huge game can be divisive, a small one " +
+        "beloved — never infer quality from player count. Pass `gameName` or " +
+        "`universeId`. Returns up/down votes, like-ratio, and a band " +
+        "(loved/mixed/poor). Renders a quality gauge widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          gameName: {
+            type: "string",
+            description: "A game's name (e.g. 'Blox Fruits'). Resolved live.",
+          },
+          universeId: {
+            type: "integer",
+            description: "A game's Roblox universe id (alternative to gameName).",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<GameQualityResult> {
+      return analyzeGameQuality({
+        gameName:
+          typeof input.gameName === "string" ? input.gameName : undefined,
+        universeId:
+          typeof input.universeId === "number" ? input.universeId : undefined,
+      });
+    },
+  },
+
+  {
+    def: {
+      name: "teardown_monetization",
+      description:
+        "Tear down how a game makes money — its gamepass pricing ladder, how " +
+        "many passes it sells, the price range, and its monetization style " +
+        "(gamepass-heavy / gamepass-light / none). Call this when the user asks " +
+        "how a game monetizes, what it charges, what gamepasses it has, or " +
+        "what to price their own game at by example. Pass `gameName` or " +
+        "`universeId`. NOTE: covers gamepasses only — developer products aren't " +
+        "publicly listable, so say the picture may be larger. Renders a " +
+        "monetization teardown widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          gameName: {
+            type: "string",
+            description: "A game's name (e.g. 'Blox Fruits'). Resolved live.",
+          },
+          universeId: {
+            type: "integer",
+            description: "A game's Roblox universe id (alternative to gameName).",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<MonetizationResult> {
+      return teardownMonetization({
+        gameName:
+          typeof input.gameName === "string" ? input.gameName : undefined,
+        universeId:
+          typeof input.universeId === "number" ? input.universeId : undefined,
+      });
+    },
+  },
+
+  {
+    def: {
+      name: "map_competitors",
+      description:
+        "Map a game's real competitors using Roblox's OWN recommendations " +
+        "graph — the games the platform itself treats as adjacent, each with " +
+        "its live players and like-ratio. Call this when the user asks who " +
+        "competes with a game, what games are similar to it, or who the rivals " +
+        "in its space are. More authoritative than a keyword search because " +
+        "it's Roblox's actual 'players who like X also play' graph. Pass " +
+        "`gameName` or `universeId`. Renders a competitor map widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          gameName: {
+            type: "string",
+            description: "The anchor game's name (e.g. 'Blox Fruits'). Resolved live.",
+          },
+          universeId: {
+            type: "integer",
+            description: "The anchor game's universe id (alternative to gameName).",
+          },
+          limit: {
+            type: "integer",
+            description: "How many competitors to map (1-25). Default 12.",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<CompetitorMapResult> {
+      return mapCompetitors({
+        gameName:
+          typeof input.gameName === "string" ? input.gameName : undefined,
+        universeId:
+          typeof input.universeId === "number" ? input.universeId : undefined,
+        limit: typeof input.limit === "number" ? input.limit : undefined,
+      });
+    },
+  },
+
+  {
+    def: {
+      name: "estimate_retention",
+      description:
+        "Estimate how well players stick with / progress through a game, using " +
+        "a PROXY built from its milestone badges' award counts (the ratio of " +
+        "awards between sequential milestones ≈ a progression-through funnel). " +
+        "Call this when the user asks about retention, stickiness, drop-off, or " +
+        "how far players get. Pass `gameName` or `universeId`. This is a ROUGH, " +
+        "very-low-confidence proxy that depends on the dev shipping meaningful " +
+        "badges — if a game has none, say so and stress that absence of badges " +
+        "is NOT evidence of poor retention. Never present it as true D1/D7 " +
+        "retention. Renders a retention funnel widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          gameName: {
+            type: "string",
+            description: "A game's name (e.g. 'Blox Fruits'). Resolved live.",
+          },
+          universeId: {
+            type: "integer",
+            description: "A game's Roblox universe id (alternative to gameName).",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<RetentionResult> {
+      return estimateRetention({
+        gameName:
+          typeof input.gameName === "string" ? input.gameName : undefined,
+        universeId:
+          typeof input.universeId === "number" ? input.universeId : undefined,
+      });
+    },
+  },
+
+  {
+    def: {
+      name: "analyze_icon",
+      description:
+        "Analyze a game's ICON/thumbnail art direction using vision — its " +
+        "colour palette, focal subject, whether it uses text/a face, contrast, " +
+        "and style — then give concrete suggestions to improve it. Call this " +
+        "when the user asks about their icon, thumbnail, art, or how to make a " +
+        "game stand out visually in search/discovery. Pass `gameName` or " +
+        "`universeId`. NOTE: this is a paid (Pro) feature — if it returns a " +
+        "locked result, tell the user icon analysis is on the Pro plan; don't " +
+        "fabricate an analysis. Renders an icon-analysis widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          gameName: {
+            type: "string",
+            description: "A game's name (e.g. 'Blox Fruits'). Resolved live.",
+          },
+          universeId: {
+            type: "integer",
+            description: "A game's Roblox universe id (alternative to gameName).",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<IconAnalysisResult> {
+      return analyzeIcon({
+        gameName:
+          typeof input.gameName === "string" ? input.gameName : undefined,
+        universeId:
+          typeof input.universeId === "number" ? input.universeId : undefined,
+      });
     },
   },
 ];

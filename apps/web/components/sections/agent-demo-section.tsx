@@ -1,39 +1,34 @@
 import { AgentDemo } from "./agent-demo";
+import { Section, Eyebrow } from "./section";
 
 /**
  * Framed section for the scripted agent demo. Editorial copy on the left, the
- * replayed answer panel on the right.
+ * replayed answer panel on the right. Light scheme keeps the replayed product
+ * panel reading as the real interface.
  */
 export function AgentDemoSection() {
   return (
-    <section
-      id="demo"
-      className="scroll-mt-16 border-b border-border bg-secondary/40"
-    >
-      <div className="mx-auto grid max-w-6xl gap-12 px-6 py-24 sm:py-28 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-14">
+    <Section scheme="light" id="demo" innerClassName="py-24 sm:py-32">
+      <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
         <div className="lg:max-w-md">
-          <p className="mb-3 inline-flex items-center gap-2 font-mono text-xs tracking-wider text-accent uppercase">
-            <span className="h-px w-6 bg-accent" aria-hidden />
-            Watch it think
-          </p>
-          <h2 className="font-heading text-3xl font-semibold tracking-[-0.01em] text-foreground sm:text-[40px] sm:leading-[1.05]">
+          <Eyebrow>How it works</Eyebrow>
+          <h2 className="mt-5 text-[2rem] leading-[1.08] font-light tracking-[-0.04em] text-foreground sm:text-[2.6rem]">
             Ask a real question. Get a verdict.
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-            This is an actual bloxscout exchange, replayed. You ask whether a
-            niche is saturated; the agent scans the live cohort, sizes the
-            demand, and tells you — in plain language — whether there&apos;s room
-            to win.
+          <p className="mt-5 text-[1.0625rem] leading-[1.6] text-foreground/60">
+            An actual bloxscout exchange, replayed. You ask whether a niche is
+            saturated; the agent scans the live cohort, sizes the demand, and
+            tells you — in plain language — whether there&apos;s room to win.
           </p>
-          <ul className="mt-6 space-y-2.5 text-sm text-foreground/85">
+          <ul className="mt-7 space-y-3 border-t border-foreground/10 pt-6 text-[14px] text-foreground/75">
             {[
               "Reads the live cohort, not stale training data",
               "Scores who owns the niche and how much white space is left",
               "Lands on a decision you can act on today",
             ].map((point) => (
               <li key={point} className="flex items-start gap-2.5">
-                <span className="mt-0.5 select-none font-mono text-accent">
-                  ›
+                <span className="mt-px select-none font-mono text-foreground/30">
+                  →
                 </span>
                 {point}
               </li>
@@ -45,6 +40,6 @@ export function AgentDemoSection() {
           <AgentDemo />
         </div>
       </div>
-    </section>
+    </Section>
   );
 }

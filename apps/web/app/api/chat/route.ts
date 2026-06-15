@@ -29,6 +29,7 @@ import {
   appendUserMessage,
   ensureConversation,
 } from "@/lib/agent/store";
+import { getEntitlement } from "@/lib/supabase/account";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +37,9 @@ export const maxDuration = 60;
 
 /** Max agent loop turns — bounds runaway tool-calling. */
 const MAX_TURNS = 6;
+
+/** Tools gated to paid tiers (vision spends model tokens per call). */
+const PAID_TOOLS = new Set(["analyze_icon"]);
 
 interface ChatRequestBody {
   conversationId?: string | null;
@@ -68,6 +72,18 @@ export async function POST(request: NextRequest) {
     // Auth not configured on this deployment — still allow chat to function so
     // the spine is demoable; persistence below will simply no-op.
     userId = "anonymous";
+  }
+
+  // Resolve the tier once so we can gate paid tools (e.g. vision). Best-effort:
+  // any failure (incl. anonymous/no-Supabase) falls back to the free tier.
+  let isPaid = false;
+  try {
+    if (userId !== "anonymous") {
+      const { tier } = await getEntitlement(userId);
+      isPaid = tier !== "free";
+    }
+  } catch {
+    isPaid = false;
   }
 
   let body: ChatRequestBody;
@@ -175,6 +191,20 @@ export async function POST(request: NextRequest) {
             if (!tool) {
               result = { ok: false, error: `Unknown tool: ${tu.name}` };
               isError = true;
+            } else if (PAID_TOOLS.has(tu.name) && !isPaid) {
+              // Paywall: don't spend model tokens for free-tier users. Return a
+              // locked result the widget renders as an upsell, and which the
+              // agent narrates honestly (system prompt covers this).
+              result = {
+                ok: false,
+                locked: true,
+                note: "Icon analysis uses vision and is available on the Pro plan.",
+                universeId: null,
+                name: null,
+                iconUrl: null,
+                traits: null,
+                recommendations: [],
+              };
             } else {
               try {
                 result = await tool.execute(args);

@@ -13,14 +13,26 @@
  * here keyed on the same tool name.
  */
 import * as React from "react";
+import { CompetitorMap } from "@/components/copilot/competitor-map";
+import { IconAnalysis } from "@/components/copilot/icon-analysis";
+import { MonetizationTeardown } from "@/components/copilot/monetization-teardown";
 import { NicheCard } from "@/components/copilot/niche-card";
 import { NicheScan } from "@/components/copilot/niche-scan";
+import { QualityGauge } from "@/components/copilot/quality-gauge";
 import { RankingWidget } from "@/components/copilot/ranking-widget";
+import { RetentionFunnel } from "@/components/copilot/retention-funnel";
+import { RevenueCard } from "@/components/copilot/revenue-card";
 import { RisingList } from "@/components/copilot/rising-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import type {
+  CompetitorMapResult,
+  GameQualityResult,
+  IconAnalysisResult,
+  MonetizationResult,
   NicheAnalysisResult,
   RankingResult,
+  RetentionResult,
+  RevenueResult,
   RisingResult,
   SaturationResult,
 } from "@/lib/agent/tools";
@@ -47,6 +59,24 @@ export const WIDGET_BY_TOOL: Record<string, WidgetRenderer> = {
   analyze_niche: (result) => (
     <NicheScan result={result as NicheAnalysisResult} />
   ),
+  estimate_revenue: (result) => (
+    <RevenueCard result={result as RevenueResult} />
+  ),
+  get_game_quality: (result) => (
+    <QualityGauge result={result as GameQualityResult} />
+  ),
+  teardown_monetization: (result) => (
+    <MonetizationTeardown result={result as MonetizationResult} />
+  ),
+  map_competitors: (result) => (
+    <CompetitorMap result={result as CompetitorMapResult} />
+  ),
+  estimate_retention: (result) => (
+    <RetentionFunnel result={result as RetentionResult} />
+  ),
+  analyze_icon: (result) => (
+    <IconAnalysis result={result as IconAnalysisResult} />
+  ),
 };
 
 /** Human label for the running-tool indicator, keyed by tool name. */
@@ -56,6 +86,12 @@ const RUNNING_LABEL: Record<string, string> = {
   get_genre_saturation: "Scoring genre saturation",
   get_rising_niches: "Scanning rising niches",
   analyze_niche: "Scanning the niche live",
+  estimate_revenue: "Estimating revenue",
+  get_game_quality: "Checking the like-ratio",
+  teardown_monetization: "Tearing down monetization",
+  map_competitors: "Mapping competitors",
+  estimate_retention: "Reading the badge funnel",
+  analyze_icon: "Looking at the icon",
 };
 
 /**

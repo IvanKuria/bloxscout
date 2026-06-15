@@ -8,13 +8,16 @@ import {
   RobloxRateLimitError,
 } from "./errors.js";
 import type {
+  Badge,
   CreatorGame,
   Game,
   GameIcon,
   GameIconSize,
   GamePass,
   GamePlayerCount,
+  GameRecommendation,
   GameSummary,
+  GameVotes,
   Group,
   RobloxUniverseId,
   RobloxUserId,
@@ -47,6 +50,7 @@ export const ROBLOX_ENDPOINTS = {
   users: "https://users.roblox.com",
   groups: "https://groups.roblox.com",
   thumbnails: "https://thumbnails.roblox.com",
+  badges: "https://badges.roblox.com",
 } as const;
 
 export interface RobloxClientOptions {
@@ -282,6 +286,181 @@ export class RobloxClient {
   async getPlayerCounts(universeIds: RobloxUniverseId[]): Promise<GamePlayerCount[]> {
     const games = await this.getGames(universeIds);
     return games.map((g) => ({ universeId: g.id, playing: g.playing, visits: g.visits }));
+  }
+
+  /**
+   * Up/down vote totals per universe via `GET /v1/games/votes?universeIds=...`.
+   * Same per-request id cap as `getGames`, so we chunk transparently at
+   * `GAMES_BATCH_SIZE`. The like-ratio derived from this is the cheapest
+   * quality signal Roblox exposes unauthenticated. Cached on the SLOW bucket —
+   * vote tallies move slowly relative to CCU. Results follow input order;
+   * missing ids are simply absent.
+   */
+  async getGameVotes(universeIds: RobloxUniverseId[]): Promise<GameVotes[]> {
+    if (universeIds.length === 0) return [];
+    const unique = [...new Set(universeIds)];
+    const chunks: number[][] = [];
+    for (let i = 0; i < unique.length; i += GAMES_BATCH_SIZE) {
+      chunks.push(unique.slice(i, i + GAMES_BATCH_SIZE));
+    }
+
+    const byId = new Map<RobloxUniverseId, GameVotes>();
+    for (const chunk of chunks) {
+      const url = new URL("/v1/games/votes", ROBLOX_ENDPOINTS.games);
+      url.searchParams.set("universeIds", chunk.join(","));
+      const data = await this.fetchJson<{
+        data?: Array<{ id?: number; upVotes?: number; downVotes?: number }>;
+      }>(url, {
+        label: "GET /v1/games/votes",
+        ttlSeconds: CACHE_TTL.SLOW,
+        cacheKey: `votes:${chunk
+          .slice()
+          .sort((a, b) => a - b)
+          .join(",")}`,
+      });
+      for (const v of data.data ?? []) {
+        if (typeof v.id !== "number") continue;
+        byId.set(v.id, {
+          universeId: v.id,
+          upVotes: typeof v.upVotes === "number" ? v.upVotes : 0,
+          downVotes: typeof v.downVotes === "number" ? v.downVotes : 0,
+        });
+      }
+    }
+
+    const ordered: GameVotes[] = [];
+    for (const id of universeIds) {
+      const v = byId.get(id);
+      if (v !== undefined) ordered.push(v);
+    }
+    return ordered;
+  }
+
+  /**
+   * Roblox's own "similar games" recommendations for a universe via
+   * `GET /v1/games/recommendations/game/{universeId}?maxRows=N`. Unauthenticated
+   * (confirmed 2026-06). Each entry carries live CCU + vote totals + creator
+   * inline, so this single request yields a full competitor cohort. Cached on
+   * the DEFAULT bucket — the graph shifts on the order of hours, not minutes.
+   * Sponsored rows are dropped (they're ad placements, not true neighbours).
+   */
+  async getRecommendations(
+    universeId: RobloxUniverseId,
+    opts: { maxRows?: number } = {},
+  ): Promise<GameRecommendation[]> {
+    if (!Number.isInteger(universeId) || universeId < 1) {
+      throw new BloxscoutError(
+        "getRecommendations: universeId must be a positive integer",
+        "VALIDATION_ERROR",
+      );
+    }
+    const maxRows = Math.max(1, Math.min(50, Math.round(opts.maxRows ?? 20)));
+    const url = new URL(
+      `/v1/games/recommendations/game/${universeId}`,
+      ROBLOX_ENDPOINTS.games,
+    );
+    url.searchParams.set("maxRows", String(maxRows));
+    const data = await this.fetchJson<{
+      games?: Array<{
+        universeId?: number;
+        name?: string;
+        playerCount?: number;
+        totalUpVotes?: number;
+        totalDownVotes?: number;
+        creatorName?: string;
+        creatorType?: string;
+        genre?: string;
+        canonicalUrlPath?: string;
+        isSponsored?: boolean;
+      }>;
+    }>(url, {
+      label: "GET /v1/games/recommendations/game/{id}",
+      ttlSeconds: CACHE_TTL.DEFAULT,
+      cacheKey: `recommendations:${universeId}:${maxRows}`,
+    });
+
+    const out: GameRecommendation[] = [];
+    for (const g of data.games ?? []) {
+      if (typeof g.universeId !== "number" || g.isSponsored) continue;
+      out.push({
+        universeId: g.universeId,
+        name: g.name ?? "",
+        playerCount: typeof g.playerCount === "number" ? g.playerCount : 0,
+        totalUpVotes: typeof g.totalUpVotes === "number" ? g.totalUpVotes : 0,
+        totalDownVotes: typeof g.totalDownVotes === "number" ? g.totalDownVotes : 0,
+        creatorName: g.creatorName ?? "",
+        creatorType: g.creatorType ?? "",
+        genre: g.genre ?? "",
+        ...(g.canonicalUrlPath ? { canonicalUrlPath: g.canonicalUrlPath } : {}),
+      });
+    }
+    return out;
+  }
+
+  /**
+   * A universe's badges with award statistics via
+   * `GET https://badges.roblox.com/v1/universes/{id}/badges?limit=N`.
+   * Unauthenticated (confirmed 2026-06). `statistics.awardedCount` is embedded
+   * inline, so one request yields a progression funnel — no per-badge stats
+   * call needed. Returns the first page only (cap 100), which covers virtually
+   * every game's badge set. Cached on the SLOW bucket — award counts drift
+   * slowly. Sorted by award count descending so the earliest/most-reached
+   * milestones lead.
+   */
+  async getUniverseBadges(
+    universeId: RobloxUniverseId,
+    opts: { limit?: number } = {},
+  ): Promise<Badge[]> {
+    if (!Number.isInteger(universeId) || universeId < 1) {
+      throw new BloxscoutError(
+        "getUniverseBadges: universeId must be a positive integer",
+        "VALIDATION_ERROR",
+      );
+    }
+    const limit = Math.max(1, Math.min(100, Math.round(opts.limit ?? 100)));
+    const url = new URL(`/v1/universes/${universeId}/badges`, ROBLOX_ENDPOINTS.badges);
+    url.searchParams.set("limit", String(limit));
+    url.searchParams.set("sortOrder", "Asc");
+    const data = await this.fetchJson<{
+      data?: Array<{
+        id?: number;
+        name?: string;
+        enabled?: boolean;
+        created?: string;
+        statistics?: {
+          pastDayAwardedCount?: number;
+          awardedCount?: number;
+          winRatePercentage?: number;
+        };
+      }>;
+    }>(url, {
+      label: "GET /v1/universes/{id}/badges",
+      ttlSeconds: CACHE_TTL.SLOW,
+      cacheKey: `badges:${universeId}:${limit}`,
+    });
+
+    const out: Badge[] = [];
+    for (const b of data.data ?? []) {
+      if (typeof b.id !== "number") continue;
+      out.push({
+        id: b.id,
+        name: b.name ?? "",
+        enabled: b.enabled ?? false,
+        awardedCount:
+          typeof b.statistics?.awardedCount === "number" ? b.statistics.awardedCount : 0,
+        pastDayAwardedCount:
+          typeof b.statistics?.pastDayAwardedCount === "number"
+            ? b.statistics.pastDayAwardedCount
+            : 0,
+        winRate:
+          typeof b.statistics?.winRatePercentage === "number"
+            ? b.statistics.winRatePercentage
+            : 0,
+        created: b.created ?? "",
+      });
+    }
+    out.sort((a, b) => b.awardedCount - a.awardedCount);
+    return out;
   }
 
   /**
