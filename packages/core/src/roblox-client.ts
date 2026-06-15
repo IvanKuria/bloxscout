@@ -8,6 +8,7 @@ import {
   RobloxRateLimitError,
 } from "./errors.js";
 import type {
+  Badge,
   CreatorGame,
   Game,
   GameIcon,
@@ -49,6 +50,7 @@ export const ROBLOX_ENDPOINTS = {
   users: "https://users.roblox.com",
   groups: "https://groups.roblox.com",
   thumbnails: "https://thumbnails.roblox.com",
+  badges: "https://badges.roblox.com",
 } as const;
 
 export interface RobloxClientOptions {
@@ -392,6 +394,72 @@ export class RobloxClient {
         ...(g.canonicalUrlPath ? { canonicalUrlPath: g.canonicalUrlPath } : {}),
       });
     }
+    return out;
+  }
+
+  /**
+   * A universe's badges with award statistics via
+   * `GET https://badges.roblox.com/v1/universes/{id}/badges?limit=N`.
+   * Unauthenticated (confirmed 2026-06). `statistics.awardedCount` is embedded
+   * inline, so one request yields a progression funnel — no per-badge stats
+   * call needed. Returns the first page only (cap 100), which covers virtually
+   * every game's badge set. Cached on the SLOW bucket — award counts drift
+   * slowly. Sorted by award count descending so the earliest/most-reached
+   * milestones lead.
+   */
+  async getUniverseBadges(
+    universeId: RobloxUniverseId,
+    opts: { limit?: number } = {},
+  ): Promise<Badge[]> {
+    if (!Number.isInteger(universeId) || universeId < 1) {
+      throw new BloxscoutError(
+        "getUniverseBadges: universeId must be a positive integer",
+        "VALIDATION_ERROR",
+      );
+    }
+    const limit = Math.max(1, Math.min(100, Math.round(opts.limit ?? 100)));
+    const url = new URL(`/v1/universes/${universeId}/badges`, ROBLOX_ENDPOINTS.badges);
+    url.searchParams.set("limit", String(limit));
+    url.searchParams.set("sortOrder", "Asc");
+    const data = await this.fetchJson<{
+      data?: Array<{
+        id?: number;
+        name?: string;
+        enabled?: boolean;
+        created?: string;
+        statistics?: {
+          pastDayAwardedCount?: number;
+          awardedCount?: number;
+          winRatePercentage?: number;
+        };
+      }>;
+    }>(url, {
+      label: "GET /v1/universes/{id}/badges",
+      ttlSeconds: CACHE_TTL.SLOW,
+      cacheKey: `badges:${universeId}:${limit}`,
+    });
+
+    const out: Badge[] = [];
+    for (const b of data.data ?? []) {
+      if (typeof b.id !== "number") continue;
+      out.push({
+        id: b.id,
+        name: b.name ?? "",
+        enabled: b.enabled ?? false,
+        awardedCount:
+          typeof b.statistics?.awardedCount === "number" ? b.statistics.awardedCount : 0,
+        pastDayAwardedCount:
+          typeof b.statistics?.pastDayAwardedCount === "number"
+            ? b.statistics.pastDayAwardedCount
+            : 0,
+        winRate:
+          typeof b.statistics?.winRatePercentage === "number"
+            ? b.statistics.winRatePercentage
+            : 0,
+        created: b.created ?? "",
+      });
+    }
+    out.sort((a, b) => b.awardedCount - a.awardedCount);
     return out;
   }
 

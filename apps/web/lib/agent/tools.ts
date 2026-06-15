@@ -35,6 +35,8 @@ import { teardownMonetization } from "@/lib/monetization";
 import type { MonetizationResult } from "@/lib/monetization";
 import { analyzeGameQuality } from "@/lib/quality";
 import type { GameQualityResult } from "@/lib/quality";
+import { estimateRetention } from "@/lib/retention";
+import type { RetentionResult } from "@/lib/retention";
 import { estimateRevenue } from "@/lib/revenue";
 import type { RevenueResult } from "@/lib/revenue";
 import { getThumbnails } from "@/lib/thumbnails";
@@ -54,6 +56,7 @@ export type {
   MonetizationStyle,
 } from "@/lib/monetization";
 export type { CompetitorMapResult, CompetitorRow } from "@/lib/competitors";
+export type { RetentionResult, RetentionStep } from "@/lib/retention";
 
 /** A JSON-Schema-ish object the Anthropic SDK accepts as `input_schema`. */
 type JsonSchema = {
@@ -655,6 +658,44 @@ export const COPILOT_TOOLS: CopilotTool[] = [
         universeId:
           typeof input.universeId === "number" ? input.universeId : undefined,
         limit: typeof input.limit === "number" ? input.limit : undefined,
+      });
+    },
+  },
+
+  {
+    def: {
+      name: "estimate_retention",
+      description:
+        "Estimate how well players stick with / progress through a game, using " +
+        "a PROXY built from its milestone badges' award counts (the ratio of " +
+        "awards between sequential milestones ≈ a progression-through funnel). " +
+        "Call this when the user asks about retention, stickiness, drop-off, or " +
+        "how far players get. Pass `gameName` or `universeId`. This is a ROUGH, " +
+        "very-low-confidence proxy that depends on the dev shipping meaningful " +
+        "badges — if a game has none, say so and stress that absence of badges " +
+        "is NOT evidence of poor retention. Never present it as true D1/D7 " +
+        "retention. Renders a retention funnel widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          gameName: {
+            type: "string",
+            description: "A game's name (e.g. 'Blox Fruits'). Resolved live.",
+          },
+          universeId: {
+            type: "integer",
+            description: "A game's Roblox universe id (alternative to gameName).",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<RetentionResult> {
+      return estimateRetention({
+        gameName:
+          typeof input.gameName === "string" ? input.gameName : undefined,
+        universeId:
+          typeof input.universeId === "number" ? input.universeId : undefined,
       });
     },
   },

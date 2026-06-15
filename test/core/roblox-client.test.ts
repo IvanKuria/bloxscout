@@ -611,6 +611,57 @@ describe("RobloxClient.getRecommendations", () => {
   });
 });
 
+describe("RobloxClient.getUniverseBadges", () => {
+  let agent: MockAgent;
+  let client: RobloxClient;
+
+  beforeEach(() => {
+    ({ client, agent } = makeClient());
+  });
+
+  afterEach(async () => {
+    await agent.close();
+  });
+
+  it("flattens embedded statistics and sorts by awardedCount desc", async () => {
+    agent
+      .get("https://badges.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/v1/universes/1/badges") })
+      .reply(200, {
+        data: [
+          {
+            id: 10,
+            name: "Third Sea",
+            enabled: true,
+            created: "2022-01-01T00:00:00Z",
+            statistics: { pastDayAwardedCount: 5, awardedCount: 100, winRatePercentage: 0.01 },
+          },
+          {
+            id: 11,
+            name: "Second Sea",
+            enabled: true,
+            created: "2022-01-01T00:00:00Z",
+            statistics: { pastDayAwardedCount: 9, awardedCount: 300, winRatePercentage: 0.02 },
+          },
+        ],
+      });
+
+    const badges = await client.getUniverseBadges(1);
+    expect(badges.map((b) => b.name)).toEqual(["Second Sea", "Third Sea"]);
+    expect(badges[0]).toMatchObject({ awardedCount: 300, winRate: 0.02 });
+  });
+
+  it("rejects a non-positive universeId and defaults missing stats to 0", async () => {
+    await expect(client.getUniverseBadges(0)).rejects.toBeInstanceOf(BloxscoutError);
+    agent
+      .get("https://badges.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/v1/universes/7/badges") })
+      .reply(200, { data: [{ id: 1, name: "X", enabled: true }] });
+    const badges = await client.getUniverseBadges(7);
+    expect(badges[0]).toMatchObject({ awardedCount: 0, winRate: 0, pastDayAwardedCount: 0 });
+  });
+});
+
 // -----------------------------------------------------------------------------
 // Fixtures
 // -----------------------------------------------------------------------------

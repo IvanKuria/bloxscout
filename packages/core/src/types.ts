@@ -131,6 +131,27 @@ export interface GameRecommendation {
 }
 
 /**
+ * A game badge with its award statistics.
+ *
+ * Verified shape for `GET https://badges.roblox.com/v1/universes/{id}/badges`
+ * (unauthenticated, 2026-06) — `{ data: [...] }`. `statistics.awardedCount` is
+ * embedded inline, so a single call yields a progression/engagement funnel:
+ * badges are dev-defined milestones, and the ratio of awards between
+ * sequential milestones approximates a progression-through rate. `winRate` is
+ * Roblox's own awarded-share figure (a 0..1 fraction).
+ */
+export interface Badge {
+  id: number;
+  name: string;
+  enabled: boolean;
+  awardedCount: number;
+  pastDayAwardedCount: number;
+  /** Roblox's "win rate" — share of players who earned it, as a 0..1 fraction. */
+  winRate: number;
+  created: string;
+}
+
+/**
  * User profile.
  *
  * Verified shape (2026-05) for `GET https://users.roblox.com/v1/users/{userId}`.

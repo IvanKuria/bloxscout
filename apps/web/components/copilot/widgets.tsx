@@ -19,6 +19,7 @@ import { NicheCard } from "@/components/copilot/niche-card";
 import { NicheScan } from "@/components/copilot/niche-scan";
 import { QualityGauge } from "@/components/copilot/quality-gauge";
 import { RankingWidget } from "@/components/copilot/ranking-widget";
+import { RetentionFunnel } from "@/components/copilot/retention-funnel";
 import { RevenueCard } from "@/components/copilot/revenue-card";
 import { RisingList } from "@/components/copilot/rising-list";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,6 +29,7 @@ import type {
   MonetizationResult,
   NicheAnalysisResult,
   RankingResult,
+  RetentionResult,
   RevenueResult,
   RisingResult,
   SaturationResult,
@@ -67,6 +69,9 @@ export const WIDGET_BY_TOOL: Record<string, WidgetRenderer> = {
   map_competitors: (result) => (
     <CompetitorMap result={result as CompetitorMapResult} />
   ),
+  estimate_retention: (result) => (
+    <RetentionFunnel result={result as RetentionResult} />
+  ),
 };
 
 /** Human label for the running-tool indicator, keyed by tool name. */
@@ -80,6 +85,7 @@ const RUNNING_LABEL: Record<string, string> = {
   get_game_quality: "Checking the like-ratio",
   teardown_monetization: "Tearing down monetization",
   map_competitors: "Mapping competitors",
+  estimate_retention: "Reading the badge funnel",
 };
 
 /**
