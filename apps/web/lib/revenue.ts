@@ -28,6 +28,7 @@ import type { GenreRevenueEntry } from "@bloxscout/core/hosted-format";
 import { RobloxClient } from "@bloxscout/core/roblox-client";
 import { getGenreRevenue } from "@/lib/data";
 import { genreSlug } from "@/lib/format";
+import { pickGameMatch } from "@/lib/resolve-game";
 import { getThumbnails } from "@/lib/thumbnails";
 
 const roblox = new RobloxClient();
@@ -141,8 +142,7 @@ async function resolveGame(
   } catch {
     return null;
   }
-  const m =
-    matches.find((x) => Number.isFinite(x.playerCount)) ?? matches[0];
+  const m = pickGameMatch(q, matches);
   if (!m) return null;
   try {
     const [g] = await roblox.getGames([m.universeId]);

@@ -17,6 +17,7 @@ import { cache } from "react";
 import type Anthropic from "@anthropic-ai/sdk";
 import { RobloxClient } from "@bloxscout/core/roblox-client";
 import { COPILOT_MODEL, getAnthropic } from "@/lib/agent/anthropic";
+import { pickGameMatch } from "@/lib/resolve-game";
 
 const roblox = new RobloxClient();
 
@@ -113,7 +114,7 @@ async function resolveTarget(input: IconAnalysisInput): Promise<Target | null> {
   if (!q) return null;
   try {
     const matches = await roblox.searchGames(q, { limit: 5 });
-    const m = matches[0];
+    const m = pickGameMatch(q, matches);
     if (!m) return null;
     return { universeId: m.universeId, name: m.name };
   } catch {
