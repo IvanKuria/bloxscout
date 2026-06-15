@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * RankingWidget — inline interactive ranking table for `get_trending_games`
+ * RankingWidget · inline interactive ranking table for `get_trending_games`
  * and `get_breakout_games`. A TanStack-sortable table on a clean light surface:
  * each game shows its icon + name, live players (with a subtle accent bar),
  * 7-day growth, and the 24h anomaly z-score. Numbers are tabular. Renders an
@@ -154,7 +154,7 @@ export function RankingWidget({ result }: { result: RankingResult }) {
       <WidgetShell result={result}>
         <p className="px-4 py-6 text-center text-xs text-muted-foreground">
           {result.note ??
-            "No rows yet — rankings are still computing as snapshots accumulate."}
+            "No rows yet. Rankings are still computing as snapshots accumulate."}
         </p>
       </WidgetShell>
     );

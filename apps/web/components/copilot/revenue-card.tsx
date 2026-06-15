@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * RevenueCard — inline widget for `estimate_revenue`.
+ * RevenueCard · inline widget for `estimate_revenue`.
  *
  * Three layouts off one result: a single-game headline (icon + monthly USD +
  * per-1k-CCU efficiency), a focused-genre aggregate, or a top-earners
@@ -53,7 +53,7 @@ function GameView({ game }: { game: RevenueGame }) {
       <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
         <Stat label="Live CCU" value={compact(game.playing)} />
         <Stat label="Est. Robux/mo" value={compact(game.estMonthlyRobux)} />
-        <Stat label="Genre" value={game.genre ?? "—"} />
+        <Stat label="Genre" value={game.genre ?? "·"} />
       </div>
     </div>
   );
@@ -99,7 +99,7 @@ export function RevenueCard({ result }: { result: RevenueResult }) {
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="recon-pulse inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-accent"
             aria-hidden
           />
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">

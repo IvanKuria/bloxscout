@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * NicheCard — inline saturation widget for `get_genre_saturation`.
+ * NicheCard · inline saturation widget for `get_genre_saturation`.
  *
  * A light card with a Recharts radial gauge (0-100 saturation), the
  * concentration read-outs, and a compact leaderboard of the most-saturated
@@ -26,8 +26,8 @@ function scoreColor(score: number | null, whiteSpace: boolean): string {
 
 function verdict(g: NicheGauge): string {
   if (g.saturationScore === null) return "Not enough data to score yet";
-  if (g.whiteSpace) return "Under-served — room to enter";
-  if (g.saturationScore >= 70) return "Crowded — hard to break in";
+  if (g.whiteSpace) return "Under-served · room to enter";
+  if (g.saturationScore >= 70) return "Crowded · hard to break in";
   if (g.saturationScore >= 45) return "Competitive";
   return "Open";
 }
@@ -63,7 +63,7 @@ function Gauge({ gauge }: { gauge: NicheGauge }) {
       </ResponsiveContainer>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="tabular font-heading text-3xl font-semibold leading-none text-foreground">
-          {gauge.saturationScore === null ? "—" : Math.round(score)}
+          {gauge.saturationScore === null ? "·" : Math.round(score)}
         </span>
         <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
           / 100
@@ -146,7 +146,7 @@ function Leaderboard({ niches }: { niches: NicheGauge[] }) {
               />
             </div>
             <span className="tabular w-10 shrink-0 text-right text-sm font-medium text-foreground">
-              {n.saturationScore === null ? "—" : Math.round(score)}
+              {n.saturationScore === null ? "·" : Math.round(score)}
             </span>
             {n.whiteSpace ? (
               <span className="shrink-0 rounded-md bg-positive/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-positive">

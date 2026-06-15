@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * RisingList — inline opportunity widget for `get_rising_niches`. A compact
+ * RisingList · inline opportunity widget for `get_rising_niches`. A compact
  * ranked list of rising genres with their momentum score and growth, on a
  * clean light surface; the score bar is the single accent.
  */

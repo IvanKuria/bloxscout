@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * QualityGauge — inline widget for `get_game_quality`. A radial like-ratio gauge
+ * QualityGauge · inline widget for `get_game_quality`. A radial like-ratio gauge
  * (loved → mixed → poor) with the raw up/down counts. Mirrors the NicheCard
  * gauge so the agent's widgets share a visual language. The accent flips to the
  * positive colour for a "loved" game.
@@ -11,7 +11,7 @@ import { GameAvatar } from "@/components/copilot/game-avatar";
 import type { GameQualityResult, QualityBand } from "@/lib/agent/tools";
 import { compact } from "@/lib/format";
 
-const ACCENT = "#e2231a";
+const ACCENT = "#ff2d87";
 const POSITIVE = "#1faa6b";
 const NEUTRAL = "#c79a1e";
 const TRACK = "#ececec";
@@ -56,7 +56,7 @@ function Gauge({ result }: { result: GameQualityResult }) {
       </ResponsiveContainer>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="tabular font-heading text-3xl font-semibold leading-none text-foreground">
-          {result.likeRatio === null ? "—" : `${pct}%`}
+          {result.likeRatio === null ? "·" : `${pct}%`}
         </span>
         <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
           liked
@@ -84,11 +84,11 @@ export function QualityGauge({ result }: { result: GameQualityResult }) {
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="recon-pulse inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-accent"
             aria-hidden
           />
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">
-            {result.name ?? "Game"} — quality
+            {result.name ?? "Game"} · quality
           </span>
         </div>
         <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">

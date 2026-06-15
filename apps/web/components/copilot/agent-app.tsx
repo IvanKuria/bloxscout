@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * AgentApp — the logged-in AI agent surface: a conversation sidebar + the chat
+ * AgentApp · the logged-in AI agent surface: a conversation sidebar + the chat
  * thread, ChatGPT/Claude-style.
  *
  * Owns the source of truth for the thread list and the active selection so the
@@ -37,13 +37,13 @@ export function AgentApp() {
   const [loadingList, setLoadingList] = React.useState(true);
   // `activeId` drives the sidebar highlight + toolbar title (set on both select
   // AND on a fresh chat's first-send creation). `hydrateId` is what the MOUNTED
-  // thread loads from — set ONLY when opening a past thread, never on creation,
+  // thread loads from · set ONLY when opening a past thread, never on creation,
   // so creating a conversation mid-stream doesn't remount/re-hydrate (which
   // would wipe the in-flight messages). The thread tracks its own id internally.
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [hydrateId, setHydrateId] = React.useState<string | null>(null);
   // A monotonically-bumped key forces the thread to remount for "New chat" /
-  // when switching threads — but NOT when a conversation is just created.
+  // when switching threads · but NOT when a conversation is just created.
   const [threadKey, setThreadKey] = React.useState(0);
   const [collapsed, setCollapsed] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -85,7 +85,7 @@ export function AgentApp() {
     setMobileOpen(false);
   }, []);
 
-  // A fresh thread got its server id on first send — splice it in + select it.
+  // A fresh thread got its server id on first send · splice it in + select it.
   const handleCreated = React.useCallback((id: string) => {
     setActiveId(id);
     setConversations((prev) =>

@@ -7,7 +7,7 @@ import { isCopilotPreview } from "@/lib/preview";
 import { createClient } from "@/lib/supabase/server";
 
 // The gated area is always request-time (per-user, cookie-bound). Never
-// prerender it — that would also try to read auth env at build time.
+// prerender it · that would also try to read auth env at build time.
 export const dynamic = "force-dynamic";
 
 export default async function AppLayout({
@@ -32,7 +32,7 @@ export default async function AppLayout({
       email = user.email ?? null;
     }
   } catch {
-    // Auth not configured on this deployment — fall through to the gate below.
+    // Auth not configured on this deployment · fall through to the gate below.
   }
   if (!authed && !preview) redirect("/login?redirectedFrom=/app");
 

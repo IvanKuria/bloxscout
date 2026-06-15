@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 const TIER_ORDER: Tier[] = ["free", "pro", "studio"];
 
 function fmtDate(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "·";
   return new Date(iso).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -67,7 +67,7 @@ export default async function AccountPage() {
               Signed in as
             </span>
             <span className="break-all text-sm text-foreground">
-              {user.email ?? "—"}
+              {user.email ?? "·"}
             </span>
           </div>
           <div className="flex flex-col gap-1.5 bg-card p-5">
@@ -90,7 +90,7 @@ export default async function AccountPage() {
               {ent.cancelAtPeriodEnd ? "Cancels on" : "Renews on"}
             </span>
             <span className="tabular text-sm text-foreground">
-              {isPaid ? fmtDate(ent.currentPeriodEnd) : "—"}
+              {isPaid ? fmtDate(ent.currentPeriodEnd) : "·"}
             </span>
           </div>
         </div>
@@ -164,12 +164,12 @@ export default async function AccountPage() {
                       <UpgradeButton
                         tier={t as Exclude<Tier, "free">}
                         interval="monthly"
-                        label={`Upgrade — ${p.priceMonthly}/mo`}
+                        label={`Upgrade · ${p.priceMonthly}/mo`}
                       />
                       <UpgradeButton
                         tier={t as Exclude<Tier, "free">}
                         interval="yearly"
-                        label={`Annual — ${p.priceYearly}/yr`}
+                        label={`Annual · ${p.priceYearly}/yr`}
                         variant="outline"
                       />
                     </>

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * The tool→widget map — the generative-UI contract.
+ * The tool→widget map · the generative-UI contract.
  *
  * `WIDGET_BY_TOOL` maps a copilot tool name (`lib/agent/tools.ts`) to a
  * recon-themed React component. When a `tool-result` arrives over the stream,

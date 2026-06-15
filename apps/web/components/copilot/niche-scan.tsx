@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * NicheScan — inline widget for `analyze_niche`.
+ * NicheScan · inline widget for `analyze_niche`.
  *
  * A LIVE niche competition scan: the verdict (open / contested / locked /
  * thin), the headline numbers (games, total CCU, top-1/top-3 dominance), and a
- * leaderboard of the matched games — each with its icon, a one-line
+ * leaderboard of the matched games · each with its icon, a one-line
  * description, and its share of the niche's players. Light surface, hairline
  * borders, one red accent; the verdict tone is the only color signal.
  */
@@ -13,22 +13,25 @@ import Link from "next/link";
 import type { NicheAnalysisResult, NicheGameRow, NicheVerdict } from "@/lib/agent/tools";
 import { compact, int, slugify } from "@/lib/format";
 import { GameAvatar } from "@/components/copilot/game-avatar";
+import { cn } from "@/lib/utils";
 
 const VERDICT: Record<
   NicheVerdict,
   { label: string; tone: "good" | "warn" | "bad" | "muted" }
 > = {
-  open: { label: "Open — room to win", tone: "good" },
-  contested: { label: "Contested — a few big players", tone: "warn" },
-  locked: { label: "Locked up — the leader owns it", tone: "bad" },
-  thin: { label: "Thin market — little proven demand", tone: "muted" },
+  open: { label: "Open · room to win", tone: "good" },
+  contested: { label: "Contested · a few big players", tone: "warn" },
+  locked: { label: "Locked up · the leader owns it", tone: "bad" },
+  thin: { label: "Thin market · little proven demand", tone: "muted" },
 };
 
-const TONE_CLASS: Record<string, string> = {
-  good: "text-positive",
-  warn: "text-foreground",
-  bad: "text-accent",
-  muted: "text-muted-foreground",
+// Verdict chip colours — green when there's room, magenta when it's harder,
+// neutral when the market is thin.
+const TONE_CHIP: Record<string, string> = {
+  good: "border-positive/30 bg-positive/10 text-positive",
+  warn: "border-accent/25 bg-accent/[0.08] text-accent",
+  bad: "border-accent/25 bg-accent/[0.08] text-accent",
+  muted: "border-border bg-muted-surface text-muted-foreground",
 };
 
 function pct(n: number): string {
@@ -37,11 +40,11 @@ function pct(n: number): string {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+    <div className="bg-card px-3 py-2.5">
+      <span className="block font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
         {label}
       </span>
-      <span className="tabular text-sm font-medium text-foreground">
+      <span className="tabular mt-1 block text-sm font-medium text-foreground">
         {value}
       </span>
     </div>
@@ -108,15 +111,22 @@ export function NicheScan({ result }: { result: NicheAnalysisResult }) {
       {result.ok ? (
         <>
           <div className="flex flex-col gap-3 px-4 py-4">
-            <span className="flex items-center gap-2 text-sm font-medium">
-              <span className={TONE_CLASS[meta.tone]}>{meta.label}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-md border px-2.5 py-1 text-[13px] font-medium",
+                  TONE_CHIP[meta.tone],
+                )}
+              >
+                {meta.label}
+              </span>
               {result.whiteSpace ? (
-                <span className="rounded-md bg-positive/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-positive">
+                <span className="rounded-md border border-positive/30 bg-positive/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-positive">
                   White space
                 </span>
               ) : null}
-            </span>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
+            </div>
+            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4">
               <Stat label="Live games" value={int(result.gameCount)} />
               <Stat label="Total CCU" value={compact(result.totalPlaying)} />
               <Stat label="Top-1 share" value={pct(result.top1Share)} />

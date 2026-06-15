@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Conversation sidebar for the AI agent — ChatGPT/Claude-style.
+ * Conversation sidebar for the AI agent · ChatGPT/Claude-style.
  *
  * Owns the thread list (title + relative time), the active selection, "New
  * chat", and per-thread rename + delete via the `/api/conversations` routes.

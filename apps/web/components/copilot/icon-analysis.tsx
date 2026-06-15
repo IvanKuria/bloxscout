@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * IconAnalysis — inline widget for `analyze_icon` (the vision tool). Shows the
+ * IconAnalysis · inline widget for `analyze_icon` (the vision tool). Shows the
  * game icon, the extracted art-direction traits as chips, and concrete
  * recommendations. Renders an upsell state when a free-tier user hits this paid
  * tool (`result.locked`), and an honest empty state otherwise.
@@ -37,7 +37,7 @@ function Traits({ traits }: { traits: IconTraits }) {
         value={
           traits.palette.length
             ? traits.palette.map((c) => <Chip key={c}>{c}</Chip>)
-            : <span className="text-xs text-muted-foreground">—</span>
+            : <span className="text-xs text-muted-foreground">·</span>
         }
       />
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -62,11 +62,11 @@ export function IconAnalysis({ result }: { result: IconAnalysisResult }) {
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="recon-pulse inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-accent"
             aria-hidden
           />
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">
-            {result.name ?? "Game"} — icon analysis
+            {result.name ?? "Game"} · icon analysis
           </span>
         </div>
         <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">

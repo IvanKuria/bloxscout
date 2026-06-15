@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * CompetitorMap — inline widget for `map_competitors`. A ranked table of the
+ * CompetitorMap · inline widget for `map_competitors`. A ranked table of the
  * games Roblox's own recommendation graph treats as adjacent to the anchor,
  * each with live CCU and a like-ratio chip. The CCU bar is the single accent.
  */
@@ -41,7 +41,7 @@ function Row({ row, max }: { row: CompetitorRow; max: number }) {
           {compact(row.playing)}
         </span>
         <span className={`tabular text-xs ${ratioTone(row.likeRatio)}`}>
-          {row.likeRatio === null ? "—" : `${Math.round(row.likeRatio * 100)}% liked`}
+          {row.likeRatio === null ? "·" : `${Math.round(row.likeRatio * 100)}% liked`}
         </span>
       </div>
     </li>
@@ -55,7 +55,7 @@ export function CompetitorMap({ result }: { result: CompetitorMapResult }) {
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="recon-pulse inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-accent"
             aria-hidden
           />
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">

@@ -10,12 +10,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Per-user, cookie-bound, model-backed — always request-time.
+// Per-user, cookie-bound, model-backed · always request-time.
 export const dynamic = "force-dynamic";
 
 export default async function AgentPage() {
   // Defense in depth: the layout + proxy gate this, re-check at the source.
-  // redirect() throws (NEXT_REDIRECT) — keep it OUTSIDE the try/catch.
+  // redirect() throws (NEXT_REDIRECT) · keep it OUTSIDE the try/catch.
   const preview = isCopilotPreview();
   let authed = false;
   try {
@@ -25,7 +25,7 @@ export default async function AgentPage() {
     } = await supabase.auth.getUser();
     if (user) authed = true;
   } catch {
-    // Auth not configured — fall through to the gate below.
+    // Auth not configured · fall through to the gate below.
   }
   if (!authed && !preview) redirect("/login?redirectedFrom=/app/copilot");
 

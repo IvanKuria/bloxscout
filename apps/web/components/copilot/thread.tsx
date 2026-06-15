@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * The AI agent's chat thread — light, airy, production-grade.
+ * The AI agent's chat thread · light, airy, production-grade.
  *
  * Owns one conversation's turns in React state and streams via
  * `lib/agent/chat-client.ts` (our NDJSON protocol over `/api/chat`). The data
  * widgets (rendered inline from the tool→widget map) are the visual texture;
  * everything else stays clean white surface + hairline borders + one red accent.
  *
- * Assistant prose renders through <Streamdown> (real markdown — no raw `**`);
+ * Assistant prose renders through <Streamdown> (real markdown · no raw `**`);
  * user prose is plain. On open it hydrates a saved thread (text + widgets) from
  * `/api/conversations/[id]`, and reports a newly-created thread id + first-line
  * title up to the sidebar via callbacks.
@@ -419,7 +419,7 @@ export function CopilotThread({
           controller.signal,
         );
       } catch {
-        // AbortError (Stop pressed) — clear the running indicator, keep partials.
+        // AbortError (Stop pressed) · clear the running indicator, keep partials.
         updateAssistant(assistantId, (t) => ({ ...t, runningTool: null }));
       } finally {
         if (abortRef.current === controller) abortRef.current = null;

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * RetentionFunnel — inline widget for `estimate_retention`. A descending
+ * RetentionFunnel · inline widget for `estimate_retention`. A descending
  * milestone funnel from badge award counts: each bar is that milestone's share
  * of the most-reached badge (progression-through), with the awards-as-%-of-
  * visits read-out where visits are known. A persistent very-low-confidence band
@@ -47,11 +47,11 @@ export function RetentionFunnel({ result }: { result: RetentionResult }) {
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="recon-pulse inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-accent"
             aria-hidden
           />
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">
-            {result.name ?? "Game"} — progression
+            {result.name ?? "Game"} · progression
           </span>
         </div>
         <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
@@ -86,7 +86,7 @@ export function RetentionFunnel({ result }: { result: RetentionResult }) {
         </span>
         <p className="text-xs leading-relaxed text-muted-foreground">
           {result.ok
-            ? "Proxy from dev-defined badge milestones — not true D1/D7 retention."
+            ? "Proxy from dev-defined badge milestones, not true D1/D7 retention."
             : (result.note ??
               "Badge-based proxy unavailable; absence of badges ≠ poor retention.")}
         </p>

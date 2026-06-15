@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * MonetizationTeardown — inline widget for `teardown_monetization`. Shows a
+ * MonetizationTeardown · inline widget for `teardown_monetization`. Shows a
  * game's gamepass pricing ladder (sorted high→low) plus the headline style and
  * price spread. Robux prices use the tabular numerals + an R$ marker.
  */
@@ -46,11 +46,11 @@ export function MonetizationTeardown({ result }: { result: MonetizationResult })
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="recon-pulse inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-accent"
             aria-hidden
           />
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">
-            {result.name ?? "Game"} — monetization
+            {result.name ?? "Game"} · monetization
           </span>
         </div>
         <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
@@ -69,7 +69,7 @@ export function MonetizationTeardown({ result }: { result: MonetizationResult })
                 label="Range"
                 value={
                   result.priceMin === null ? (
-                    "—"
+                    "·"
                   ) : (
                     <span className="tabular">
                       {int(result.priceMin)}–{int(result.priceMax ?? result.priceMin)}{" "}
