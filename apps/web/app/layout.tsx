@@ -1,30 +1,33 @@
 import type { Metadata } from "next";
-import { Archivo, Geist, Geist_Mono } from "next/font/google";
+import { Host_Grotesk, Azeret_Mono, Aleo } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { OrganizationJsonLd } from "@/components/seo/json-ld";
 import { site } from "@/lib/site";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Primary face — a refined, low-contrast grotesque. Headings run light (300);
+// body weights 300–600. Twenty.com's signature type voice.
+const hostGrotesk = Host_Grotesk({
+  variable: "--font-host-grotesk",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
   display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Mono — labels, buttons, numerics. Used uppercase for UI chrome.
+const azeretMono = Azeret_Mono({
+  variable: "--font-azeret-mono",
   subsets: ["latin"],
+  weight: ["300", "500"],
   display: "swap",
 });
 
-// Display face for headings / report titles — a condensed grotesque that gives
-// the data pages their sharp "field-report" character without losing the
-// engineered feel of the mono numerics.
-const archivo = Archivo({
-  variable: "--font-archivo",
+// Editorial serif accent — sparing display moments (Aleo light).
+const aleo = Aleo({
+  variable: "--font-aleo",
   subsets: ["latin"],
+  weight: ["300", "400"],
   display: "swap",
-  axes: ["wdth"],
 });
 
 export const metadata: Metadata = {
@@ -88,7 +91,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} h-full antialiased`}
+      className={`${hostGrotesk.variable} ${azeretMono.variable} ${aleo.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <OrganizationJsonLd />

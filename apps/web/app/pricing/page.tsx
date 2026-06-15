@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { SiteHeader } from "@/components/sections/site-header";
 import { SiteFooter } from "@/components/sections/site-footer";
 import { PricingTiers } from "@/components/sections/pricing-tiers";
+import { Section, Eyebrow } from "@/components/sections/section";
+import { CtaLink } from "@/components/sections/cta-link";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -46,83 +47,68 @@ export default function PricingPage() {
       <SiteHeader />
       <main className="flex-1">
         {/* Hero */}
-        <section className="relative overflow-hidden border-b border-border bg-background">
+        <section
+          data-scheme="light"
+          className="relative overflow-hidden bg-background"
+        >
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(110%_70%_at_50%_-10%,rgba(226,35,26,0.06),transparent_60%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(110%_70%_at_50%_-15%,rgba(28,28,28,0.05),transparent_60%)]"
           />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-50 [background-image:linear-gradient(to_right,rgba(10,10,10,0.025)_1px,transparent_1px),linear-gradient(to_bottom,rgba(10,10,10,0.025)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(80%_60%_at_50%_0%,black,transparent_75%)]"
-          />
-
-          <div className="relative mx-auto max-w-6xl px-6 pt-20 pb-14 sm:pt-24 sm:pb-16">
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="mb-4 inline-flex items-center justify-center gap-2 font-mono text-xs tracking-[0.18em] text-accent uppercase">
-                <span className="h-px w-6 bg-accent" aria-hidden />
-                Pricing
-                <span className="h-px w-6 bg-accent" aria-hidden />
-              </p>
-              <h1 className="font-heading text-4xl font-semibold tracking-[-0.02em] text-foreground sm:text-[56px] sm:leading-[1.03]">
-                Priced to pay for itself.
-              </h1>
-              <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-                One winning idea is worth more than a year of bloxscout. Start
-                free, then upgrade when you want the agent watching the whole
-                Roblox economy for you.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Tiers */}
-        <section className="border-b border-border bg-secondary/40">
-          <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-            <PricingTiers />
-            <p className="mt-10 text-center font-mono text-xs text-muted-foreground">
-              Paid plans complete checkout after you sign in. Prices in USD ·
-              cancel anytime.
+          <div className="relative mx-auto max-w-3xl px-6 pt-24 pb-16 text-center sm:pt-28">
+            <Eyebrow className="justify-center">Pricing</Eyebrow>
+            <h1 className="mt-6 text-[2.75rem] leading-[1.04] font-light tracking-[-0.04em] text-foreground sm:text-[3.5rem]">
+              Priced to pay for itself.
+            </h1>
+            <p className="mx-auto mt-6 max-w-xl text-[1.0625rem] leading-[1.6] text-foreground/60">
+              One winning idea is worth more than a year of bloxscout. Start
+              free, then upgrade when you want the agent watching the whole
+              Roblox economy for you.
             </p>
           </div>
         </section>
 
-        {/* FAQ */}
-        <section className="border-b border-border bg-background">
-          <div className="mx-auto max-w-3xl px-6 py-20 sm:py-24">
-            <h2 className="mb-10 font-heading text-2xl font-semibold tracking-[-0.01em] text-foreground sm:text-3xl">
-              Pricing questions.
-            </h2>
-            <dl className="divide-y divide-border">
-              {FAQ.map((item) => (
-                <div key={item.q} className="py-6 first:pt-0">
-                  <dt className="font-heading text-base font-medium text-foreground">
-                    {item.q}
-                  </dt>
-                  <dd className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
-                    {item.a}
-                  </dd>
-                </div>
-              ))}
-            </dl>
+        {/* Tiers */}
+        <Section scheme="muted" innerClassName="py-20 sm:py-24">
+          <PricingTiers />
+          <p className="mt-10 text-center font-mono text-[11px] tracking-[0.04em] text-foreground/45">
+            Paid plans complete checkout after you sign in. Prices in USD ·
+            cancel anytime.
+          </p>
+        </Section>
 
-            <div className="mt-12 flex flex-col items-start gap-4 rounded-2xl border border-border bg-secondary/50 p-7 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="font-heading text-lg font-semibold text-foreground">
-                  Still deciding? Start on Free.
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Ask the agent a real question in under a minute.
-                </p>
+        {/* FAQ */}
+        <Section scheme="light" innerClassName="max-w-3xl py-20 sm:py-24">
+          <h2 className="mb-10 text-[1.75rem] font-light tracking-[-0.04em] text-foreground sm:text-[2.25rem]">
+            Pricing questions.
+          </h2>
+          <dl className="divide-y divide-foreground/10 border-t border-foreground/10">
+            {FAQ.map((item) => (
+              <div key={item.q} className="py-7">
+                <dt className="text-[16px] font-normal tracking-[-0.01em] text-foreground">
+                  {item.q}
+                </dt>
+                <dd className="mt-2.5 text-[14.5px] leading-relaxed text-foreground/60">
+                  {item.a}
+                </dd>
               </div>
-              <Link
-                href="/signup"
-                className="inline-flex shrink-0 items-center rounded-xl bg-accent px-5 py-3 text-sm font-medium text-accent-foreground shadow-[0_10px_24px_-12px_rgba(226,35,26,0.7)] transition-colors hover:bg-accent-hover"
-              >
-                Start free
-              </Link>
+            ))}
+          </dl>
+
+          <div className="mt-14 flex flex-col items-start gap-5 rounded-lg border border-foreground/12 bg-muted-surface p-8 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-lg font-light tracking-[-0.02em] text-foreground">
+                Still deciding? Start on Free.
+              </p>
+              <p className="mt-1.5 text-[13.5px] text-foreground/55">
+                Ask the agent a real question in under a minute.
+              </p>
             </div>
+            <CtaLink href="/signup" className="shrink-0">
+              Start free
+            </CtaLink>
           </div>
-        </section>
+        </Section>
       </main>
       <SiteFooter />
     </>

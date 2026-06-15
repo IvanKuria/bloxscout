@@ -28,10 +28,11 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-archivo);
-  /* Recon console palette — dark data-surface tokens used by the
+  --font-sans: var(--font-host-grotesk);
+  --font-mono: var(--font-azeret-mono);
+  --font-serif: var(--font-aleo);
+  --font-heading: var(--font-host-grotesk);
+  /* Recon console palette — neutral data-surface tokens used by the
      stat panels, sparklines and live counters on the data pages. */
   --color-console: var(--console);
   --color-console-foreground: var(--console-foreground);
@@ -40,49 +41,54 @@
   --color-console-grid: var(--console-grid);
   --color-positive: var(--positive);
   --color-negative: var(--negative);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 8px);
 }
 
 :root {
-  /* Light & airy base. Near-white canvas, near-black ink, hairline borders,
-     soft off-white panels; the brand red is a sparing accent only. */
-  --background: #ffffff;
-  --foreground: #14151a;
-  --muted: #6b7280;
-  --muted-foreground: #6b7280;
-  --muted-surface: #f6f7f8;
-  --border: #ececee;
-  --input: #e4e5e8;
-  --ring: #e2231a;
-  --accent: #e2231a;
-  --accent-foreground: #ffffff;
-  --accent-hover: #c41e16;
-  --card: #ffffff;
-  --card-foreground: #14151a;
-  --popover: #ffffff;
-  --popover-foreground: #14151a;
-  --primary: #14151a;
-  --primary-foreground: #ffffff;
-  --secondary: #f6f7f8;
-  --secondary-foreground: #14151a;
-  --destructive: #e2231a;
-  --destructive-foreground: #ffffff;
-  --radius: 0.75rem;
+  /* NEAR-MONOCHROME. Charcoal ink on white, hairline charcoal borders, soft
+     off-white panels. Text hierarchy is built from charcoal opacity. No brand
+     red anywhere — the "accent" is charcoal ink. */
+  --ink: 28 28 28; /* #1c1c1c as space-separated RGB for opacity utilities */
 
-  /* "console" tokens were the old dark data-surface — now remapped LIGHT so
-     no surface renders dark. They read as a soft elevated panel on white.
-     (Components are being re-skinned to plain light classes; this is the
-     safety net so nothing is a black hole in the meantime.) */
-  --console: #fbfbfc;
-  --console-foreground: #14151a;
-  --console-muted: #6b7280;
-  --console-border: #ececee;
-  --console-grid: rgba(20, 21, 26, 0.035);
-  --positive: #15a06a;
-  --negative: #e2231a;
+  --background: #ffffff;
+  --foreground: #1c1c1c;
+  --muted: rgba(28, 28, 28, 0.6);
+  --muted-foreground: rgba(28, 28, 28, 0.6);
+  --muted-surface: #f4f4f4;
+  --border: rgba(28, 28, 28, 0.1);
+  --input: rgba(28, 28, 28, 0.16);
+  --ring: rgba(28, 28, 28, 0.55);
+
+  /* Accent = charcoal ink. Primary buttons are charcoal bg / white text and
+     lighten on hover. */
+  --accent: #1c1c1c;
+  --accent-foreground: #ffffff;
+  --accent-hover: #3a3a3a;
+
+  --card: #ffffff;
+  --card-foreground: #1c1c1c;
+  --popover: #ffffff;
+  --popover-foreground: #1c1c1c;
+  --primary: #1c1c1c;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f4;
+  --secondary-foreground: #1c1c1c;
+  --destructive: #8a8a8a;
+  --destructive-foreground: #ffffff;
+  --radius: 0.5rem; /* cards ~8px; buttons override to 4px */
+
+  /* Neutral data-surface tokens (app widgets only). */
+  --console: #fafafa;
+  --console-foreground: #1c1c1c;
+  --console-muted: rgba(28, 28, 28, 0.55);
+  --console-border: rgba(28, 28, 28, 0.1);
+  --console-grid: rgba(28, 28, 28, 0.035);
+  /* Muted semantic data colors — for app widgets ONLY, never decorative. */
+  --positive: #2f7d5b;
+  --negative: #9a4a3f;
 }
 
 @layer base {
@@ -90,7 +96,9 @@
   h2,
   h3,
   .font-heading {
-    font-family: var(--font-heading), var(--font-geist-sans), sans-serif;
+    font-family: var(--font-host-grotesk), system-ui, sans-serif;
+    font-weight: 300;
+    letter-spacing: -0.04em;
   }
 }
 
@@ -106,6 +114,44 @@
   .tabular {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
+  }
+  /* Editorial serif accent (Aleo, light). */
+  .font-serif {
+    font-family: var(--font-aleo), Georgia, serif;
+  }
+}
+
+/* Section scheme wrapper — the twenty.com rhythm. Sections alternate
+   background + foreground via data-scheme; dividers, not rules, do the work.
+   light → #fff, muted → #f4f4f4, dark → #1c1c1c. */
+@layer base {
+  [data-scheme="light"] {
+    --background: #ffffff;
+    --foreground: #1c1c1c;
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+  [data-scheme="muted"] {
+    --background: #f4f4f4;
+    --foreground: #1c1c1c;
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+  [data-scheme="dark"] {
+    --background: #1c1c1c;
+    --foreground: #ffffff;
+    --muted: rgba(255, 255, 255, 0.6);
+    --muted-foreground: rgba(255, 255, 255, 0.6);
+    --border: rgba(255, 255, 255, 0.14);
+    --muted-surface: #262626;
+    --card: #232323;
+    --card-foreground: #ffffff;
+    --secondary: #2a2a2a;
+    --accent: #ffffff;
+    --accent-foreground: #1c1c1c;
+    --accent-hover: #d6d6d6;
+    background-color: var(--background);
+    color: var(--foreground);
   }
 }
 
@@ -136,6 +182,5 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: "ss01", "cv11";
   }
 }

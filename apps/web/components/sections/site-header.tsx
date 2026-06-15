@@ -1,64 +1,47 @@
 import Link from "next/link";
 import { site } from "@/lib/site";
+import { CtaLink } from "./cta-link";
+
+const NAV = [
+  { href: "/#capabilities", label: "Capabilities" },
+  { href: "/#demo", label: "How it works" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/#faq", label: "FAQ" },
+];
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link
           href="/"
-          className="group inline-flex items-center gap-2 font-mono text-sm font-semibold tracking-tight text-foreground"
+          className="font-mono text-[15px] font-medium tracking-[-0.01em] text-foreground"
         >
-          {/* Bracket mark — the wordmark stands on its own, no pulsing dot. */}
-          <span
-            className="text-accent transition-transform group-hover:-translate-x-0.5"
-            aria-hidden
-          >
-            [
-          </span>
           {site.name}
-          <span
-            className="text-accent transition-transform group-hover:translate-x-0.5"
-            aria-hidden
-          >
-            ]
-          </span>
         </Link>
 
-        <nav className="hidden items-center gap-7 text-sm text-muted-foreground sm:flex">
-          <Link
-            href="/#capabilities"
-            className="transition-colors hover:text-foreground"
-          >
-            Capabilities
-          </Link>
-          <Link
-            href="/#radar"
-            className="transition-colors hover:text-foreground"
-          >
-            On the radar
-          </Link>
-          <Link href="/pricing" className="transition-colors hover:text-foreground">
-            Pricing
-          </Link>
-          <Link href="/#faq" className="transition-colors hover:text-foreground">
-            FAQ
-          </Link>
+        <nav className="hidden items-center gap-8 sm:flex">
+          {NAV.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="font-mono text-[11px] tracking-[0.1em] text-foreground/55 uppercase transition-colors hover:text-foreground"
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link
             href="/login"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="hidden font-mono text-[11px] tracking-[0.1em] text-foreground/55 uppercase transition-colors hover:text-foreground sm:inline"
           >
             Sign in
           </Link>
-          <Link
-            href="/signup"
-            className="inline-flex items-center rounded-lg bg-accent px-3.5 py-1.5 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent-hover"
-          >
+          <CtaLink href="/signup" size="sm">
             Start free
-          </Link>
+          </CtaLink>
         </div>
       </div>
     </header>

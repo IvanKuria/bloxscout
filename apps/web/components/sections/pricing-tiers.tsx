@@ -1,18 +1,15 @@
 "use client";
 
 /**
- * PricingTiers — the interactive heart of /pricing. A monthly↔annual toggle
- * drives the displayed price and the per-tier savings line. Copy is defined here
- * (cleaned, install/MCP-free) rather than read straight from the Stripe config so
- * the marketing surface controls its own language. CTAs all route to /signup
- * (paid checkout happens post-auth).
- *
- * Reduced-motion safe: the price swap is a short opacity/translate transition the
- * browser drops under `prefers-reduced-motion`; nothing here is rAF-driven.
+ * PricingTiers — monthly↔annual toggle driving the displayed price and per-tier
+ * savings line. Restyled monochrome in the twenty.com idiom: mono uppercase
+ * toggle, light Host Grotesk prices, hairline cards, a quietly-distinguished
+ * featured tier (charcoal border + a small mono badge, no colour). CTAs route to
+ * /signup. Reduced-motion safe (price swap is a short CSS transition).
  */
 import * as React from "react";
-import Link from "next/link";
 import { Check } from "lucide-react";
+import { CtaLink } from "./cta-link";
 
 type Interval = "monthly" | "yearly";
 
@@ -81,30 +78,26 @@ function formatPrice(tier: Tier, interval: Interval): string {
   return `$${amount}`;
 }
 
-function unitLabel(interval: Interval): string {
-  return interval === "monthly" ? "/ mo" : "/ yr";
-}
-
 export function PricingTiers() {
   const [interval, setInterval] = React.useState<Interval>("monthly");
 
   return (
     <div>
       {/* Toggle */}
-      <div className="mb-12 flex flex-col items-center gap-3">
-        <div className="inline-flex items-center rounded-full border border-border bg-secondary p-1 font-mono text-[12px]">
+      <div className="mb-14 flex flex-col items-center gap-3">
+        <div className="inline-flex items-center rounded-[4px] border border-foreground/15 p-0.5 font-mono text-[11px] tracking-[0.1em] uppercase">
           {(["monthly", "yearly"] as const).map((opt) => {
-            const activeOpt = interval === opt;
+            const active = interval === opt;
             return (
               <button
                 key={opt}
                 type="button"
                 onClick={() => setInterval(opt)}
-                aria-pressed={activeOpt}
-                className={`relative rounded-full px-4 py-1.5 tracking-tight transition-colors ${
-                  activeOpt
-                    ? "bg-background text-foreground shadow-[0_1px_0_0_rgba(10,10,10,0.04),0_6px_16px_-10px_rgba(10,10,10,0.4)]"
-                    : "text-muted-foreground hover:text-foreground"
+                aria-pressed={active}
+                className={`rounded-[2px] px-4 py-2 transition-colors ${
+                  active
+                    ? "bg-foreground text-background"
+                    : "text-foreground/55 hover:text-foreground"
                 }`}
               >
                 {opt === "monthly" ? "Monthly" : "Annual"}
@@ -113,10 +106,10 @@ export function PricingTiers() {
           })}
         </div>
         <p
-          className={`font-mono text-[11px] tracking-[0.16em] uppercase transition-opacity ${
+          className={`font-mono text-[10px] tracking-[0.16em] uppercase transition-opacity ${
             interval === "yearly"
-              ? "text-positive opacity-100"
-              : "text-muted-foreground/0 opacity-0"
+              ? "text-foreground/55 opacity-100"
+              : "opacity-0"
           }`}
           aria-hidden={interval !== "yearly"}
         >
@@ -124,7 +117,7 @@ export function PricingTiers() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
+      <div className="grid gap-px overflow-hidden rounded-lg border border-foreground/12 bg-foreground/12 lg:grid-cols-3">
         {TIERS.map((tier) => {
           const savings =
             tier.monthly > 0 && interval === "yearly"
@@ -133,67 +126,55 @@ export function PricingTiers() {
           return (
             <div
               key={tier.name}
-              className={`group relative flex flex-col overflow-hidden rounded-2xl border p-7 transition-all ${
-                tier.featured
-                  ? "border-accent/30 bg-card shadow-[0_1px_0_0_rgba(10,10,10,0.04),0_30px_70px_-40px_rgba(226,35,26,0.45)] ring-1 ring-accent/15 lg:-mt-2 lg:mb-2"
-                  : "border-border bg-card ring-1 ring-foreground/[0.04] hover:-translate-y-0.5 hover:ring-foreground/15"
+              className={`relative flex flex-col bg-background p-8 ${
+                tier.featured ? "bg-muted-surface" : ""
               }`}
             >
-              {tier.featured && (
-                <>
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-accent to-transparent"
-                  />
-                  <span className="absolute top-5 right-5 rounded-full bg-accent/10 px-2.5 py-1 font-mono text-[9px] tracking-[0.16em] text-accent uppercase">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-light tracking-[-0.02em] text-foreground">
+                  {tier.name}
+                </h3>
+                {tier.featured && (
+                  <span className="rounded-[3px] border border-foreground/20 px-2 py-1 font-mono text-[9px] tracking-[0.16em] text-foreground/55 uppercase">
                     Most picked
-                  </span>
-                </>
-              )}
-
-              <h3 className="font-heading text-xl font-semibold tracking-tight text-foreground">
-                {tier.name}
-              </h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                {tier.tagline}
-              </p>
-
-              <div className="mt-6 flex items-baseline gap-1.5">
-                <span className="font-heading text-5xl font-semibold tracking-[-0.02em] text-foreground tabular-nums">
-                  {formatPrice(tier, interval)}
-                </span>
-                {tier.monthly > 0 && (
-                  <span className="font-mono text-sm text-muted-foreground">
-                    {unitLabel(interval)}
                   </span>
                 )}
               </div>
-              <p className="mt-1.5 h-4 font-mono text-[11px] tracking-tight text-positive">
+              <p className="mt-2 text-[13.5px] leading-relaxed text-foreground/55">
+                {tier.tagline}
+              </p>
+
+              <div className="mt-7 flex items-baseline gap-1.5">
+                <span className="text-[2.75rem] leading-none font-light tracking-[-0.04em] text-foreground tabular-nums">
+                  {formatPrice(tier, interval)}
+                </span>
+                {tier.monthly > 0 && (
+                  <span className="font-mono text-[12px] text-foreground/45">
+                    {interval === "monthly" ? "/ mo" : "/ yr"}
+                  </span>
+                )}
+              </div>
+              <p className="mt-2 h-4 font-mono text-[11px] tracking-[0.04em] text-foreground/45">
                 {savings > 0 ? `Save $${savings} a year` : ""}
               </p>
 
-              <Link
+              <CtaLink
                 href={tier.href}
-                className={`mt-6 inline-flex w-full items-center justify-center rounded-xl px-5 py-3 text-sm font-medium transition-colors ${
-                  tier.featured
-                    ? "bg-accent text-accent-foreground shadow-[0_10px_24px_-12px_rgba(226,35,26,0.7)] hover:bg-accent-hover"
-                    : "border border-border bg-background text-foreground hover:bg-secondary"
-                }`}
+                variant={tier.featured ? "default" : "outline"}
+                className="mt-7 w-full"
               >
                 {tier.cta}
-              </Link>
+              </CtaLink>
 
-              <ul className="mt-7 space-y-3 border-t border-border/70 pt-6">
+              <ul className="mt-8 space-y-3 border-t border-foreground/10 pt-7">
                 {tier.features.map((feature) => (
                   <li
                     key={feature}
-                    className="flex items-start gap-2.5 text-sm leading-snug text-foreground/85"
+                    className="flex items-start gap-2.5 text-[13.5px] leading-snug text-foreground/75"
                   >
                     <Check
-                      className={`mt-0.5 h-4 w-4 shrink-0 ${
-                        tier.featured ? "text-accent" : "text-positive"
-                      }`}
-                      strokeWidth={2.4}
+                      className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/45"
+                      strokeWidth={2.2}
                       aria-hidden
                     />
                     {feature}
