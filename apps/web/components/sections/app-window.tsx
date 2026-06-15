@@ -1,7 +1,7 @@
 import { MessageSquarePlus, Search, ArrowUp } from "lucide-react";
-import { analyzeNiche, type NicheGameRow } from "@/lib/niche";
+import { analyzeNiche, type NicheAnalysisResult } from "@/lib/niche";
 import { compact, int } from "@/lib/format";
-import { GameAvatar } from "@/components/copilot/game-avatar";
+import { NicheScan } from "@/components/copilot/niche-scan";
 import { BrandMark } from "@/components/brand-mark";
 
 /**
@@ -10,7 +10,10 @@ import { BrandMark } from "@/components/brand-mark";
  * niche-scan result). It runs a LIVE `analyzeNiche("tower defense")` at render
  * (ISR, page revalidate=1800) so the leaderboard shows real games with real
  * Roblox thumbnails — proof the product is reading live data, not a mockup.
- * Falls back to a curated static cohort if the live search is unavailable.
+ *
+ * The result renders through the ACTUAL `<NicheScan>` widget (same component the
+ * agent uses), so the hero can never drift from the product. A curated full
+ * result is the fallback when the live search is unavailable.
  */
 
 const THREADS = [
@@ -20,19 +23,27 @@ const THREADS = [
   { title: "Brookhaven vs the RP genre", active: false },
 ];
 
-const FALLBACK: NicheGameRow[] = [
-  { universeId: 0, name: "Tower Defense Simulator", playing: 121000, creatorName: null, share: 0.44, description: "", thumbnailUrl: null },
-  { universeId: 0, name: "Toilet Tower Defense", playing: 58000, creatorName: null, share: 0.21, description: "", thumbnailUrl: null },
-  { universeId: 0, name: "Ultimate Tower Defense", playing: 27000, creatorName: null, share: 0.1, description: "", thumbnailUrl: null },
-  { universeId: 0, name: "Anime Defenders", playing: 19000, creatorName: null, share: 0.07, description: "", thumbnailUrl: null },
-  { universeId: 0, name: "All Star Tower Defense", playing: 14000, creatorName: null, share: 0.05, description: "", thumbnailUrl: null },
-];
-
-const VERDICT_LABEL: Record<string, string> = {
-  open: "Open · room to win",
-  contested: "Contested · room in the tail",
-  locked: "Locked up · leader owns it",
-  thin: "Thin market",
+/** Curated full result so the hero always looks good if the live scan is down. */
+const FALLBACK_RESULT: NicheAnalysisResult = {
+  ok: true,
+  query: "tower defense",
+  title: "Tower defense · niche scan",
+  gameCount: 30,
+  totalPlaying: 274000,
+  top1Share: 0.44,
+  top3Share: 0.75,
+  hhi: 0.28,
+  saturationScore: 58,
+  verdict: "contested",
+  whiteSpace: true,
+  leaders: [
+    { universeId: 0, name: "Tower Defense Simulator", playing: 121000, creatorName: null, share: 0.44, description: "", thumbnailUrl: null },
+    { universeId: 0, name: "Toilet Tower Defense", playing: 58000, creatorName: null, share: 0.21, description: "", thumbnailUrl: null },
+    { universeId: 0, name: "Ultimate Tower Defense", playing: 27000, creatorName: null, share: 0.1, description: "", thumbnailUrl: null },
+    { universeId: 0, name: "Anime Defenders", playing: 19000, creatorName: null, share: 0.07, description: "", thumbnailUrl: null },
+    { universeId: 0, name: "All Star Tower Defense", playing: 14000, creatorName: null, share: 0.05, description: "", thumbnailUrl: null },
+  ],
+  tailGames: 9,
 };
 
 function pct(n: number) {
@@ -41,21 +52,8 @@ function pct(n: number) {
 
 export async function AppWindow() {
   const niche = await analyzeNiche("tower defense");
-  const ok = niche.ok && niche.leaders.length >= 4;
-
-  const leaders = (ok ? niche.leaders : FALLBACK).slice(0, 5);
-  const maxShare = Math.max(0.0001, ...leaders.map((g) => g.share));
-  const stats = ok
-    ? {
-        games: int(niche.gameCount),
-        ccu: compact(niche.totalPlaying),
-        top1: pct(niche.top1Share),
-        top3: pct(niche.top3Share),
-      }
-    : { games: "30", ccu: "274k", top1: "44%", top3: "75%" };
-  const verdict = ok
-    ? (VERDICT_LABEL[niche.verdict] ?? "Contested")
-    : "Contested · room in the tail";
+  const result =
+    niche.ok && niche.leaders.length >= 4 ? niche : FALLBACK_RESULT;
 
   return (
     <div className="overflow-hidden rounded-xl border border-foreground/12 bg-background text-left shadow-[0_2px_0_0_rgba(23,23,29,0.02),0_60px_120px_-55px_rgba(23,23,29,0.5)]">
@@ -137,20 +135,16 @@ export async function AppWindow() {
             {/* agent reply */}
             <div className="flex flex-col gap-4">
               <p className="max-w-prose text-[13.5px] leading-relaxed text-foreground/80">
-                Here is the live read. {stats.games} live games share{" "}
+                Here is the live read. {int(result.gameCount)} live games share{" "}
                 <span className="font-medium text-foreground">
-                  {stats.ccu} players
+                  {compact(result.totalPlaying)} players
                 </span>
-                , and the leader holds {stats.top1}. I measured how concentrated
-                the niche is and where the open room sits. The breakdown:
+                , and the leader holds {pct(result.top1Share)}. I measured how
+                concentrated the niche is and where the open room sits. The
+                breakdown:
               </p>
 
-              <NicheResult
-                leaders={leaders}
-                maxShare={maxShare}
-                stats={stats}
-                verdict={verdict}
-              />
+              <NicheScan result={result} />
             </div>
           </div>
 
@@ -167,97 +161,6 @@ export async function AppWindow() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function NicheResult({
-  leaders,
-  maxShare,
-  stats,
-  verdict,
-}: {
-  leaders: NicheGameRow[];
-  maxShare: number;
-  stats: { games: string; ccu: string; top1: string; top3: string };
-  verdict: string;
-}) {
-  return (
-    <div className="overflow-hidden rounded-xl border border-foreground/12 bg-background shadow-xs">
-      {/* header */}
-      <div className="flex items-center justify-between border-b border-foreground/10 px-4 py-2.5">
-        <span className="font-mono text-[10px] tracking-[0.16em] text-foreground uppercase">
-          Tower defense · niche scan
-        </span>
-        <span className="font-mono text-[9px] tracking-[0.16em] text-foreground/40 uppercase tabular-nums">
-          {stats.games} games
-        </span>
-      </div>
-
-      {/* verdict + stat tiles */}
-      <div className="flex flex-col gap-3 px-4 py-4">
-        <span className="inline-flex w-fit items-center rounded-md border border-accent/25 bg-accent/[0.08] px-2.5 py-1 text-[13px] font-medium text-accent">
-          {verdict}
-        </span>
-        <div className="grid grid-cols-4 gap-px overflow-hidden rounded-lg border border-foreground/10 bg-foreground/10">
-          {[
-            ["Live games", stats.games],
-            ["Total CCU", stats.ccu],
-            ["Top-1 share", stats.top1],
-            ["Top-3 share", stats.top3],
-          ].map(([label, value]) => (
-            <div key={label} className="bg-background px-3 py-2.5">
-              <p className="font-mono text-[8.5px] tracking-[0.14em] text-foreground/45 uppercase">
-                {label}
-              </p>
-              <p className="tabular mt-1 text-[15px] font-medium text-foreground">
-                {value}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* leaderboard */}
-      <div className="border-t border-foreground/10 px-4 py-2 font-mono text-[9px] tracking-[0.16em] text-foreground/40 uppercase">
-        Who&apos;s winning the niche now
-      </div>
-      <ul className="flex flex-col divide-y divide-foreground/[0.07]">
-        {leaders.map((g, i) => (
-          <li
-            key={`${g.universeId}-${i}`}
-            className="flex items-center gap-3 px-4 py-2.5"
-          >
-            <GameAvatar
-              name={g.name}
-              src={g.thumbnailUrl}
-              className="size-8 rounded-md"
-            />
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <span className="truncate text-[13px] font-medium text-foreground">
-                {g.name}
-              </span>
-              <span
-                className="h-1.5 w-full overflow-hidden rounded-full bg-foreground/[0.08]"
-                aria-hidden
-              >
-                <span
-                  className="block h-full rounded-full bg-accent"
-                  style={{ width: `${(g.share / maxShare) * 100}%` }}
-                />
-              </span>
-            </div>
-            <div className="flex w-12 shrink-0 flex-col items-end">
-              <span className="tabular text-[13px] font-medium text-foreground">
-                {compact(g.playing)}
-              </span>
-              <span className="tabular font-mono text-[10px] text-foreground/45">
-                {pct(g.share)}
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
