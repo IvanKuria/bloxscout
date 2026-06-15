@@ -16,11 +16,13 @@ import * as React from "react";
 import { NicheCard } from "@/components/copilot/niche-card";
 import { NicheScan } from "@/components/copilot/niche-scan";
 import { RankingWidget } from "@/components/copilot/ranking-widget";
+import { RevenueCard } from "@/components/copilot/revenue-card";
 import { RisingList } from "@/components/copilot/rising-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import type {
   NicheAnalysisResult,
   RankingResult,
+  RevenueResult,
   RisingResult,
   SaturationResult,
 } from "@/lib/agent/tools";
@@ -47,6 +49,9 @@ export const WIDGET_BY_TOOL: Record<string, WidgetRenderer> = {
   analyze_niche: (result) => (
     <NicheScan result={result as NicheAnalysisResult} />
   ),
+  estimate_revenue: (result) => (
+    <RevenueCard result={result as RevenueResult} />
+  ),
 };
 
 /** Human label for the running-tool indicator, keyed by tool name. */
@@ -56,6 +61,7 @@ const RUNNING_LABEL: Record<string, string> = {
   get_genre_saturation: "Scoring genre saturation",
   get_rising_niches: "Scanning rising niches",
   analyze_niche: "Scanning the niche live",
+  estimate_revenue: "Estimating revenue",
 };
 
 /**

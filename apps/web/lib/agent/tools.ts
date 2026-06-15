@@ -29,11 +29,18 @@ import {
 import { genreSlug } from "@/lib/format";
 import { analyzeNiche } from "@/lib/niche";
 import type { NicheAnalysisResult } from "@/lib/niche";
+import { estimateRevenue } from "@/lib/revenue";
+import type { RevenueResult } from "@/lib/revenue";
 import { getThumbnails } from "@/lib/thumbnails";
 
 // Re-export the niche-scan result types so the widget layer imports its props
 // from the same place as the other tool results (type-only; erased at build).
 export type { NicheAnalysisResult, NicheGameRow, NicheVerdict } from "@/lib/niche";
+export type {
+  RevenueResult,
+  RevenueGame,
+  RevenueAssumptions,
+} from "@/lib/revenue";
 
 /** A JSON-Schema-ish object the Anthropic SDK accepts as `input_schema`. */
 type JsonSchema = {
@@ -472,6 +479,56 @@ export const COPILOT_TOOLS: CopilotTool[] = [
         generatedAt: view.generatedAt,
         rows,
       };
+    },
+  },
+
+  {
+    def: {
+      name: "estimate_revenue",
+      description:
+        "Estimate Roblox game revenue in USD. Call this when the user asks how " +
+        "much a game makes/earns, what a niche or genre is worth, or which " +
+        "genres are most profitable. Three modes: pass `gameName` or " +
+        "`universeId` for a SINGLE game's monthly estimate (live CCU × a " +
+        "platform-average monetization heuristic); pass `genre` for that " +
+        "genre's earning aggregate; pass nothing for a top-earning-genres " +
+        "leaderboard. The figure is a HEURISTIC that varies 5-10x by " +
+        "monetization design — ALWAYS lead with the disclaimer the result " +
+        "carries; never present it as precise. Renders a revenue card widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          gameName: {
+            type: "string",
+            description:
+              "A game's name to estimate (e.g. 'Grow a Garden'). Resolved live.",
+          },
+          universeId: {
+            type: "integer",
+            description: "A game's Roblox universe id (alternative to gameName).",
+          },
+          genre: {
+            type: "string",
+            description:
+              "A genre to estimate (e.g. 'Simulator'). Omit gameName/universeId.",
+          },
+          limit: {
+            type: "integer",
+            description: "Leaderboard size for genre/leaderboard mode (1-12). Default 6.",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<RevenueResult> {
+      return estimateRevenue({
+        gameName:
+          typeof input.gameName === "string" ? input.gameName : undefined,
+        universeId:
+          typeof input.universeId === "number" ? input.universeId : undefined,
+        genre: typeof input.genre === "string" ? input.genre : undefined,
+        limit: typeof input.limit === "number" ? input.limit : undefined,
+      });
     },
   },
 ];
