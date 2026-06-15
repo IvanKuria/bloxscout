@@ -1,265 +1,164 @@
-import { cn } from "@/lib/utils";
-
 /**
- * The capability preview mini-visuals — clean, abstract, MONOCHROME typographic
- * / data treatments. No game thumbnails or icons: a minimal saturation arc, a
- * ranked text list, a sparkline, stat tickers. Charcoal ink on hairline frames;
- * they read as polished product intel, not decoration.
+ * Capability preview visuals — compact, FRAMELESS data snippets (the capability
+ * cards in tool-catalog supply the frame + title). Each capability gets a
+ * distinct chart type: momentum bars, a concentration split, breakout columns,
+ * a fit meter, a percentile distribution, a trend line. Solid magenta/amber
+ * only — no gradients, no blinkers.
  */
 
-const frame =
-  "rounded-md border border-foreground/10 bg-background/60 p-4";
-const label =
-  "font-mono text-[9.5px] tracking-[0.16em] text-foreground/40 uppercase";
+const MAG = "#ff2d87";
+const AMB = "#ffab2e";
 
-/** Find emergent niches — ranked momentum list with thin bars. */
+/* 1. Find emergent niches → ranked momentum bars */
 export function NichesPreview() {
-  const items = [
-    { name: "brainrot", value: "+38%", pct: 100 },
-    { name: "anime defenders", value: "+21%", pct: 62 },
-    { name: "horror co-op", value: "+14%", pct: 41 },
+  const rows = [
+    { name: "brainrot", pct: 100, delta: "+38%", hot: true },
+    { name: "horror co-op", pct: 66, delta: "+21%", hot: true },
+    { name: "anime defenders", pct: 44, delta: "+14%", hot: false },
   ];
   return (
-    <div className={frame}>
-      <div className="mb-3 flex items-center justify-between">
-        <span className={label}>emergent · 7d</span>
-        <span className={label}>momentum</span>
-      </div>
-      <ul className="space-y-2.5">
-        {items.map((item) => (
-          <li
-            key={item.name}
-            className="grid grid-cols-[1fr_1.5fr_auto] items-center gap-3"
-          >
-            <span className="truncate font-mono text-[11px] text-foreground/75">
-              {item.name}
-            </span>
+    <div className="flex flex-col gap-2.5">
+      {rows.map((r) => (
+        <div key={r.name} className="flex flex-col gap-1">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[11px] text-foreground/75">{r.name}</span>
+            <span className="font-mono text-[11px] tabular-nums text-foreground">{r.delta}</span>
+          </div>
+          <span className="h-1.5 overflow-hidden rounded-full bg-foreground/[0.08]" aria-hidden>
             <span
-              className="relative h-[3px] overflow-hidden rounded-full bg-foreground/10"
-              aria-hidden
-            >
-              <span
-                className="absolute inset-y-0 left-0 rounded-full bg-foreground/70"
-                style={{ width: `${item.pct}%` }}
-              />
-            </span>
-            <span className="font-mono text-[11px] tabular-nums text-foreground/55">
-              {item.value}
-            </span>
-          </li>
-        ))}
-      </ul>
+              className="block h-full rounded-full"
+              style={{ width: `${r.pct}%`, backgroundColor: r.hot ? MAG : AMB }}
+            />
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
 
-/** Gauge a niche — a minimal saturation arc. */
+/* 2. Gauge a niche → market-concentration split */
 export function SaturationPreview() {
-  // semicircle arc, 0..180deg; needle at ~62% (contested-leaning-open)
-  const pct = 0.38; // openness
-  const angle = 180 * pct; // from left (open) sweeping right (locked)
-  const r = 46;
-  const cx = 60;
-  const cy = 56;
-  const rad = (Math.PI * (180 - angle)) / 180;
-  const nx = cx + r * Math.cos(rad);
-  const ny = cy - r * Math.sin(rad);
+  const segs = [
+    { w: 44, fill: MAG, op: 1 },
+    { w: 31, fill: MAG, op: 0.4 },
+    { w: 25, fill: "currentColor", className: "text-foreground/12", op: 1 },
+  ];
+  let acc = 0;
   return (
-    <div className={cn(frame, "flex flex-col items-center gap-2")}>
-      <div className="mb-1 flex w-full items-center justify-between">
-        <span className={label}>tower defense</span>
-        <span className="font-mono text-[10px] tracking-[0.12em] text-foreground/70 uppercase">
-          open
-        </span>
+    <div className="flex flex-col gap-3">
+      <svg viewBox="0 0 260 24" className="w-full" aria-hidden>
+        {segs.map((s, i) => {
+          const x = (acc / 100) * 260;
+          acc += s.w;
+          const w = (s.w / 100) * 260 - 3;
+          return (
+            <rect key={i} x={x} y="0" width={Math.max(w, 0)} height="24" rx="4" fill={s.fill} opacity={s.op} className={s.className} />
+          );
+        })}
+      </svg>
+      <div className="flex items-center gap-4 font-mono text-[10px] text-foreground/55">
+        <span>top-1 <span className="text-foreground">44%</span></span>
+        <span>top-3 <span className="text-foreground">75%</span></span>
+        <span>tail <span className="text-foreground">25%</span></span>
       </div>
-      <svg viewBox="0 0 120 64" className="h-16 w-full" aria-hidden>
-        <path
-          d="M14 56 A46 46 0 0 1 106 56"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          className="text-foreground/12"
-        />
-        <path
-          d="M14 56 A46 46 0 0 1 106 56"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeDasharray="145"
-          strokeDashoffset={145 * (1 - pct)}
-          className="text-foreground/75"
-        />
-        <line
-          x1={cx}
-          y1={cy}
-          x2={nx}
-          y2={ny}
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          className="text-foreground"
-        />
-        <circle cx={cx} cy={cy} r="2.5" className="fill-foreground" />
+    </div>
+  );
+}
+
+/* 3. Spot breakout games → growth columns */
+export function BreakoutsPreview() {
+  const cols = [
+    { name: "Anime Defenders", h: 100, delta: "+64%", lead: true },
+    { name: "Toilet TD", h: 62, delta: "+38%", lead: false },
+    { name: "Critical Legends", h: 40, delta: "+22%", lead: false },
+    { name: "Pet Sim 99", h: 26, delta: "+14%", lead: false },
+  ];
+  return (
+    <div>
+      {/* bars are direct children of a fixed-height row so % heights resolve */}
+      <div className="flex h-24 items-end gap-2.5">
+        {cols.map((c) => (
+          <span
+            key={c.name}
+            className="flex-1 rounded-t-sm"
+            style={{ height: `${c.h}%`, backgroundColor: c.lead ? MAG : "rgba(23,23,29,0.12)" }}
+            aria-hidden
+          />
+        ))}
+      </div>
+      <div className="mt-2 flex gap-2.5">
+        {cols.map((c) => (
+          <span
+            key={c.name}
+            className={`flex-1 text-center font-mono text-[10px] tabular-nums ${c.lead ? "text-foreground" : "text-foreground/45"}`}
+          >
+            {c.delta}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* 4. Decide what to build → recommendation + fit meter */
+export function IdeasPreview() {
+  const chips = ["real demand", "fragmented", "solo-buildable"];
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-[15px] font-medium tracking-[-0.01em] text-foreground">
+        Co-op horror · short sessions
+      </p>
+      <div>
+        <div className="mb-1.5 flex items-center justify-between font-mono text-[9.5px] tracking-[0.12em] text-foreground/45 uppercase">
+          <span>fit for a solo dev</span>
+          <span className="text-foreground">86%</span>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-foreground/10">
+          <div className="h-full rounded-full" style={{ width: "86%", backgroundColor: MAG }} />
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {chips.map((c) => (
+          <span key={c} className="rounded-full border border-foreground/12 bg-foreground/[0.03] px-2 py-0.5 font-mono text-[9.5px] text-foreground/65">
+            {c}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* 5. Read any game or genre → percentile distribution */
+export function IntelligencePreview() {
+  const hill = "M6,72 C50,72 60,22 130,22 C200,22 210,72 254,72";
+  return (
+    <div className="flex flex-col gap-2">
+      <svg viewBox="0 0 260 80" className="h-24 w-full" aria-hidden>
+        <path d={`${hill} L254,76 L6,76 Z`} fill="currentColor" className="text-foreground/[0.05]" />
+        <path d={hill} fill="none" stroke="currentColor" strokeWidth="1.4" className="text-foreground/25" />
+        <line x1="130" y1="10" x2="130" y2="76" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" className="text-foreground/25" />
+        <line x1="206" y1="16" x2="206" y2="76" stroke={MAG} strokeWidth="2.4" />
+        <circle cx="206" cy="16" r="3.5" fill={MAG} />
+        <text x="200" y="11" fontSize="8.5" textAnchor="end" fill={MAG} style={{ fontWeight: 600 }} className="font-mono">p82</text>
       </svg>
       <p className="font-mono text-[10px] text-foreground/55">
-        top-1 <span className="text-foreground">44%</span> · white space in the
-        tail
+        top <span className="text-foreground">18%</span> of its genre
       </p>
     </div>
   );
 }
 
-/** Spot breakout games — a sparkline. */
-export function BreakoutsPreview() {
-  const path = "M0,18 L12,16 L24,17 L36,11 L48,12 L60,5 L72,6 L84,2";
-  return (
-    <div className={frame}>
-      <div className="mb-2 flex items-center justify-between">
-        <span className={label}>breakout · 7d ccu</span>
-        <span className="font-mono text-[11px] tabular-nums text-foreground/70">
-          +64%
-        </span>
-      </div>
-      <svg viewBox="0 0 84 22" className="h-12 w-full" aria-hidden>
-        <path
-          d={`${path} L84,22 L0,22 Z`}
-          fill="currentColor"
-          className="text-foreground/[0.06]"
-        />
-        <path
-          d={path}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-foreground/80"
-        />
-        <circle cx="84" cy="2" r="1.6" className="fill-foreground" />
-      </svg>
-      <p className="mt-1.5 font-mono text-[10px] text-foreground/50">
-        outpacing its genre median
-      </p>
-    </div>
-  );
-}
-
-/** Decide what to build — idea direction read-out. */
-export function IdeasPreview() {
-  return (
-    <div className={cn(frame, "flex flex-col gap-2.5")}>
-      <span className={label}>what should I build?</span>
-      <div className="rounded border border-foreground/10 bg-background px-3 py-2.5">
-        <p className="text-[12.5px] font-medium text-foreground">
-          Co-op horror · short sessions
-        </p>
-        <p className="mt-1 font-mono text-[10px] leading-relaxed text-foreground/50">
-          real demand · leaders fragmented · solo-buildable
-        </p>
-      </div>
-      <span className="font-mono text-[10px] tracking-[0.1em] text-foreground/70 uppercase">
-        → winnable for a small team
-      </span>
-    </div>
-  );
-}
-
-/** Read any game or genre — two stat tickers vs the genre. */
-export function IntelligencePreview() {
-  const sparkA = "M0,18 L10,14 L20,16 L30,9 L40,11 L50,5 L60,7 L70,3";
-  const sparkB = "M0,16 L10,18 L20,13 L30,15 L40,10 L50,12 L60,11 L70,9";
-  return (
-    <div className={frame}>
-      <div className="mb-3">
-        <span className={label}>game vs genre · 7d</span>
-      </div>
-      <div className="grid grid-cols-2">
-        {[
-          { name: "this game", ccu: "102k", delta: "+17%", path: sparkA, strong: true },
-          { name: "genre p50", ccu: "41k", delta: "+6%", path: sparkB, strong: false },
-        ].map((side, i) => (
-          <div
-            key={side.name}
-            className={cn(
-              "flex flex-col gap-1.5 px-3 py-1",
-              i === 0 && "border-r border-foreground/10",
-            )}
-          >
-            <span className="font-mono text-[10px] text-foreground/50">
-              {side.name}
-            </span>
-            <span className="tabular font-mono text-base font-medium text-foreground">
-              {side.ccu}
-            </span>
-            <svg viewBox="0 0 70 22" className="h-5 w-full" aria-hidden>
-              <path
-                d={side.path}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className={side.strong ? "text-foreground/80" : "text-foreground/30"}
-              />
-            </svg>
-            <span
-              className={cn(
-                "font-mono text-[10px] tabular-nums",
-                side.strong ? "text-foreground/70" : "text-foreground/45",
-              )}
-            >
-              {side.delta}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/** Always-live data — a refresh sparkline with a live dot. */
+/* 6. Always-live data → trend line */
 export function TrendsPreview() {
-  const points = [
-    { x: 0, y: 18 },
-    { x: 20, y: 14 },
-    { x: 40, y: 15 },
-    { x: 60, y: 11 },
-    { x: 80, y: 8 },
-    { x: 100, y: 6 },
-  ];
-  const path = `M${points.map((p) => `${p.x},${p.y}`).join(" L")}`;
+  const line = "M0,52 L40,42 L80,46 L120,30 L160,33 L200,18 L240,13 L280,4";
   return (
-    <div className={frame}>
-      <div className="mb-2 flex items-center justify-between">
-        <span className={label}>live ccu</span>
-        <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.12em] text-foreground/60 uppercase">
-          <span className="recon-pulse h-1.5 w-1.5 rounded-full bg-foreground" />
-          live
-        </span>
-      </div>
-      <svg viewBox="0 0 100 24" className="h-12 w-full" aria-hidden>
-        <path
-          d={`${path} L100,24 L0,24 Z`}
-          fill="currentColor"
-          className="text-foreground/[0.06]"
-        />
-        <path
-          d={path}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-foreground/80"
-        />
-        {points.map((p) => (
-          <circle key={p.x} cx={p.x} cy={p.y} r="1.1" className="fill-foreground/70" />
-        ))}
+    <div className="flex flex-col gap-2">
+      <svg viewBox="0 0 280 56" className="h-24 w-full" aria-hidden>
+        <path d={line} fill="none" stroke={MAG} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="280" cy="4" r="3" fill={MAG} />
       </svg>
-      <p className="mt-2 font-mono text-[10px] text-foreground/50">
-        refreshed every ~30 min · timestamped
+      <p className="font-mono text-[10px] text-foreground/55">
+        274,120 playing now · refreshed ~30 min
       </p>
     </div>
   );

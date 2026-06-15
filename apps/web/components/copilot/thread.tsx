@@ -110,7 +110,7 @@ function AssistantBubble({ turn }: { turn: AssistantTurn }) {
     <div className="flex w-full max-w-full flex-col gap-3 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1">
       <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
         <span
-          className="recon-pulse inline-block size-1.5 rounded-full bg-accent"
+          className="inline-block size-1.5 rounded-full bg-accent"
           aria-hidden
         />
         bloxscout agent
@@ -144,7 +144,7 @@ function ThreadWelcome({ onPick }: { onPick: (text: string) => void }) {
       <div className="flex flex-col items-center gap-3">
         <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground shadow-xs">
           <span
-            className="recon-pulse inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-accent"
             aria-hidden
           />
           bloxscout agent

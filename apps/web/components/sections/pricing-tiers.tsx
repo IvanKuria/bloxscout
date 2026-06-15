@@ -127,7 +127,9 @@ export function PricingTiers() {
             <div
               key={tier.name}
               className={`relative flex flex-col bg-background p-8 ${
-                tier.featured ? "bg-muted-surface" : ""
+                tier.featured
+                  ? "bg-muted-surface ring-1 ring-accent/35 ring-inset"
+                  : ""
               }`}
             >
               <div className="flex items-center justify-between">
@@ -135,7 +137,7 @@ export function PricingTiers() {
                   {tier.name}
                 </h3>
                 {tier.featured && (
-                  <span className="rounded-[3px] border border-foreground/20 px-2 py-1 font-mono text-[9px] tracking-[0.16em] text-foreground/55 uppercase">
+                  <span className="rounded-[3px] border border-accent/30 bg-accent/[0.08] px-2 py-1 font-mono text-[9px] tracking-[0.16em] text-accent uppercase">
                     Most picked
                   </span>
                 )}
@@ -173,7 +175,7 @@ export function PricingTiers() {
                     className="flex items-start gap-2.5 text-[13.5px] leading-snug text-foreground/75"
                   >
                     <Check
-                      className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/45"
+                      className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent"
                       strokeWidth={2.2}
                       aria-hidden
                     />

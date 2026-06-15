@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
-import { Host_Grotesk, Azeret_Mono, Aleo } from "next/font/google";
+import { Host_Grotesk, Azeret_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { OrganizationJsonLd } from "@/components/seo/json-ld";
 import { site } from "@/lib/site";
 import "./globals.css";
 
-// Primary face — a refined, low-contrast grotesque. Headings run light (300);
-// body weights 300–600. Twenty.com's signature type voice.
+// The whole type system is Host Grotesk — a refined, low-contrast grotesque.
+// Headings run light (300); we carry 600/700 so display lines can set a single
+// word bold (e.g. the hero's "AI agent"). All-sans, twenty.com's type voice.
 const hostGrotesk = Host_Grotesk({
   variable: "--font-host-grotesk",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -19,14 +20,6 @@ const azeretMono = Azeret_Mono({
   variable: "--font-azeret-mono",
   subsets: ["latin"],
   weight: ["300", "500"],
-  display: "swap",
-});
-
-// Editorial serif accent — sparing display moments (Aleo light).
-const aleo = Aleo({
-  variable: "--font-aleo",
-  subsets: ["latin"],
-  weight: ["300", "400"],
   display: "swap",
 });
 
@@ -91,7 +84,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${hostGrotesk.variable} ${azeretMono.variable} ${aleo.variable} h-full antialiased`}
+      className={`${hostGrotesk.variable} ${azeretMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <OrganizationJsonLd />

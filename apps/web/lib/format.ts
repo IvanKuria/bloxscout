@@ -4,11 +4,11 @@
  *
  * Citeability rule (from the AEO spec): a number is never shown bare. These
  * helpers always pair a value with a unit, and `null`/unknown values render as
- * an explicit em-dash sentinel so "not available yet" is visible, not implied.
+ * an explicit sentinel so "not available yet" is visible, not implied.
  */
 
-/** Sentinel for a value the young dataset doesn't have yet. */
-export const NA = "—"; // em dash
+/** Sentinel for a value the young dataset doesn't have yet (no em dash). */
+export const NA = "·";
 
 /** Full grouped integer, e.g. 142831 -> "142,831". `null` -> NA. */
 export function int(n: number | null | undefined): string {

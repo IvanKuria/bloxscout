@@ -35,7 +35,7 @@ export const capabilityGroups: CapabilityGroup[] = [
     slug: "niches",
     name: "Find emergent niches",
     blurb:
-      "Surface the niches gaining players before they're obvious — while there's still room to enter.",
+      "Surface the niches gaining players before they're obvious, while there's still room to enter.",
     icon: Compass,
     capabilities: [
       {
@@ -54,7 +54,7 @@ export const capabilityGroups: CapabilityGroup[] = [
     slug: "saturation",
     name: "Gauge a niche",
     blurb:
-      "Ask whether any niche is saturated or still winnable — scored on live competition, not vibes.",
+      "Ask whether any niche is saturated or still winnable, scored on live competition, not vibes.",
     icon: Radar,
     capabilities: [
       {
@@ -73,7 +73,7 @@ export const capabilityGroups: CapabilityGroup[] = [
     slug: "breakouts",
     name: "Spot breakout games",
     blurb:
-      "Catch the games growing fastest right now — the ones defining what comes next.",
+      "Catch the games growing fastest right now, the ones defining what comes next.",
     icon: Rocket,
     capabilities: [
       {
@@ -84,7 +84,7 @@ export const capabilityGroups: CapabilityGroup[] = [
       {
         prompt: "What's gaining players faster than the genre around it?",
         answer:
-          "Outliers beating their cohort's growth — early signal on where attention is moving.",
+          "Outliers beating their cohort's growth: early signal on where attention is moving.",
       },
     ],
   },
@@ -101,7 +101,7 @@ export const capabilityGroups: CapabilityGroup[] = [
           "Idea directions matched to demand you can realistically win, with the reasoning behind each.",
       },
       {
-        prompt: "I'm a solo dev — where's my best shot?",
+        prompt: "I'm a solo dev, where's my best shot?",
         answer:
           "Niches sized to a small team: real players, fragmented leaders, room to enter.",
       },
@@ -136,7 +136,7 @@ export const capabilityGroups: CapabilityGroup[] = [
       {
         prompt: "How many people are playing this right now?",
         answer:
-          "Current concurrents and visits, timestamped — not a stale training-data guess.",
+          "Current concurrents and visits, timestamped, not a stale training-data guess.",
       },
       {
         prompt: "What's the trend over the last 7 days?",

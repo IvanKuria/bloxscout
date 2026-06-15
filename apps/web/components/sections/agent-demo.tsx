@@ -24,7 +24,7 @@ const LEADERS = [
 ];
 
 const ANSWER =
-  "Contested, but not locked. 30 live games, 274k players. Tower Defense Simulator alone holds 44% — yet 9 smaller titles are still pulling real CCU. That tail is your white space: a sharp twist on the format can win a slice without unseating the leader.";
+  "Contested, but not locked. 30 live games, 274k players. Tower Defense Simulator alone holds 44%, yet 9 smaller titles are still pulling real CCU. That tail is your white space: a sharp twist on the format can win a slice without unseating the leader.";
 
 type Phase = "typing" | "thinking" | "answering" | "done";
 
@@ -91,10 +91,6 @@ export function AgentDemo() {
               bloxscout agent
             </span>
           </div>
-          <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] text-foreground/45 uppercase">
-            <span className="recon-pulse inline-block h-1.5 w-1.5 rounded-full bg-foreground" aria-hidden />
-            live data
-          </span>
         </div>
 
         <div className="flex flex-col gap-4 px-4 py-5 sm:px-5">
@@ -159,15 +155,15 @@ function NicheWidget() {
     <div className="overflow-hidden rounded-md border border-foreground/10 bg-background">
       <div className="flex items-center justify-between border-b border-foreground/10 bg-muted-surface px-3.5 py-2">
         <span className="font-mono text-[10px] tracking-[0.16em] text-foreground uppercase">
-          tower defense — niche scan
+          Tower defense · niche scan
         </span>
-        <span className="font-mono text-[9px] tracking-[0.16em] text-foreground/45 uppercase">
-          live scan
+        <span className="font-mono text-[9px] tracking-[0.16em] text-foreground/45 uppercase tabular-nums">
+          30 games
         </span>
       </div>
 
       <div className="flex flex-col gap-3 px-3.5 py-3">
-        <span className="inline-flex w-fit items-center gap-2 text-[13px] font-light tracking-[-0.02em] text-foreground">
+        <span className="inline-flex w-fit items-center gap-2 rounded-md border border-accent/25 bg-accent/[0.08] px-2.5 py-1 text-[13px] font-medium tracking-[-0.01em] text-accent">
           Contested · white space in the tail
         </span>
         <div className="grid grid-cols-4 gap-x-3 gap-y-2">
@@ -200,7 +196,7 @@ function NicheWidget() {
             </span>
             <span className="h-[3px] flex-1 overflow-hidden rounded-full bg-foreground/10">
               <span
-                className="block h-full rounded-full bg-foreground/70"
+                className="block h-full rounded-full bg-accent"
                 style={{ width: `${(g.pct / maxPct) * 100}%` }}
                 aria-hidden
               />

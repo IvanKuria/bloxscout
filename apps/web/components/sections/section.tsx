@@ -50,11 +50,11 @@ export function Eyebrow({
   return (
     <p
       className={cn(
-        "inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-foreground/45 uppercase",
+        "inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-accent uppercase",
         className,
       )}
     >
-      <span className="h-px w-6 bg-foreground/25" aria-hidden />
+      <span className="h-px w-6 bg-accent" aria-hidden />
       {children}
     </p>
   );

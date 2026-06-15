@@ -1,101 +1,146 @@
 "use client";
 
 /**
- * BlurText — a restrained, word-by-word reveal (adapted from reactbits
- * `BlurText`, motion/framer-only, no GSAP). Used for the hero headline: each
- * word lifts and de-blurs in a short stagger when it enters the viewport.
- *
- * SSR-safe: motion renders each span on the server with its `initial` style
- * inlined, so the server markup and the client's first paint match (no
- * hydration mismatch). Reduced-motion-safe: when the user prefers reduced
- * motion, spans render in their resolved (visible) state with no animation.
+ * BlurText — the canonical reactbits.dev component (motion/framer, no GSAP),
+ * installed via `npx shadcn add https://reactbits.dev/r/BlurText-TS-TW`, then
+ * hardened for our Next 16 / SSR / a11y constraints:
+ *   - `"use client"` (it uses hooks + IntersectionObserver).
+ *   - A `prefers-reduced-motion` short-circuit that renders the resolved,
+ *     visible text with no animation.
+ *   - The text always lives in the DOM (motion only animates opacity/blur/
+ *     transform), so it stays crawlable for SEO even before it reveals.
+ * Named + default export so existing `import { BlurText }` sites keep working.
  */
-import * as React from "react";
-import { motion, useReducedMotion, type Transition } from "motion/react";
+import { motion, type Transition, type Easing, useReducedMotion } from "motion/react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type BlurTextProps = {
-  text: string;
+  text?: string;
   delay?: number;
   className?: string;
   animateBy?: "words" | "letters";
+  direction?: "top" | "bottom";
   threshold?: number;
   rootMargin?: string;
+  animationFrom?: Record<string, string | number>;
+  animationTo?: Array<Record<string, string | number>>;
+  easing?: Easing | Easing[];
+  onAnimationComplete?: () => void;
   stepDuration?: number;
 };
 
-const FROM = { filter: "blur(8px)", opacity: 0, y: 16 };
-const TO = [
-  { filter: "blur(4px)", opacity: 0.6, y: 4 },
-  { filter: "blur(0px)", opacity: 1, y: 0 },
-] as const;
-
-function buildKeyframes() {
+const buildKeyframes = (
+  from: Record<string, string | number>,
+  steps: Array<Record<string, string | number>>,
+): Record<string, Array<string | number>> => {
   const keys = new Set<string>([
-    ...Object.keys(FROM),
-    ...TO.flatMap((s) => Object.keys(s)),
+    ...Object.keys(from),
+    ...steps.flatMap((s) => Object.keys(s)),
   ]);
-  const out: Record<string, Array<string | number>> = {};
+  const keyframes: Record<string, Array<string | number>> = {};
   keys.forEach((k) => {
-    out[k] = [
-      (FROM as Record<string, string | number>)[k],
-      ...TO.map((s) => (s as Record<string, string | number>)[k]),
-    ];
+    keyframes[k] = [from[k], ...steps.map((s) => s[k])];
   });
-  return out;
-}
+  return keyframes;
+};
 
-export function BlurText({
-  text,
-  delay = 90,
+export const BlurText: React.FC<BlurTextProps> = ({
+  text = "",
+  delay = 200,
   className = "",
   animateBy = "words",
-  threshold = 0.15,
+  direction = "top",
+  threshold = 0.1,
   rootMargin = "0px",
-  stepDuration = 0.34,
-}: BlurTextProps) {
-  const segments = animateBy === "words" ? text.split(" ") : text.split("");
+  animationFrom,
+  animationTo,
+  easing = [0.22, 1, 0.36, 1],
+  onAnimationComplete,
+  stepDuration = 0.35,
+}) => {
   const reduced = useReducedMotion();
+  const elements = animateBy === "words" ? text.split(" ") : text.split("");
+  const [inView, setInView] = useState(false);
+  // A <span> wrapper (not reactbits' default <p>) so the component is valid as
+  // phrasing content inside an <h1>/<h2> headline without a hydration mismatch.
+  const ref = useRef<HTMLSpanElement>(null);
 
-  const stepCount = TO.length + 1;
+  useEffect(() => {
+    if (!ref.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.unobserve(ref.current as Element);
+        }
+      },
+      { threshold, rootMargin },
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [threshold, rootMargin]);
+
+  const defaultFrom = useMemo(
+    () =>
+      direction === "top"
+        ? { filter: "blur(10px)", opacity: 0, y: -28 }
+        : { filter: "blur(10px)", opacity: 0, y: 28 },
+    [direction],
+  );
+
+  const defaultTo = useMemo(
+    () => [
+      { filter: "blur(5px)", opacity: 0.5, y: direction === "top" ? 4 : -4 },
+      { filter: "blur(0px)", opacity: 1, y: 0 },
+    ],
+    [direction],
+  );
+
+  const fromSnapshot = animationFrom ?? defaultFrom;
+  const toSnapshots = animationTo ?? defaultTo;
+
+  const stepCount = toSnapshots.length + 1;
   const totalDuration = stepDuration * (stepCount - 1);
   const times = Array.from({ length: stepCount }, (_, i) =>
     stepCount === 1 ? 0 : i / (stepCount - 1),
   );
-  const keyframes = buildKeyframes();
 
-  // Reduced motion: render visible, no animation.
+  // Reduced motion: render the visible text immediately, no animation.
   if (reduced) {
     return <span className={className}>{text}</span>;
   }
 
   return (
-    <span className={className} style={{ display: "inline" }}>
-      {segments.map((segment, index) => {
-        const transition: Transition = {
+    <span ref={ref} className={className}>
+      {elements.map((segment, index) => {
+        const animateKeyframes = buildKeyframes(fromSnapshot, toSnapshots);
+        const spanTransition: Transition = {
           duration: totalDuration,
           times,
           delay: (index * delay) / 1000,
-          ease: [0.22, 1, 0.36, 1],
+          ease: easing,
         };
         return (
           <motion.span
             key={index}
-            initial={FROM}
-            whileInView={keyframes}
-            viewport={{ once: true, amount: threshold, margin: rootMargin }}
-            transition={transition}
+            initial={fromSnapshot}
+            animate={inView ? animateKeyframes : fromSnapshot}
+            transition={spanTransition}
+            onAnimationComplete={
+              index === elements.length - 1 ? onAnimationComplete : undefined
+            }
             style={{
               display: "inline-block",
               willChange: "transform, filter, opacity",
             }}
           >
             {segment === " " ? " " : segment}
-            {animateBy === "words" && index < segments.length - 1 && " "}
+            {animateBy === "words" && index < elements.length - 1 && " "}
           </motion.span>
         );
       })}
     </span>
   );
-}
+};
 
 export default BlurText;

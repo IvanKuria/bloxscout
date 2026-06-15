@@ -14,7 +14,7 @@ import type { NicheGauge, SaturationResult } from "@/lib/agent/tools";
 import { compact, int } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-const ACCENT = "#e2231a";
+const ACCENT = "#ff2d87";
 const POSITIVE = "#1faa6b";
 const TRACK = "#ececec";
 
@@ -168,7 +168,7 @@ export function NicheCard({ result }: { result: SaturationResult }) {
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="recon-pulse inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-accent"
             aria-hidden
           />
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">

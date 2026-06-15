@@ -2,8 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/brand-mark";
 import { isCopilotPreview } from "@/lib/preview";
-import { site } from "@/lib/site";
 import { createClient } from "@/lib/supabase/server";
 
 // The gated area is always request-time (per-user, cookie-bound). Never
@@ -42,13 +42,10 @@ export default async function AppLayout({
         <div className="flex h-14 items-center justify-between px-4 sm:px-6">
           <Link
             href="/app"
-            className="inline-flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground"
+            className="inline-flex items-center gap-2 text-sm font-medium tracking-[-0.01em] text-foreground"
           >
-            <span
-              className="recon-pulse inline-block size-2 rounded-full bg-accent"
-              aria-hidden
-            />
-            {site.name}
+            <BrandMark className="size-5" />
+            bloxscout
             <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               / agent
             </span>
