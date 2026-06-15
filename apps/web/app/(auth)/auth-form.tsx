@@ -1,14 +1,10 @@
 "use client";
 
-import { ArrowRight, CheckCircle2, LoaderCircle, Mail } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
-import {
-  type AuthState,
-  signInWithDiscord,
-  signInWithEmail,
-} from "./actions";
+import { type AuthState, signInWithDiscord } from "./actions";
 
 function DiscordIcon({ className }: { className?: string }) {
   return (
@@ -23,50 +19,15 @@ function DiscordIcon({ className }: { className?: string }) {
   );
 }
 
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-console-muted">
-      {children}
-    </span>
-  );
-}
-
-function EmailSubmit() {
-  const { pending } = useFormStatus();
-  return (
-    <Button
-      type="submit"
-      size="lg"
-      disabled={pending}
-      className="w-full bg-accent text-accent-foreground hover:bg-accent-hover"
-    >
-      {pending ? (
-        <LoaderCircle className="size-4 animate-spin" />
-      ) : (
-        <>
-          Send magic link
-          <ArrowRight className="size-4" />
-        </>
-      )}
-    </Button>
-  );
-}
-
 function DiscordSubmit() {
   const { pending } = useFormStatus();
   return (
-    <Button
-      type="submit"
-      variant="outline"
-      size="lg"
-      disabled={pending}
-      className="w-full border-console-border bg-transparent text-console-foreground hover:bg-white/5 hover:text-console-foreground"
-    >
+    <Button type="submit" size="lg" disabled={pending} className="w-full">
       {pending ? (
         <LoaderCircle className="size-4 animate-spin" />
       ) : (
         <>
-          <DiscordIcon className="size-4 text-[#5865F2]" />
+          <DiscordIcon className="size-4" />
           Continue with Discord
         </>
       )}
@@ -75,27 +36,20 @@ function DiscordSubmit() {
 }
 
 export function AuthForm() {
-  const [emailState, emailAction] = useActionState<
-    AuthState | undefined,
-    FormData
-  >(signInWithEmail, undefined);
   const [discordState, discordAction] = useActionState<
     AuthState | undefined,
     FormData
   >(async () => signInWithDiscord(), undefined);
 
   return (
-    <div className="rounded-xl border border-console-border bg-black/30 p-6 backdrop-blur-sm">
+    <div className="rounded-xl border border-border bg-card p-6 shadow-[0_1px_0_rgba(23,23,29,0.04),0_24px_60px_-28px_rgba(23,23,29,0.25)] sm:p-7">
       <div className="mb-6 flex flex-col gap-1.5">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
-          Access console
-        </span>
-        <h1 className="font-heading text-2xl font-semibold leading-tight text-console-foreground">
-          Sign in or create an account
-        </h1>
-        <p className="text-sm text-console-muted">
-          Start asking the agent for winning Roblox ideas. No password — we send
-          a one-time link.
+        <h2 className="font-heading text-2xl leading-tight text-foreground">
+          Sign in with Discord
+        </h2>
+        <p className="text-sm leading-relaxed text-foreground/60">
+          One tap, no password. Most Roblox developers already have a Discord
+          account, so there&apos;s nothing new to set up.
         </p>
       </div>
 
@@ -109,45 +63,7 @@ export function AuthForm() {
         </p>
       ) : null}
 
-      {/* Divider */}
-      <div className="my-5 flex items-center gap-3">
-        <div className="h-px flex-1 bg-console-border" />
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-console-muted">
-          or via email
-        </span>
-        <div className="h-px flex-1 bg-console-border" />
-      </div>
-
-      {/* Magic-link email */}
-      {emailState?.message ? (
-        <div className="flex items-start gap-2.5 rounded-lg border border-positive/30 bg-positive/10 p-3.5">
-          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-positive" />
-          <p className="text-sm text-console-foreground">{emailState.message}</p>
-        </div>
-      ) : (
-        <form action={emailAction} className="flex flex-col gap-3">
-          <label className="flex flex-col gap-1.5">
-            <FieldLabel>Email address</FieldLabel>
-            <div className="flex items-center gap-2 rounded-lg border border-console-border bg-black/40 px-3 focus-within:border-accent">
-              <Mail className="size-4 text-console-muted" />
-              <input
-                type="email"
-                name="email"
-                required
-                autoComplete="email"
-                placeholder="you@studio.gg"
-                className="h-10 w-full bg-transparent font-mono text-sm text-console-foreground outline-none placeholder:text-console-muted/60"
-              />
-            </div>
-          </label>
-          {emailState?.error ? (
-            <p className="font-mono text-xs text-negative">{emailState.error}</p>
-          ) : null}
-          <EmailSubmit />
-        </form>
-      )}
-
-      <p className="mt-5 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-console-muted">
+      <p className="mt-5 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-foreground/40">
         Signing in means you accept the terms
       </p>
     </div>
