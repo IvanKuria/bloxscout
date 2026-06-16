@@ -54,6 +54,10 @@ export interface SteamAppDetails {
   priceUsd: number | null;
   headerImageUrl: string | null;
   type: string | null;
+  /** Studio(s) that built it — used to filter out AAA. */
+  developers: string[];
+  /** Publisher(s) — the primary AAA signal alongside price. */
+  publishers: string[];
 }
 
 export interface SteamReviewSummary {
@@ -153,6 +157,8 @@ export class SteamClient {
       is_free?: boolean;
       header_image?: string;
       type?: string;
+      developers?: unknown;
+      publishers?: unknown;
     };
     return {
       appId,
@@ -168,6 +174,8 @@ export class SteamClient {
           : null,
       headerImageUrl: d.header_image ?? null,
       type: d.type ?? null,
+      developers: toStringArray(d.developers),
+      publishers: toStringArray(d.publishers),
     };
   }
 
@@ -344,6 +352,12 @@ export function parseOwnersBand(owners: string | undefined): [number | null, num
   const low = Number.isFinite(parts[0]) ? (parts[0] as number) : null;
   const high = Number.isFinite(parts[1]) ? (parts[1] as number) : low;
   return [low, high];
+}
+
+/** Coerce Steam's `developers`/`publishers` (usually string[]) into a clean string[]. */
+function toStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v): v is string => typeof v === "string" && v.length > 0);
 }
 
 /** Exponential backoff with full jitter: base 200ms * 2^attempt, capped at 5s. */

@@ -73,6 +73,8 @@ describe("SteamClient", () => {
             release_date: { coming_soon: false, date: "10 Jun, 2026" },
             price_overview: { final: 799 },
             header_image: "https://img/header.jpg",
+            developers: ["Tiny Team"],
+            publishers: ["Tiny Team", ""],
           },
         },
       });
@@ -84,6 +86,9 @@ describe("SteamClient", () => {
     expect(d?.priceUsd).toBeCloseTo(7.99, 6);
     expect(d?.comingSoon).toBe(false);
     expect(d?.releaseDate).toBe("10 Jun, 2026");
+    expect(d?.developers).toEqual(["Tiny Team"]);
+    // empty strings filtered out
+    expect(d?.publishers).toEqual(["Tiny Team"]);
   });
 
   it("getAppDetails treats is_free and missing page", async () => {

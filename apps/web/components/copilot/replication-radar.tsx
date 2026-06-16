@@ -13,6 +13,13 @@ function nicheHref(slug: string | null): string {
   return slug ? `/genre/${slug}` : "/rising-roblox-niches";
 }
 
+/** Plain-language clone-ability label from the [0,1] replicability score. */
+function cloneLabel(score: number): string | null {
+  if (score >= 0.75) return "easy to clone";
+  if (score >= 0.5) return "clone-able";
+  return null;
+}
+
 function subline(row: RadarResult["rows"][number]): string {
   const bits: string[] = [];
   if (row.reviewVelocityPerDay != null) {
@@ -22,6 +29,8 @@ function subline(row: RadarResult["rows"][number]): string {
     bits.push(`${row.currentPlayers.toLocaleString()} playing`);
   }
   if (row.ageDays != null) bits.push(`${row.ageDays}d old`);
+  const clone = cloneLabel(row.replicabilityScore);
+  if (clone) bits.push(clone);
   if (row.observationBasis === "first-seen") bits.push("first sight");
   return bits.join(" · ");
 }

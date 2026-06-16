@@ -20,6 +20,10 @@ export interface ExternalGameObservation {
   releaseDate: string | null;
   genres: string[];
   tags: string[];
+  /** Studio(s) — used to filter AAA out of the radar. */
+  developers: string[];
+  /** Publisher(s) — primary AAA signal alongside price. */
+  publishers: string[];
   priceUsd: number | null;
   reviewTotal: number | null;
   positivePct: number | null;
@@ -81,6 +85,8 @@ export class SteamSource implements ExternalSource {
       releaseDate: details.comingSoon ? null : details.releaseDate,
       genres: details.genres,
       tags: spy?.tags ?? [],
+      developers: details.developers,
+      publishers: details.publishers,
       priceUsd: details.priceUsd,
       reviewTotal: reviews?.totalReviews ?? null,
       positivePct: reviews?.positivePct ?? null,
