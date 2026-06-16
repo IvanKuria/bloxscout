@@ -38,7 +38,7 @@
 
 ### Wrap
 - [x] full green gate — root **352 tests** pass (44 files), typecheck clean (both tsconfigs), web eslint clean, **`next build` exit 0**
-- [x] draft PR opened
+- [x] draft PR opened — **PR #76; CI 5/5 green (Node 20/22 × Linux/macOS/Windows) + Vercel preview deployed**
 
 ## ✅ BUILD COMPLETE — all 4 phases shipped on `feat/v2-replication-radar`
 Phase 1 (Steam ingest→scoring→view/state/catalog) · Phase 2 (copilot tools+widgets+prompt+analytics) · Phase 3 (hub SEO page) · Phase 4 (programmatic AEO pages+sitemap). 12 green-gated commits. New tests: steam-virality (15), steam-client (9), external-sources (3), steam-breakouts (8), cross-platform (8) = 43 added; 352 total.
