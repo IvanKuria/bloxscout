@@ -7,7 +7,8 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
-import { type AuthState, signInWithDiscord } from "./actions";
+import { createClient } from "@/lib/supabase/client";
+import type { AuthState } from "./actions";
 
 function DiscordIcon({ className }: { className?: string }) {
   return (
@@ -72,7 +73,28 @@ export function AuthForm({ mode = "login" }: { mode?: AuthMode }) {
     FormData
   >(async () => {
     posthog.capture("signin_started", { method: "discord", mode });
-    return signInWithDiscord();
+    // Initiate OAuth from the BROWSER so the PKCE code-verifier is written to a
+    // cookie (via @supabase/ssr's browser client) that survives the round-trip
+    // to Discord and is readable by the /auth/callback server route. Doing this
+    // in a server action drops the Set-Cookie on the external redirect, which
+    // surfaces later as "PKCE code verifier not found in storage".
+    let supabase: ReturnType<typeof createClient>;
+    try {
+      supabase = createClient();
+    } catch {
+      return { error: "Auth is not configured on this deployment." };
+    }
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "discord",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=/app`,
+      },
+    });
+    if (error) {
+      return { error: error.message };
+    }
+    // Success: the browser client redirects to Discord on its own.
+    return undefined;
   }, undefined);
 
   return (
@@ -90,7 +112,7 @@ export function AuthForm({ mode = "login" }: { mode?: AuthMode }) {
           </p>
         </div>
 
-        {/* Discord OAuth — preserves the signInWithDiscord server action flow. */}
+        {/* Discord OAuth — initiated client-side so the PKCE verifier persists. */}
         <form action={discordAction} className="mt-8">
           <DiscordSubmit />
         </form>
