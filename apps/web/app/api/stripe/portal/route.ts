@@ -65,6 +65,15 @@ export async function POST(request: NextRequest) {
     // partial secrets (e.g. "Invalid API Key provided: whsec_…"). Log it
     // server-side and return a generic message.
     console.error("[stripe/portal] failed to open billing portal:", e);
+    // A stale/missing customer (e.g. a stored id that doesn't exist in the
+    // current Stripe mode) means there's nothing to manage — guide the user
+    // to re-subscribe instead of returning an opaque 500.
+    if ((e as { code?: string })?.code === "resource_missing") {
+      return NextResponse.json(
+        { error: "We couldn't find your billing account. Please start a new subscription." },
+        { status: 409 },
+      );
+    }
     return NextResponse.json(
       { error: "Could not open the billing portal. Please try again later." },
       { status: 500 },

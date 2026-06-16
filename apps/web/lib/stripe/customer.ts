@@ -19,11 +19,22 @@ export async function getOrCreateCustomer(
     .eq("user_id", userId)
     .maybeSingle();
 
+  const stripe = getStripe();
+
   if (existing?.stripe_customer_id) {
-    return existing.stripe_customer_id;
+    // Verify the stored customer still exists in the CURRENT Stripe mode. A
+    // stale id — e.g. a test-mode customer carried over after switching to a
+    // live key, or a customer deleted in the dashboard — would otherwise break
+    // both checkout and the billing portal. If it's gone, fall through and
+    // create a fresh one (self-heal).
+    try {
+      const c = await stripe.customers.retrieve(existing.stripe_customer_id);
+      if (!c.deleted) return existing.stripe_customer_id;
+    } catch (e) {
+      if ((e as { code?: string })?.code !== "resource_missing") throw e;
+    }
   }
 
-  const stripe = getStripe();
   const customer: Stripe.Customer = await stripe.customers.create({
     email,
     metadata: { supabase_user_id: userId },
