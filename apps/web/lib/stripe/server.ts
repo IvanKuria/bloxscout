@@ -18,6 +18,16 @@ export function getStripe(): Stripe {
         "Billing is not configured — see apps/web/.env.example.",
     );
   }
+  // Fail fast (server-side only) if the value isn't a Stripe secret key — the
+  // common deploy mistake is pasting the webhook secret (whsec_...) here, which
+  // Stripe rejects at call time with a confusing "Invalid API Key" error.
+  if (!key.startsWith("sk_") && !key.startsWith("rk_")) {
+    throw new Error(
+      `STRIPE_SECRET_KEY is set but is not a Stripe secret key ` +
+        `(expected "sk_..." or "rk_...", got "${key.slice(0, 6)}…"). ` +
+        `It is likely swapped with STRIPE_WEBHOOK_SECRET in the deploy env.`,
+    );
+  }
 
   cached = new Stripe(key, {
     // Pin via the SDK's bundled default; omit explicit apiVersion to avoid

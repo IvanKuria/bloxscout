@@ -104,8 +104,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: session.url });
   } catch (e) {
-    const message =
-      e instanceof Error ? e.message : "Could not start checkout.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Don't leak raw provider errors (may contain partial secrets) to the
+    // client. Log server-side, return a generic message.
+    console.error("[stripe/checkout] failed to create checkout session:", e);
+    return NextResponse.json(
+      { error: "Could not start checkout. Please try again later." },
+      { status: 500 },
+    );
   }
 }

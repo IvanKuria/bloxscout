@@ -61,7 +61,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: session.url });
   } catch (e) {
-    const message = e instanceof Error ? e.message : "Could not open portal.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Never forward the raw provider error to the client — it can contain
+    // partial secrets (e.g. "Invalid API Key provided: whsec_…"). Log it
+    // server-side and return a generic message.
+    console.error("[stripe/portal] failed to open billing portal:", e);
+    return NextResponse.json(
+      { error: "Could not open the billing portal. Please try again later." },
+      { status: 500 },
+    );
   }
 }
