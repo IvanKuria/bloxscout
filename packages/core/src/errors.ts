@@ -55,10 +55,7 @@ export class SteamApiError extends BloxscoutError {
   public readonly endpoint: string;
   public readonly body: string | undefined;
 
-  constructor(
-    message: string,
-    init: { statusCode: number; endpoint: string; body?: string },
-  ) {
+  constructor(message: string, init: { statusCode: number; endpoint: string; body?: string }) {
     super(message, "STEAM_API_ERROR");
     this.name = "SteamApiError";
     this.statusCode = init.statusCode;

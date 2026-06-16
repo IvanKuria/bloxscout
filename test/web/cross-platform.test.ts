@@ -1,7 +1,7 @@
+import { describe, expect, it } from "vitest";
 // The web app has no test runner of its own, but this helper is pure and
 // dependency-free, so we exercise it from the root vitest via a relative import.
 import { candidateRobloxNiche, matchExternalGame } from "../../apps/web/lib/cross-platform.js";
-import { describe, expect, it } from "vitest";
 
 describe("candidateRobloxNiche", () => {
   it("maps MECCHA-CHAMELEON-style tags to a hide-and-seek niche", () => {

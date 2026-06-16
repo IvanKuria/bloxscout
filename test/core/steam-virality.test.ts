@@ -1,8 +1,8 @@
 import {
   computeVirality,
   playerVelocitySubscore,
-  receptionSubscore,
   recencySubscore,
+  receptionSubscore,
   reviewVelocitySubscore,
 } from "@bloxscout/core/steam-virality";
 import { describe, expect, it } from "vitest";

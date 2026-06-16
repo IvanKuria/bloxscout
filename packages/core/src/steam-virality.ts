@@ -66,11 +66,7 @@ const WEIGHTS = {
 /** Review-velocity sub-score in [0, 1]; 0 when unavailable or non-positive. */
 export function reviewVelocitySubscore(reviewVelocityPerDay: number | null): number {
   if (reviewVelocityPerDay === null || reviewVelocityPerDay <= 0) return 0;
-  return logistic(
-    reviewVelocityPerDay,
-    REVIEW_VELOCITY_MIDPOINT,
-    REVIEW_VELOCITY_STEEPNESS,
-  );
+  return logistic(reviewVelocityPerDay, REVIEW_VELOCITY_MIDPOINT, REVIEW_VELOCITY_STEEPNESS);
 }
 
 /** Player-velocity sub-score in [0, 1]; 0 when unavailable or non-positive. */
@@ -91,10 +87,7 @@ export function recencySubscore(ageDays: number | null): number {
  * Reception sub-score in [0, 1]: positive fraction, linearly discounted when
  * the review count is small (a 95% on 20 reviews is weak evidence).
  */
-export function receptionSubscore(
-  positivePct: number | null,
-  reviewTotal: number | null,
-): number {
+export function receptionSubscore(positivePct: number | null, reviewTotal: number | null): number {
   if (positivePct === null) return 0;
   const pct = Math.min(Math.max(positivePct, 0), 1);
   const n = Math.max(reviewTotal ?? 0, 0);

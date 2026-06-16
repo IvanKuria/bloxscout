@@ -25,7 +25,12 @@ function interceptAppDetails(agent: MockAgent, type: string) {
     .reply(200, {
       [MECCHA]: {
         success: true,
-        data: { name: "MECCHA CHAMELEON", type, header_image: "h.jpg", release_date: { date: "10 Jun, 2026" } },
+        data: {
+          name: "MECCHA CHAMELEON",
+          type,
+          header_image: "h.jpg",
+          release_date: { date: "10 Jun, 2026" },
+        },
       },
     });
 }

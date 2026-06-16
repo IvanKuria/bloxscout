@@ -23,6 +23,7 @@ import { randomUUID } from "node:crypto";
 import { existsSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
+import { SteamSource } from "@bloxscout/core/external-sources";
 import {
   type DailyFile,
   type GamePassFile,
@@ -38,14 +39,12 @@ import {
   type SteamStateFile,
   SteamStateFileSchema,
 } from "@bloxscout/core/hosted-format";
-import { SteamSource } from "@bloxscout/core/external-sources";
 import { RobloxClient } from "@bloxscout/core/roblox-client";
 import { SteamClient } from "@bloxscout/core/steam-client";
 import type { Game } from "@bloxscout/core/types";
 import { discoverGames } from "./discover.js";
 import { DEFAULT_GAMEPASS_TOP_N, sampleGamePasses, selectGamePassSampleIds } from "./gamepasses.js";
 import { snapshotInBatches } from "./ingest.js";
-import { computeSteamBreakouts } from "./steam-breakouts.js";
 import {
   listDailyDates,
   listRawDates,
@@ -62,11 +61,8 @@ import {
   upsertDiscovered,
 } from "./registry.js";
 import { aggregateDaily, aggregateHourly, buildHistoryShards } from "./rollup.js";
-import {
-  validateGamePassFile,
-  validateRunOutputs,
-  validateSteamBreakouts,
-} from "./validate.js";
+import { computeSteamBreakouts } from "./steam-breakouts.js";
+import { validateGamePassFile, validateRunOutputs, validateSteamBreakouts } from "./validate.js";
 import { computeViews } from "./views.js";
 
 const MAX_TRACKED = 15_000;
@@ -293,9 +289,7 @@ async function main(): Promise<void> {
     writeJsonFile(join(dataDir, HOSTED_PATHS.steamBreakoutsView), view);
     writeJsonFile(join(dataDir, HOSTED_PATHS.steamState), nextState);
     writeJsonFile(join(dataDir, HOSTED_PATHS.steamCatalog), catalog);
-    log(
-      `steam-radar: ${view.entries.length} breakouts, ${catalog.entries.length} catalog entries`,
-    );
+    log(`steam-radar: ${view.entries.length} breakouts, ${catalog.entries.length} catalog entries`);
   }
 
   // -------------------------------------------------------------------------

@@ -11,10 +11,7 @@
  * Velocity needs two observations; on first sight we fall back to a launch-to-
  * date approximation and flag `observationBasis: "first-seen"`.
  */
-import type {
-  ExternalGameObservation,
-  ExternalSource,
-} from "@bloxscout/core/external-sources";
+import type { ExternalGameObservation, ExternalSource } from "@bloxscout/core/external-sources";
 import type {
   SteamBreakoutEntry,
   SteamBreakoutsView,
@@ -156,11 +153,7 @@ function reviewVelocity(
   ageDays: number | null,
   now: number,
 ): { reviewVelocityPerDay: number | null; observationBasis: "two-snapshot" | "first-seen" } {
-  if (
-    prior?.lastReviewTotal != null &&
-    prior.lastReviewAt &&
-    obs.reviewTotal != null
-  ) {
+  if (prior?.lastReviewTotal != null && prior.lastReviewAt && obs.reviewTotal != null) {
     const dtDays = (now - Date.parse(prior.lastReviewAt)) / DAY_MS;
     if (dtDays > 0) {
       return {
@@ -171,9 +164,7 @@ function reviewVelocity(
   }
   // First sight (or unusable prior): approximate from launch-to-date.
   const launchVel =
-    obs.reviewTotal != null && ageDays != null && ageDays > 0
-      ? obs.reviewTotal / ageDays
-      : null;
+    obs.reviewTotal != null && ageDays != null && ageDays > 0 ? obs.reviewTotal / ageDays : null;
   return { reviewVelocityPerDay: launchVel, observationBasis: "first-seen" };
 }
 
@@ -195,10 +186,7 @@ export function computeAgeDays(releaseDate: string | null, now: number): number 
   return Math.max(0, Math.floor((now - ms) / DAY_MS));
 }
 
-function pruneStaleApps(
-  apps: SteamStateFile["apps"],
-  now: number,
-): SteamStateFile["apps"] {
+function pruneStaleApps(apps: SteamStateFile["apps"], now: number): SteamStateFile["apps"] {
   const cutoff = now - STATE_PRUNE_DAYS * DAY_MS;
   const kept: SteamStateFile["apps"] = {};
   for (const [key, app] of Object.entries(apps)) {

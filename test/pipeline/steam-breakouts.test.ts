@@ -4,17 +4,15 @@ import type {
   ExternalSource,
 } from "@bloxscout/core/external-sources";
 import type { SteamCatalogFile, SteamStateFile } from "@bloxscout/core/hosted-format";
-import {
-  computeAgeDays,
-  computeSteamBreakouts,
-  slugify,
-} from "../../pipeline/steam-breakouts.js";
 import { describe, expect, it } from "vitest";
+import { computeAgeDays, computeSteamBreakouts, slugify } from "../../pipeline/steam-breakouts.js";
 
 const NOW = Date.parse("2026-06-16T00:00:00.000Z");
 const DAY = 86_400_000;
 
-function obs(over: Partial<ExternalGameObservation> & { externalId: number; name: string }): ExternalGameObservation {
+function obs(
+  over: Partial<ExternalGameObservation> & { externalId: number; name: string },
+): ExternalGameObservation {
   return {
     source: "steam",
     storeUrl: `https://store.steampowered.com/app/${over.externalId}`,
@@ -51,7 +49,12 @@ describe("computeSteamBreakouts", () => {
   it("first run uses launch-to-date velocity flagged first-seen", async () => {
     const r = await computeSteamBreakouts({
       source: fakeSource([
-        obs({ externalId: 4704690, name: "MECCHA CHAMELEON", reviewTotal: 40000, positivePct: 0.95 }),
+        obs({
+          externalId: 4704690,
+          name: "MECCHA CHAMELEON",
+          reviewTotal: 40000,
+          positivePct: 0.95,
+        }),
       ]),
       priorState: null,
       priorCatalog: null,
@@ -84,7 +87,12 @@ describe("computeSteamBreakouts", () => {
     };
     const r = await computeSteamBreakouts({
       source: fakeSource([
-        obs({ externalId: 4704690, name: "MECCHA CHAMELEON", reviewTotal: 40000, currentPlayers: 25000 }),
+        obs({
+          externalId: 4704690,
+          name: "MECCHA CHAMELEON",
+          reviewTotal: 40000,
+          currentPlayers: 25000,
+        }),
       ]),
       priorState,
       priorCatalog: null,
@@ -101,7 +109,12 @@ describe("computeSteamBreakouts", () => {
   it("ranks entries by virality score descending", async () => {
     const r = await computeSteamBreakouts({
       source: fakeSource([
-        obs({ externalId: 1, name: "Stale", reviewTotal: 100, releaseDate: "2024-01-01T00:00:00.000Z" }),
+        obs({
+          externalId: 1,
+          name: "Stale",
+          reviewTotal: 100,
+          releaseDate: "2024-01-01T00:00:00.000Z",
+        }),
         obs({ externalId: 2, name: "Hot", reviewTotal: 50000, positivePct: 0.95 }),
       ]),
       priorState: null,
@@ -135,7 +148,12 @@ describe("computeSteamBreakouts", () => {
     };
     const r = await computeSteamBreakouts({
       source: fakeSource([
-        obs({ externalId: 4704690, name: "MECCHA CHAMELEON", reviewTotal: 40000, positivePct: 0.95 }),
+        obs({
+          externalId: 4704690,
+          name: "MECCHA CHAMELEON",
+          reviewTotal: 40000,
+          positivePct: 0.95,
+        }),
       ]),
       priorState: null,
       priorCatalog,

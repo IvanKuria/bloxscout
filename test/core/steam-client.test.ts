@@ -1,5 +1,5 @@
 import { BloxscoutCache } from "@bloxscout/core/cache";
-import { parseOwnersBand, SteamClient } from "@bloxscout/core/steam-client";
+import { SteamClient, parseOwnersBand } from "@bloxscout/core/steam-client";
 import { MockAgent } from "undici";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
@@ -33,8 +33,18 @@ describe("SteamClient", () => {
       .get("https://store.steampowered.com")
       .intercept({ path: (p) => p.startsWith("/api/featuredcategories") })
       .reply(200, {
-        new_releases: { items: [{ id: MECCHA, name: "MECCHA CHAMELEON" }, { id: 111, name: "A" }] },
-        top_sellers: { items: [{ id: MECCHA, name: "MECCHA CHAMELEON" }, { id: 222, name: "B" }] },
+        new_releases: {
+          items: [
+            { id: MECCHA, name: "MECCHA CHAMELEON" },
+            { id: 111, name: "A" },
+          ],
+        },
+        top_sellers: {
+          items: [
+            { id: MECCHA, name: "MECCHA CHAMELEON" },
+            { id: 222, name: "B" },
+          ],
+        },
         coming_soon: { items: [{ id: 333, name: "C" }] },
         specials: { items: [{ id: 999, name: "ignored" }] },
       });
@@ -87,8 +97,7 @@ describe("SteamClient", () => {
     expect(free?.priceUsd).toBe(0);
 
     const { client: c2, agent: a2 } = makeClient();
-    a2
-      .get("https://store.steampowered.com")
+    a2.get("https://store.steampowered.com")
       .intercept({ path: (p) => p.startsWith("/api/appdetails") })
       .reply(200, { "222": { success: false } });
     expect(await c2.getAppDetails(222)).toBeNull();
@@ -114,8 +123,7 @@ describe("SteamClient", () => {
     expect(s?.reviewScoreDesc).toBe("Overwhelmingly Positive");
 
     const { client: c2, agent: a2 } = makeClient();
-    a2
-      .get("https://store.steampowered.com")
+    a2.get("https://store.steampowered.com")
       .intercept({ path: (p) => p.startsWith("/appreviews/777") })
       .reply(200, { success: 1, query_summary: { total_reviews: 0, total_positive: 0 } });
     const empty = await c2.getReviewSummary(777);
@@ -147,8 +155,7 @@ describe("SteamClient", () => {
     expect(await client.getCurrentPlayers(MECCHA)).toBe(53000);
 
     const { client: c2, agent: a2 } = makeClient();
-    a2
-      .get("https://api.steampowered.com")
+    a2.get("https://api.steampowered.com")
       .intercept({ path: (p) => p.startsWith("/ISteamUserStats/GetNumberOfCurrentPlayers") })
       .reply(200, { response: { result: 42 } });
     expect(await c2.getCurrentPlayers(111)).toBeNull();
