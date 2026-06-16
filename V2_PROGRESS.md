@@ -27,7 +27,7 @@
 **✅ Phase 2 (web agent surface) COMPLETE** — tools + widgets + system prompt + analytics; `next build` exit 0.
 
 ### Phase 3 — Hub SEO page
-- [ ] `apps/web/app/steam-games-to-clone-on-roblox/page.tsx` + cross-links
+- [x] `apps/web/app/steam-games-to-clone-on-roblox/page.tsx` — ISR (1800s), answer-first + FAQs + ranked table (game→Steam, niche→/genre), `<ComputingState>` fallback. **next build prerenders it (exit 0)**. (Cross-links from rising/best pages + hub→/roblox-version-of land in Phase 4.)
 
 ### Phase 4 — Programmatic AEO pages
 - [ ] `apps/web/app/roblox-version-of/[slug]/page.tsx` (generateStaticParams from catalog)
@@ -38,6 +38,7 @@
 
 ## Iteration log
 - **Iter 1:** branch created; read existing patterns (`concentration.ts`, `growth.ts`, test style). Implemented pure virality scoring `steam-virality.ts` (review-velocity 0.45 / player-velocity 0.25 / recency 0.20 / reception 0.10; reuses `logistic`). 15 unit tests pass incl. a MECCHA-CHAMELEON-like case scoring >80. Committed `5fdfd43`.
+- **Iter 10 (Phase 3):** built `/steam-games-to-clone-on-roblox` hub page from the rising-niches ISR template — trend-chasing answer/intro, 3 AEO FAQs, ranked virality table (game→Steam store, niche→/genre or /rising), first-seen honesty note, `<ComputingState>` fallback. eslint clean; `next build` prerenders the route (exit 0). Phase 3 done. Committed.
 - **Iter 9:** added the radar/brief tool-selection paragraph to `SYSTEM_PROMPT` (trend-chasing framing + caveats; YOU narrate the brief over briefSections). Found server-side PostHog already covered by the route's generic `copilot_tool_invoked`; added client `replication_target_opened` capture on both widgets' Steam-store links. eslint clean, `next build` exit 0. Phase 2 done. Committed.
 - **Iter 8:** built `replication-radar.tsx` (ranked clone-candidate list: header image, virality bar, review velocity, niche chip→/genre) + `replication-brief.tsx` (single-game facts grid + tags + adaptation-brief section scaffold the agent narrates). Registered both in `widgets.tsx` (WIDGET_BY_TOOL + RUNNING_LABEL) and `protocol.ts` (CITATION_SOURCE "Steam store + reviews"). Swapped biome-ignore→eslint-disable for the external `<img>`. **`next build` exit 0**, web tsc + eslint clean. Committed.
 - **Iter 7:** added the two agent tools to `tools.ts` (see 2.2a).
