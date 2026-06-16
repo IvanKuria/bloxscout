@@ -1,14 +1,25 @@
 /**
  * Supabase client for the browser (Client Components).
  *
- * Reads only the public (NEXT_PUBLIC_*) env, which Next inlines at build time.
- * Created on demand via `createClient()` so nothing throws at module load.
+ * IMPORTANT: read the public env via *literal* `process.env.NEXT_PUBLIC_*`
+ * references. Next.js only statically inlines `NEXT_PUBLIC_*` vars into the
+ * client bundle when accessed by literal name — the dynamic `process.env[name]`
+ * helper in `env.ts` is NOT inlined and evaluates to `undefined` in the browser
+ * (it works server-side only). Created on demand so nothing throws at module load.
  */
 "use client";
 
 import { createBrowserClient } from "@supabase/ssr";
-import { supabaseAnonKey, supabaseUrl } from "./env";
 
 export function createClient() {
-  return createBrowserClient(supabaseUrl(), supabaseAnonKey());
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY in the " +
+        "client bundle. Set them in the deployment env and rebuild (NEXT_PUBLIC " +
+        "vars are inlined at build time).",
+    );
+  }
+  return createBrowserClient(url, anonKey);
 }
