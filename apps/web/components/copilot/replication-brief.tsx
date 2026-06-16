@@ -6,6 +6,7 @@
  * scaffold; the agent narrates the actual brief prose in the message text.
  */
 import Link from "next/link";
+import posthog from "posthog-js";
 import type { ReplicationBriefResult } from "@/lib/agent/tools";
 
 const SECTION_LABEL: Record<string, string> = {
@@ -66,6 +67,13 @@ export function ReplicationBrief({ result }: { result: ReplicationBriefResult })
                 href={result.storeUrl}
                 target="_blank"
                 rel="noreferrer"
+                onClick={() =>
+                  posthog.capture("replication_target_opened", {
+                    appId: result.appId,
+                    name: result.name,
+                    surface: "brief_widget",
+                  })
+                }
                 className="truncate text-sm font-medium text-foreground underline-offset-4 hover:underline"
               >
                 {result.name}

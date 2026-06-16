@@ -6,6 +6,7 @@
  * clone/adapt on Roblox, with a virality-score bar and the candidate niche.
  */
 import Link from "next/link";
+import posthog from "posthog-js";
 import type { RadarResult } from "@/lib/agent/tools";
 
 function nicheHref(slug: string | null): string {
@@ -63,6 +64,13 @@ export function ReplicationRadar({ result }: { result: RadarResult }) {
                   href={r.storeUrl}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() =>
+                    posthog.capture("replication_target_opened", {
+                      appId: r.appId,
+                      name: r.name,
+                      surface: "radar_widget",
+                    })
+                  }
                   className="truncate text-sm font-medium text-foreground underline-offset-4 hover:underline"
                 >
                   {r.name}
