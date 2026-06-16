@@ -96,6 +96,62 @@ export interface GamePlayerCount {
 }
 
 /**
+ * Up/down vote totals for a game.
+ *
+ * Verified shape for `GET https://games.roblox.com/v1/games/votes?universeIds=...`
+ * — `{ data: [{ id, upVotes, downVotes }] }` where `id` is the universe id. The
+ * like-ratio (`upVotes / (upVotes + downVotes)`) is the cheapest quality signal
+ * Roblox exposes unauthenticated.
+ */
+export interface GameVotes {
+  universeId: RobloxUniverseId;
+  upVotes: number;
+  downVotes: number;
+}
+
+/**
+ * A "similar game" from Roblox's own recommendations graph.
+ *
+ * Verified shape for `GET https://games.roblox.com/v1/games/recommendations/game/{universeId}`
+ * (unauthenticated, 2026-06) — `{ games: [...] }`. Each entry carries live CCU
+ * AND vote totals AND creator inline, so one request yields a full competitor
+ * cohort with no enrichment fetch. This is Roblox's own "what's adjacent to X"
+ * graph — effectively free competitor mapping.
+ */
+export interface GameRecommendation {
+  universeId: RobloxUniverseId;
+  name: string;
+  playerCount: number;
+  totalUpVotes: number;
+  totalDownVotes: number;
+  creatorName: string;
+  creatorType: string;
+  genre: string;
+  canonicalUrlPath?: string;
+}
+
+/**
+ * A game badge with its award statistics.
+ *
+ * Verified shape for `GET https://badges.roblox.com/v1/universes/{id}/badges`
+ * (unauthenticated, 2026-06) — `{ data: [...] }`. `statistics.awardedCount` is
+ * embedded inline, so a single call yields a progression/engagement funnel:
+ * badges are dev-defined milestones, and the ratio of awards between
+ * sequential milestones approximates a progression-through rate. `winRate` is
+ * Roblox's own awarded-share figure (a 0..1 fraction).
+ */
+export interface Badge {
+  id: number;
+  name: string;
+  enabled: boolean;
+  awardedCount: number;
+  pastDayAwardedCount: number;
+  /** Roblox's "win rate" — share of players who earned it, as a 0..1 fraction. */
+  winRate: number;
+  created: string;
+}
+
+/**
  * User profile.
  *
  * Verified shape (2026-05) for `GET https://users.roblox.com/v1/users/{userId}`.
@@ -157,6 +213,20 @@ export interface GameIcon {
 
 /** Supported icon sizes for `getGameIcons`. */
 export type GameIconSize = "512x512" | "256x256" | "150x150" | "128x128" | "100x100" | "50x50";
+
+/**
+ * A monetization game pass for a universe.
+ *
+ * Normalized from Roblox's game-passes listing. `price` is in Robux and is
+ * `null` for passes that are off-sale / unpriced. Source endpoint shape is
+ * documented on `RobloxClient.getGamePasses`.
+ */
+export interface GamePass {
+  id: number;
+  name: string;
+  /** Price in Robux, or `null` when off-sale / not for sale. */
+  price: number | null;
+}
 
 /**
  * Game published by a user, returned by `games.roblox.com/v2/users/{userId}/games`.

@@ -3,6 +3,11 @@
  * Opens the Stripe Customer Portal for the authed user's existing customer.
  */
 import { type NextRequest, NextResponse } from "next/server";
+import {
+  captureServer,
+  distinctIdFrom,
+  flushPostHog,
+} from "@/lib/posthog/server";
 import { getStripe } from "@/lib/stripe/server";
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 
@@ -50,6 +55,10 @@ export async function POST(request: NextRequest) {
       customer: data.stripe_customer_id,
       return_url: `${siteUrl(request)}/app`,
     });
+
+    captureServer(distinctIdFrom(request, userId), "manage_portal_opened");
+    await flushPostHog();
+
     return NextResponse.json({ url: session.url });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Could not open portal.";

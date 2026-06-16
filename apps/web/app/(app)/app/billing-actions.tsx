@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpRight, LoaderCircle, Settings2 } from "lucide-react";
+import posthog from "posthog-js";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { BillingInterval, Tier } from "@/lib/stripe/config";
@@ -8,7 +9,12 @@ import type { BillingInterval, Tier } from "@/lib/stripe/config";
 async function postJson(url: string, body: Record<string, unknown>) {
   const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(posthog.__loaded
+        ? { "X-POSTHOG-DISTINCT-ID": posthog.get_distinct_id() }
+        : {}),
+    },
     body: JSON.stringify(body),
   });
   const data = (await res.json().catch(() => ({}))) as {
@@ -37,6 +43,7 @@ export function UpgradeButton({
   const [error, setError] = useState<string | null>(null);
 
   async function go() {
+    posthog.capture("checkout_clicked", { tier, interval });
     setLoading(true);
     setError(null);
     try {
@@ -56,11 +63,6 @@ export function UpgradeButton({
         disabled={loading}
         variant={variant}
         size="sm"
-        className={
-          variant === "default"
-            ? "bg-accent text-accent-foreground hover:bg-accent-hover"
-            : "border-console-border bg-transparent text-console-foreground hover:bg-white/5 hover:text-console-foreground"
-        }
       >
         {loading ? (
           <LoaderCircle className="size-3.5 animate-spin" />
@@ -72,7 +74,7 @@ export function UpgradeButton({
         )}
       </Button>
       {error ? (
-        <span className="font-mono text-[11px] text-negative">{error}</span>
+        <span className="text-xs text-destructive">{error}</span>
       ) : null}
     </div>
   );
@@ -84,6 +86,7 @@ export function ManageButton() {
   const [error, setError] = useState<string | null>(null);
 
   async function go() {
+    posthog.capture("manage_subscription_clicked");
     setLoading(true);
     setError(null);
     try {
@@ -103,7 +106,6 @@ export function ManageButton() {
         disabled={loading}
         variant="outline"
         size="sm"
-        className="border-console-border bg-transparent text-console-foreground hover:bg-white/5 hover:text-console-foreground"
       >
         {loading ? (
           <LoaderCircle className="size-3.5 animate-spin" />
@@ -115,7 +117,7 @@ export function ManageButton() {
         )}
       </Button>
       {error ? (
-        <span className="font-mono text-[11px] text-negative">{error}</span>
+        <span className="text-xs text-destructive">{error}</span>
       ) : null}
     </div>
   );

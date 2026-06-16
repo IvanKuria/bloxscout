@@ -1,14 +1,13 @@
 "use client";
 
-import { ArrowRight, CheckCircle2, LoaderCircle, Mail } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
+import Link from "next/link";
+import posthog from "posthog-js";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
+import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
-import {
-  type AuthState,
-  signInWithDiscord,
-  signInWithEmail,
-} from "./actions";
+import { type AuthState, signInWithDiscord } from "./actions";
 
 function DiscordIcon({ className }: { className?: string }) {
   return (
@@ -23,50 +22,20 @@ function DiscordIcon({ className }: { className?: string }) {
   );
 }
 
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-console-muted">
-      {children}
-    </span>
-  );
-}
-
-function EmailSubmit() {
-  const { pending } = useFormStatus();
-  return (
-    <Button
-      type="submit"
-      size="lg"
-      disabled={pending}
-      className="w-full bg-accent text-accent-foreground hover:bg-accent-hover"
-    >
-      {pending ? (
-        <LoaderCircle className="size-4 animate-spin" />
-      ) : (
-        <>
-          Send magic link
-          <ArrowRight className="size-4" />
-        </>
-      )}
-    </Button>
-  );
-}
-
 function DiscordSubmit() {
   const { pending } = useFormStatus();
   return (
     <Button
       type="submit"
-      variant="outline"
       size="lg"
       disabled={pending}
-      className="w-full border-console-border bg-transparent text-console-foreground hover:bg-white/5 hover:text-console-foreground"
+      className="h-11 w-full rounded-xl bg-[#5865F2] text-white hover:bg-[#4752c4]"
     >
       {pending ? (
         <LoaderCircle className="size-4 animate-spin" />
       ) : (
         <>
-          <DiscordIcon className="size-4 text-[#5865F2]" />
+          <DiscordIcon className="size-4" />
           Continue with Discord
         </>
       )}
@@ -74,81 +43,79 @@ function DiscordSubmit() {
   );
 }
 
-export function AuthForm() {
-  const [emailState, emailAction] = useActionState<
-    AuthState | undefined,
-    FormData
-  >(signInWithEmail, undefined);
+type AuthMode = "login" | "signup";
+
+const COPY: Record<
+  AuthMode,
+  { heading: string; subheading: string; switchPrompt: string; switchCta: string; switchHref: string }
+> = {
+  login: {
+    heading: "Sign in to bloxscout",
+    subheading: "One tap, no password.",
+    switchPrompt: "New to bloxscout?",
+    switchCta: "Create an account",
+    switchHref: "/signup",
+  },
+  signup: {
+    heading: "Create your account",
+    subheading: "One tap, no password.",
+    switchPrompt: "Already have an account?",
+    switchCta: "Sign in",
+    switchHref: "/login",
+  },
+};
+
+export function AuthForm({ mode = "login" }: { mode?: AuthMode }) {
+  const copy = COPY[mode];
   const [discordState, discordAction] = useActionState<
     AuthState | undefined,
     FormData
-  >(async () => signInWithDiscord(), undefined);
+  >(async () => {
+    posthog.capture("signin_started", { method: "discord", mode });
+    return signInWithDiscord();
+  }, undefined);
 
   return (
-    <div className="rounded-xl border border-console-border bg-black/30 p-6 backdrop-blur-sm">
-      <div className="mb-6 flex flex-col gap-1.5">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
-          Access console
-        </span>
-        <h1 className="font-heading text-2xl font-semibold leading-tight text-console-foreground">
-          Sign in or create an account
-        </h1>
-        <p className="text-sm text-console-muted">
-          One account for the dashboard, exports, and your subscription. No
-          password — we send a one-time link.
-        </p>
-      </div>
-
-      {/* Discord OAuth */}
-      <form action={discordAction}>
-        <DiscordSubmit />
-      </form>
-      {discordState?.error ? (
-        <p className="mt-2 font-mono text-xs text-negative">
-          {discordState.error}
-        </p>
-      ) : null}
-
-      {/* Divider */}
-      <div className="my-5 flex items-center gap-3">
-        <div className="h-px flex-1 bg-console-border" />
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-console-muted">
-          or via email
-        </span>
-        <div className="h-px flex-1 bg-console-border" />
-      </div>
-
-      {/* Magic-link email */}
-      {emailState?.message ? (
-        <div className="flex items-start gap-2.5 rounded-lg border border-positive/30 bg-positive/10 p-3.5">
-          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-positive" />
-          <p className="text-sm text-console-foreground">{emailState.message}</p>
+    <div className="w-full">
+      <div className="rounded-2xl border border-border bg-card p-8 sm:p-10">
+        <div className="flex flex-col items-center text-center">
+          <span className="flex size-11 items-center justify-center rounded-xl border border-border bg-muted text-foreground">
+            <BrandMark className="size-6" />
+          </span>
+          <h1 className="mt-5 text-xl font-semibold tracking-tight text-foreground">
+            {copy.heading}
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            {copy.subheading}
+          </p>
         </div>
-      ) : (
-        <form action={emailAction} className="flex flex-col gap-3">
-          <label className="flex flex-col gap-1.5">
-            <FieldLabel>Email address</FieldLabel>
-            <div className="flex items-center gap-2 rounded-lg border border-console-border bg-black/40 px-3 focus-within:border-accent">
-              <Mail className="size-4 text-console-muted" />
-              <input
-                type="email"
-                name="email"
-                required
-                autoComplete="email"
-                placeholder="you@studio.gg"
-                className="h-10 w-full bg-transparent font-mono text-sm text-console-foreground outline-none placeholder:text-console-muted/60"
-              />
-            </div>
-          </label>
-          {emailState?.error ? (
-            <p className="font-mono text-xs text-negative">{emailState.error}</p>
-          ) : null}
-          <EmailSubmit />
-        </form>
-      )}
 
-      <p className="mt-5 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-console-muted">
-        Signing in means you accept the terms
+        {/* Discord OAuth — preserves the signInWithDiscord server action flow. */}
+        <form action={discordAction} className="mt-8">
+          <DiscordSubmit />
+        </form>
+        {discordState?.error ? (
+          <p
+            role="alert"
+            className="mt-3 text-center text-sm text-destructive"
+          >
+            {discordState.error}
+          </p>
+        ) : null}
+
+        <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground">
+          By continuing you agree to the terms of service.
+        </p>
+      </div>
+
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        {copy.switchPrompt}{" "}
+        <Link
+          href={copy.switchHref}
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          {copy.switchCta}
+        </Link>
       </p>
     </div>
   );

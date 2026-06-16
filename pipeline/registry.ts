@@ -26,6 +26,10 @@ export interface IngestedGame {
   id: number;
   name: string | null;
   genre: string | null;
+  /** Game's own `created` ISO timestamp (games.roblox.com). */
+  created?: string | null;
+  /** Game's own `updated` ISO timestamp (games.roblox.com). */
+  updated?: string | null;
 }
 
 export function emptyRegistry(generatedAt: string): RegistryFile {
@@ -61,7 +65,14 @@ export function upsertDiscovered(
   }
 }
 
-/** Stamp name/genre/lastSeenAt from a successful ingest fetch. */
+/**
+ * Stamp name/genre/lastSeenAt from a successful ingest fetch, and track game
+ * age + update cadence for the breakout-teardown copilot:
+ *  - `createdAt` is recorded once (stable; the game's own birth date).
+ *  - `lastUpdatedAt` follows the game's latest `updated` timestamp.
+ *  - `updateCount` increments each run we observe a *newer* `updated` than
+ *    the one already stored — a proxy for developer shipping cadence.
+ */
 export function applyIngestResults(
   registry: RegistryFile,
   games: ReadonlyArray<IngestedGame>,
@@ -73,6 +84,20 @@ export function applyIngestResults(
     entry.name = game.name ?? entry.name;
     entry.genre = game.genre ?? entry.genre;
     entry.lastSeenAt = nowIso;
+
+    if (game.created != null && entry.createdAt === undefined) {
+      entry.createdAt = game.created;
+    }
+    if (game.updated != null) {
+      if (entry.lastUpdatedAt === undefined) {
+        // First sighting: seed without counting it as a fresh ship.
+        entry.lastUpdatedAt = game.updated;
+        entry.updateCount = 0;
+      } else if (Date.parse(game.updated) > Date.parse(entry.lastUpdatedAt)) {
+        entry.lastUpdatedAt = game.updated;
+        entry.updateCount = (entry.updateCount ?? 0) + 1;
+      }
+    }
   }
 }
 

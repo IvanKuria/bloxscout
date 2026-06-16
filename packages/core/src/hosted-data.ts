@@ -28,6 +28,9 @@ import {
   MetaFileSchema,
   type RankedView,
   RankedViewSchema,
+  type RegistryEntry,
+  type RegistryFile,
+  RegistryFileSchema,
   type RisingNichesView,
   RisingNichesViewSchema,
   type SaturationView,
@@ -133,6 +136,25 @@ export class HostedDataClient {
       CACHE_TTL.SLOW,
     );
     return shard?.games[String(universeId)] ?? null;
+  }
+
+  /**
+   * The full game registry, or `null` if unavailable. Carries per-game
+   * `createdAt` (game age), `lastUpdatedAt` + `updateCount` (dev ship cadence),
+   * and label/genre. Cached on the SLOW bucket — the registry moves slowly.
+   */
+  async getRegistry(): Promise<RegistryFile | null> {
+    return this.fetchValidated(
+      HOSTED_PATHS.registry,
+      RegistryFileSchema,
+      CACHE_TTL.SLOW,
+    );
+  }
+
+  /** One game's registry entry by universe id, or `null` when absent. */
+  async getRegistryEntry(universeId: number): Promise<RegistryEntry | null> {
+    const registry = await this.getRegistry();
+    return registry?.games[String(universeId)] ?? null;
   }
 
   // ---------------------------------------------------------------------------

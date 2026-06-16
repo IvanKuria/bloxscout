@@ -17,6 +17,8 @@ export interface PlanCopy {
   priceYearly: string;
   tagline: string;
   features: string[];
+  /** Not yet purchasable — UI shows "coming soon", checkout is refused. */
+  comingSoon?: boolean;
 }
 
 /** Marketing/UI copy for each tier. Amounts are display-only. */
@@ -26,11 +28,12 @@ export const PLANS: Record<Tier, PlanCopy> = {
     name: "Free",
     priceMonthly: "$0",
     priceYearly: "$0",
-    tagline: "Recon basics for getting started.",
+    tagline: "Get a feel for the agent.",
     features: [
-      "Public trending + breakout feeds",
-      "Limited daily MCP calls",
-      "Community support",
+      "3 agent questions a day",
+      "Niche, trending & breakout scans",
+      "Revenue, competitor & monetization analysis",
+      "Live Roblox data, refreshed ~30 min",
     ],
   },
   pro: {
@@ -38,12 +41,11 @@ export const PLANS: Record<Tier, PlanCopy> = {
     name: "Pro",
     priceMonthly: "$19",
     priceYearly: "$190",
-    tagline: "Full data firehose for serious solo devs.",
+    tagline: "Unlimited intel for serious solo devs.",
     features: [
-      "Unlimited MCP calls",
-      "Historical snapshots + genre momentum",
-      "CSV / API export",
-      "Email support",
+      "Unlimited agent questions",
+      "Everything in Free, no daily cap",
+      "Icon & thumbnail vision analysis",
     ],
   },
   studio: {
@@ -52,6 +54,8 @@ export const PLANS: Record<Tier, PlanCopy> = {
     priceMonthly: "$99",
     priceYearly: "$990",
     tagline: "Team seats + priority intelligence for studios.",
+    // Studio is not purchasable this milestone (multi-seat work deferred).
+    comingSoon: true,
     features: [
       "Everything in Pro",
       "Up to 10 seats",
@@ -109,3 +113,8 @@ export function tierForPriceId(
 }
 
 export const PAID_TIERS: Exclude<Tier, "free">[] = ["pro", "studio"];
+
+/** A paid tier that is actually purchasable right now (not "coming soon"). */
+export function isPurchasableTier(tier: Tier): tier is Exclude<Tier, "free"> {
+  return PAID_TIERS.includes(tier as Exclude<Tier, "free">) && !PLANS[tier].comingSoon;
+}

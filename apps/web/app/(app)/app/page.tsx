@@ -1,5 +1,18 @@
 import type { Metadata } from "next";
+import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { PLANS, type Tier } from "@/lib/stripe/config";
 import { getEntitlement } from "@/lib/supabase/account";
 import { createClient } from "@/lib/supabase/server";
@@ -10,10 +23,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const TIER_ORDER: Tier[] = ["free", "pro", "studio"];
+const TIER_ORDER: Tier[] = ["free", "pro"];
 
 function fmtDate(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "·";
   return new Date(iso).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -33,136 +46,143 @@ export default async function AccountPage() {
   const isPaid = ent.tier !== "free";
 
   return (
-    <div className="flex flex-col gap-8">
-      <header className="flex flex-col gap-1">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
-          Account
-        </span>
-        <h1 className="font-heading text-3xl font-semibold leading-tight">
-          Your console
-        </h1>
+    <div className="mx-auto flex h-full w-full max-w-4xl flex-col gap-10 overflow-y-auto px-6 py-12">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1.5">
+          <h1 className="font-heading text-3xl font-semibold tracking-tight">
+            Account
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Manage your plan, billing, and workspace details.
+          </p>
+        </div>
+        <Button render={<Link href="/app/copilot" />} variant="outline">
+          Open the AI agent
+          <ArrowUpRight />
+        </Button>
       </header>
 
       {/* Identity + current entitlement */}
-      <section className="recon-grid relative overflow-hidden rounded-xl border border-console-border bg-black/25">
-        <span className="absolute right-3 top-3 font-mono text-[10px] uppercase tracking-[0.18em] text-console-muted">
-          Status
-        </span>
-        <div className="grid gap-px sm:grid-cols-3">
-          <div className="flex flex-col gap-1.5 p-5">
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-console-muted">
-              Signed in as
-            </span>
-            <span className="break-all font-mono text-sm text-console-foreground">
-              {user.email ?? "—"}
-            </span>
-          </div>
-          <div className="flex flex-col gap-1.5 p-5">
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-console-muted">
-              Current tier
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="font-heading text-2xl font-semibold leading-none">
-                {plan.name}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Your plan</CardTitle>
+          <CardDescription>
+            Signed in as {user.email ?? "your account"}.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <div className="grid gap-6 sm:grid-cols-3">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs text-muted-foreground">Email</span>
+              <span className="break-all text-sm text-foreground">
+                {user.email ?? "·"}
               </span>
-              {isPaid ? (
-                <span className="rounded-sm bg-accent/15 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
-                  {ent.status ?? "active"}
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs text-muted-foreground">Current tier</span>
+              <span className="flex items-center gap-2">
+                <span className="font-heading text-lg font-semibold leading-none">
+                  {plan.name}
                 </span>
-              ) : null}
-            </span>
+                {isPaid ? (
+                  <Badge variant="secondary" className="capitalize">
+                    {ent.status ?? "active"}
+                  </Badge>
+                ) : null}
+              </span>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs text-muted-foreground">
+                {ent.cancelAtPeriodEnd ? "Cancels on" : "Renews on"}
+              </span>
+              <span className="text-sm tabular-nums text-foreground">
+                {isPaid ? fmtDate(ent.currentPeriodEnd) : "·"}
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col gap-1.5 p-5">
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-console-muted">
-              {ent.cancelAtPeriodEnd ? "Cancels on" : "Renews on"}
-            </span>
-            <span className="tabular font-mono text-sm text-console-foreground">
-              {isPaid ? fmtDate(ent.currentPeriodEnd) : "—"}
-            </span>
-          </div>
-        </div>
+        </CardContent>
 
         {(isPaid || ent.hasStripeCustomer) && (
-          <div className="flex items-center justify-between gap-4 border-t border-console-border bg-black/20 px-5 py-4">
-            <p className="text-sm text-console-muted">
+          <CardFooter className="flex flex-wrap items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
               Update payment method, switch plans, or cancel.
             </p>
             <ManageButton />
-          </div>
+          </CardFooter>
         )}
-      </section>
+      </Card>
 
       {/* Plan options */}
       <section className="flex flex-col gap-4">
-        <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-console-muted">
-          Plans
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="flex flex-col gap-1">
+          <h2 className="font-heading text-lg font-semibold tracking-tight">
+            Plans
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Choose the tier that fits how you build.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
           {TIER_ORDER.map((t) => {
             const p = PLANS[t];
             const isCurrent = t === ent.tier;
             return (
-              <div
+              <Card
                 key={t}
-                className={`flex flex-col gap-4 rounded-xl border bg-black/25 p-5 ${
-                  isCurrent
-                    ? "border-accent/50 ring-1 ring-accent/20"
-                    : "border-console-border"
-                }`}
+                className={
+                  isCurrent ? "ring-2 ring-primary" : undefined
+                }
               >
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-baseline justify-between">
-                    <span className="font-heading text-lg font-semibold">
-                      {p.name}
-                    </span>
-                    {isCurrent ? (
-                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
-                        Current
-                      </span>
-                    ) : null}
+                <CardHeader>
+                  <div className="flex items-center justify-between gap-2">
+                    <CardTitle>{p.name}</CardTitle>
+                    {isCurrent ? <Badge>Current</Badge> : null}
                   </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="tabular font-heading text-2xl font-semibold leading-none">
+                  <div className="flex items-baseline gap-1 pt-1">
+                    <span className="font-heading text-2xl font-semibold leading-none tabular-nums">
                       {p.priceMonthly}
                     </span>
-                    <span className="font-mono text-xs text-console-muted">
-                      /mo
-                    </span>
+                    <span className="text-xs text-muted-foreground">/mo</span>
                   </div>
-                  <p className="text-xs text-console-muted">{p.tagline}</p>
-                </div>
+                  <CardDescription>{p.tagline}</CardDescription>
+                </CardHeader>
 
-                <ul className="flex flex-col gap-1.5 text-xs text-console-foreground/80">
-                  {p.features.map((f) => (
-                    <li key={f} className="flex gap-2">
-                      <span className="text-accent">›</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
+                <CardContent className="flex flex-1 flex-col gap-5">
+                  <Separator />
+                  <ul className="flex flex-col gap-2 text-sm text-foreground/80">
+                    {p.features.map((f) => (
+                      <li key={f} className="flex gap-2">
+                        <span aria-hidden className="text-primary">
+                          ✓
+                        </span>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
 
-                <div className="mt-auto flex flex-col gap-2">
-                  {t === "free" || isCurrent ? (
-                    <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-console-muted">
-                      {isCurrent ? "Active plan" : "Default"}
-                    </span>
-                  ) : (
-                    <>
-                      <UpgradeButton
-                        tier={t as Exclude<Tier, "free">}
-                        interval="monthly"
-                        label={`Upgrade — ${p.priceMonthly}/mo`}
-                      />
-                      <UpgradeButton
-                        tier={t as Exclude<Tier, "free">}
-                        interval="yearly"
-                        label={`Annual — ${p.priceYearly}/yr`}
-                        variant="outline"
-                      />
-                    </>
-                  )}
-                </div>
-              </div>
+                  <div className="mt-auto flex flex-col gap-2">
+                    {t === "free" || isCurrent ? (
+                      <span className="text-xs text-muted-foreground">
+                        {isCurrent ? "Active plan" : "Default plan"}
+                      </span>
+                    ) : (
+                      <>
+                        <UpgradeButton
+                          tier={t as Exclude<Tier, "free">}
+                          interval="monthly"
+                          label={`Upgrade · ${p.priceMonthly}/mo`}
+                        />
+                        <UpgradeButton
+                          tier={t as Exclude<Tier, "free">}
+                          interval="yearly"
+                          label={`Annual · ${p.priceYearly}/yr`}
+                          variant="outline"
+                        />
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             );
           })}
         </div>

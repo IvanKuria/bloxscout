@@ -20,45 +20,6 @@ async function siteOrigin(): Promise<string> {
   return host ? `${proto}://${host}` : "http://localhost:3000";
 }
 
-function isEmail(value: unknown): value is string {
-  return typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-}
-
-/** Send a passwordless magic-link / OTP email. */
-export async function signInWithEmail(
-  _prev: AuthState | undefined,
-  formData: FormData,
-): Promise<AuthState> {
-  const email = formData.get("email");
-  if (!isEmail(email)) {
-    return { error: "Enter a valid email address." };
-  }
-
-  let supabase: Awaited<ReturnType<typeof createClient>>;
-  try {
-    supabase = await createClient();
-  } catch {
-    return { error: "Auth is not configured on this deployment." };
-  }
-
-  const origin = await siteOrigin();
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      // Allow new users to be created from the magic link.
-      shouldCreateUser: true,
-      emailRedirectTo: `${origin}/auth/callback?next=/app`,
-    },
-  });
-
-  if (error) {
-    return { error: error.message };
-  }
-  return {
-    message: `Transmission sent. Check ${email} for your sign-in link.`,
-  };
-}
-
 /** Begin a Discord OAuth flow; redirects the browser to Discord. */
 export async function signInWithDiscord(): Promise<AuthState> {
   let supabase: Awaited<ReturnType<typeof createClient>>;

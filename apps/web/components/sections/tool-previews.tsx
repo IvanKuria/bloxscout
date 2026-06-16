@@ -1,253 +1,175 @@
-import { ArrowDown, Star } from "lucide-react";
-import { cn } from "@/lib/utils";
+/**
+ * Capability preview visuals — compact, FRAMELESS data snippets (the capability
+ * cards in tool-catalog supply the frame + title). Each capability gets a
+ * distinct chart type: momentum bars, a concentration split, breakout columns,
+ * a fit meter, a percentile distribution, a trend line. Colours are wired to the
+ * neutral semantic theme tokens (foreground accent + muted neutral) so every
+ * preview reads correctly in light and dark — no hardcoded hex, no gradients.
+ */
 
-const previewFrame =
-  "rounded-md border border-border bg-muted-surface/70 p-3.5";
+const ACCENT = "var(--foreground)";
+const NEUTRAL = "var(--muted-foreground)";
 
-export function DiscoveryPreview() {
-  const items = [
-    { name: "blox fruits", value: 932, pct: 100 },
-    { name: "pet simulator 99", value: 614, pct: 66 },
-    { name: "tower defense x", value: 412, pct: 44 },
+/* 1. Find emergent niches → ranked momentum bars */
+export function NichesPreview() {
+  const rows = [
+    { name: "brainrot", pct: 100, delta: "+38%", hot: true },
+    { name: "horror co-op", pct: 66, delta: "+21%", hot: true },
+    { name: "anime defenders", pct: 44, delta: "+14%", hot: false },
   ];
   return (
-    <div className={previewFrame}>
-      <div className="mb-2.5 flex items-center justify-between font-mono text-[10px] tracking-wider text-muted-foreground/80 uppercase">
-        <span>top · simulator</span>
-        <span>ccu</span>
-      </div>
-      <ul className="space-y-2">
-        {items.map((item) => (
-          <li key={item.name} className="grid grid-cols-[1fr_2fr_auto] items-center gap-2.5">
-            <span className="truncate font-mono text-[11px] text-foreground">
-              {item.name}
-            </span>
-            <span
-              className="relative h-1.5 overflow-hidden rounded-full bg-border"
-              aria-hidden
-            >
-              <span
-                className="absolute inset-y-0 left-0 rounded-full bg-accent"
-                style={{ width: `${item.pct}%` }}
-              />
-            </span>
-            <span className="font-mono text-[11px] tabular-nums text-foreground">
-              {item.value}k
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export function IntelligencePreview() {
-  const sparkA = "M0,18 L10,14 L20,16 L30,9 L40,11 L50,5 L60,7 L70,3";
-  const sparkB = "M0,16 L10,18 L20,13 L30,15 L40,10 L50,12 L60,11 L70,9";
-  return (
-    <div className={previewFrame}>
-      <div className="mb-3 font-mono text-[10px] tracking-wider text-muted-foreground/80 uppercase">
-        compare · 7d ccu
-      </div>
-      <div className="grid grid-cols-2 gap-0">
-        {[
-          { label: "game A", ccu: "102k", delta: "+17%", path: sparkA, positive: true },
-          { label: "game B", ccu: "87k", delta: "+8%", path: sparkB, positive: true },
-        ].map((side, i) => (
-          <div
-            key={side.label}
-            className={cn(
-              "flex flex-col gap-1.5 px-3 py-1",
-              i === 0 && "border-r border-border",
-            )}
-          >
-            <span className="font-mono text-[10px] text-muted-foreground">
-              {side.label}
-            </span>
-            <span className="font-mono text-base font-semibold tabular-nums text-foreground">
-              {side.ccu}
-            </span>
-            <svg viewBox="0 0 70 22" className="h-5 w-full" aria-hidden>
-              <path
-                d={side.path}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-foreground/70"
-              />
-            </svg>
-            <span
-              className={cn(
-                "font-mono text-[10px] tabular-nums",
-                side.positive ? "text-accent" : "text-muted-foreground",
-              )}
-            >
-              {side.delta}
-            </span>
+    <div className="flex flex-col gap-2.5">
+      {rows.map((r) => (
+        <div key={r.name} className="flex flex-col gap-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-muted-foreground">{r.name}</span>
+            <span className="text-[11px] tabular-nums text-foreground">{r.delta}</span>
           </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export function CreatorPreview() {
-  const creators = [
-    { name: "Hyperion Studios", followers: "4.2M", color: "bg-accent" },
-    { name: "Onyx Labs", followers: "2.1M", color: "bg-foreground" },
-    { name: "Polar Games", followers: "940k", color: "bg-muted-foreground" },
-  ];
-  return (
-    <div className={previewFrame}>
-      <div className="mb-2.5 font-mono text-[10px] tracking-wider text-muted-foreground/80 uppercase">
-        top creators · rpg
-      </div>
-      <ul className="space-y-2">
-        {creators.map((c, i) => (
-          <li key={c.name} className="flex items-center gap-3">
+          <span className="h-1.5 overflow-hidden rounded-full bg-foreground/[0.08]" aria-hidden>
             <span
-              className={cn(
-                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-background",
-                c.color,
-              )}
-              aria-hidden
-            >
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            <span className="flex-1 truncate text-[12px] font-medium text-foreground">
-              {c.name}
-            </span>
-            <span className="inline-flex items-center gap-1 font-mono text-[11px] tabular-nums text-muted-foreground">
-              <Star className="h-3 w-3 fill-current" strokeWidth={0} />
-              {c.followers}
-            </span>
-          </li>
-        ))}
-      </ul>
+              className="block h-full rounded-full"
+              style={{ width: `${r.pct}%`, backgroundColor: r.hot ? ACCENT : NEUTRAL }}
+            />
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
 
-export function CalculatorPreview() {
-  return (
-    <div className={cn(previewFrame, "flex flex-col items-center gap-1.5 py-5")}>
-      <div className="flex items-baseline gap-1.5 font-mono text-[15px] tabular-nums text-muted-foreground">
-        100,000 <span className="text-[12px]">R$</span>
-      </div>
-      <ArrowDown className="h-3.5 w-3.5 text-accent" />
-      <div className="flex items-baseline gap-1.5">
-        <span className="font-mono text-2xl font-semibold tabular-nums text-foreground">
-          $350.00
-        </span>
-        <span className="font-mono text-[11px] text-muted-foreground">USD</span>
-      </div>
-      <p className="mt-2 font-mono text-[10px] tracking-wide text-muted-foreground/70">
-        rate · $0.0035 / R$
-      </p>
-    </div>
-  );
-}
-
-export function OperationalPreview() {
-  const points = [
-    { x: 0, y: 18, label: "12:00", v: "102k" },
-    { x: 20, y: 14, label: "12:05", v: "103k" },
-    { x: 40, y: 15, label: "12:10", v: "103k" },
-    { x: 60, y: 11, label: "12:15", v: "104k" },
-    { x: 80, y: 8, label: "12:20", v: "105k" },
-    { x: 100, y: 6, label: "12:25", v: "105k" },
+/* 2. Gauge a niche → market-concentration split */
+export function SaturationPreview() {
+  const segs = [
+    { w: 44, fill: ACCENT, op: 1 },
+    { w: 31, fill: ACCENT, op: 0.4 },
+    { w: 25, fill: "currentColor", className: "text-foreground/12", op: 1 },
   ];
-  const path = `M${points.map((p) => `${p.x},${p.y}`).join(" L")}`;
+  let acc = 0;
   return (
-    <div className={previewFrame}>
-      <div className="mb-2 flex items-center justify-between font-mono text-[10px] tracking-wider text-muted-foreground/80 uppercase">
-        <span>snapshot · 920587237</span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
-          live
-        </span>
+    <div className="flex flex-col gap-3">
+      <svg viewBox="0 0 260 24" className="w-full" aria-hidden>
+        {segs.map((s, i) => {
+          const x = (acc / 100) * 260;
+          acc += s.w;
+          const w = (s.w / 100) * 260 - 3;
+          return (
+            <rect key={i} x={x} y="0" width={Math.max(w, 0)} height="24" rx="4" fill={s.fill} opacity={s.op} className={s.className} />
+          );
+        })}
+      </svg>
+      <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
+        <span>top-1 <span className="text-foreground">44%</span></span>
+        <span>top-3 <span className="text-foreground">75%</span></span>
+        <span>tail <span className="text-foreground">25%</span></span>
       </div>
-      <svg viewBox="0 0 100 24" className="h-12 w-full" aria-hidden>
-        <path
-          d={`${path} L100,24 L0,24 Z`}
-          fill="currentColor"
-          className="text-accent/10"
-        />
-        <path
-          d={path}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-accent"
-        />
-        {points.map((p) => (
-          <circle
-            key={p.x}
-            cx={p.x}
-            cy={p.y}
-            r="1.2"
-            fill="currentColor"
-            className="text-accent"
+    </div>
+  );
+}
+
+/* 3. Spot breakout games → growth columns */
+export function BreakoutsPreview() {
+  const cols = [
+    { name: "Anime Defenders", h: 100, delta: "+64%", lead: true },
+    { name: "Toilet TD", h: 62, delta: "+38%", lead: false },
+    { name: "Critical Legends", h: 40, delta: "+22%", lead: false },
+    { name: "Pet Sim 99", h: 26, delta: "+14%", lead: false },
+  ];
+  return (
+    <div>
+      {/* bars are direct children of a fixed-height row so % heights resolve */}
+      <div className="flex h-24 items-end gap-2.5">
+        {cols.map((c) => (
+          <span
+            key={c.name}
+            className={`flex-1 rounded-t-sm ${c.lead ? "" : "bg-foreground/12"}`}
+            style={{ height: `${c.h}%`, backgroundColor: c.lead ? ACCENT : undefined }}
+            aria-hidden
           />
         ))}
-      </svg>
-      <div className="mt-1 flex justify-between font-mono text-[9.5px] text-muted-foreground">
-        <span>12:00</span>
-        <span>12:25</span>
       </div>
-      <p className="mt-2 font-mono text-[10px] text-muted-foreground/70">
-        → ~/.bloxscout/data.db
+      <div className="mt-2 flex gap-2.5">
+        {cols.map((c) => (
+          <span
+            key={c.name}
+            className={`flex-1 text-center text-[10px] tabular-nums ${c.lead ? "text-foreground" : "text-muted-foreground"}`}
+          >
+            {c.delta}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* 4. Decide what to build → recommendation + fit meter */
+export function IdeasPreview() {
+  const chips = ["real demand", "fragmented", "solo-buildable"];
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-[15px] font-medium tracking-[-0.01em] text-foreground">
+        Co-op horror · short sessions
+      </p>
+      <div>
+        <div className="mb-1.5 flex items-center justify-between text-[10px] text-muted-foreground">
+          <span>Fit for a solo dev</span>
+          <span className="text-foreground">86%</span>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-foreground/10">
+          <div className="h-full rounded-full" style={{ width: "86%", backgroundColor: ACCENT }} />
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {chips.map((c) => (
+          <span key={c} className="rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">
+            {c}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* 5. Read any game or genre → percentile distribution */
+export function IntelligencePreview() {
+  const hill = "M6,72 C50,72 60,22 130,22 C200,22 210,72 254,72";
+  return (
+    <div className="flex flex-col gap-2">
+      <svg viewBox="0 0 260 80" className="h-24 w-full" aria-hidden>
+        <path d={`${hill} L254,76 L6,76 Z`} fill="currentColor" className="text-foreground/[0.05]" />
+        <path d={hill} fill="none" stroke="currentColor" strokeWidth="1.4" className="text-foreground/25" />
+        <line x1="130" y1="10" x2="130" y2="76" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" className="text-foreground/25" />
+        <line x1="206" y1="16" x2="206" y2="76" stroke={ACCENT} strokeWidth="2.4" />
+        <circle cx="206" cy="16" r="3.5" fill={ACCENT} />
+        <text x="200" y="11" fontSize="8.5" textAnchor="end" fill={ACCENT} style={{ fontWeight: 600 }}>p82</text>
+      </svg>
+      <p className="text-[10px] text-muted-foreground">
+        Top <span className="text-foreground">18%</span> of its genre
       </p>
     </div>
   );
 }
 
-export function ReportsPreview() {
+/* 6. Always-live data → trend line */
+export function TrendsPreview() {
+  const line = "M0,52 L40,42 L80,46 L120,30 L160,33 L200,18 L240,13 L280,4";
   return (
-    <div
-      className={cn(
-        previewFrame,
-        "border-foreground/15 bg-background shadow-[2px_2px_0_0] shadow-foreground/5",
-      )}
-    >
-      <div className="mb-2 flex items-center justify-between border-b border-border pb-1.5">
-        <span className="font-mono text-[11px] font-medium text-foreground">
-          rpg-report.md
-        </span>
-        <span className="font-mono text-[9.5px] tracking-wide text-muted-foreground/70 uppercase">
-          md · json
-        </span>
-      </div>
-      <div className="space-y-1.5 font-mono text-[11px] leading-relaxed">
-        <p className="font-semibold text-foreground">
-          # RPG market — 2026-05-21
-        </p>
-        <p className="text-muted-foreground">
-          <span className="text-accent">▸</span> median ccu{" "}
-          <span className="text-foreground">12,400</span>
-        </p>
-        <p className="text-muted-foreground">
-          <span className="text-accent">▸</span> p90 ccu{" "}
-          <span className="text-foreground">142,800</span>
-        </p>
-        <p className="text-muted-foreground">
-          <span className="text-accent">▸</span> top creators{" "}
-          <span className="text-foreground">8</span>
-        </p>
-      </div>
+    <div className="flex flex-col gap-2">
+      <svg viewBox="0 0 280 56" className="h-24 w-full" aria-hidden>
+        <path d={line} fill="none" stroke={ACCENT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="280" cy="4" r="3" fill={ACCENT} />
+      </svg>
+      <p className="text-[10px] text-muted-foreground">
+        274,120 playing now · refreshed ~30 min
+      </p>
     </div>
   );
 }
 
 export const previewBySlug = {
-  discovery: DiscoveryPreview,
+  niches: NichesPreview,
+  saturation: SaturationPreview,
+  breakouts: BreakoutsPreview,
+  ideas: IdeasPreview,
   intelligence: IntelligencePreview,
-  creator: CreatorPreview,
-  calculators: CalculatorPreview,
-  operational: OperationalPreview,
-  reports: ReportsPreview,
+  trends: TrendsPreview,
 } as const;

@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored shadcn.io AI Elements (third-party registry components).
+    "components/ai/**",
   ]),
 ]);
 

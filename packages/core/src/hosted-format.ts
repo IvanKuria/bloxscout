@@ -25,13 +25,19 @@ const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "expected YYYY-MM-DD");
 // Raw run files — v1/raw/YYYY-MM-DD/<runId>.json.gz
 // ---------------------------------------------------------------------------
 
-/** `[universeId, playing, visits, favoritedCount]` */
-export const RawRunRowSchema = z.tuple([
-  z.number().int(),
-  z.number().int(),
-  z.number().int(),
-  z.number().int(),
-]);
+/**
+ * `[universeId, playing, visits, favoritedCount, createdMs?, updatedMs?]`
+ *
+ * The first four columns are the original v1 shape. `createdMs`/`updatedMs`
+ * are additive trailing columns (epoch milliseconds of the game's `created`
+ * and `updated` ISO timestamps) captured for the breakout-teardown copilot:
+ * game age and update cadence. Stored as epoch ms (not ISO strings) to keep
+ * raw rows compact. Older rows without them parse unchanged — the rollup
+ * layer reads columns positionally and ignores the trailing ones.
+ */
+export const RawRunRowSchema = z
+  .tuple([z.number().int(), z.number().int(), z.number().int(), z.number().int()])
+  .rest(z.number().int());
 export type RawRunRow = z.infer<typeof RawRunRowSchema>;
 
 export const RawRunFileSchema = z.object({
@@ -113,6 +119,33 @@ export const HistoryShardSchema = z.object({
 export type HistoryShard = z.infer<typeof HistoryShardSchema>;
 
 // ---------------------------------------------------------------------------
+// Gamepass / monetization samples — v1/gamepasses/YYYY-MM-DD.json
+// ---------------------------------------------------------------------------
+
+/**
+ * One sampled game pass: `[gamePassId, name, priceRobux | null]`. `price` is
+ * `null` for off-sale / unpriced passes. Feeds the breakout-teardown copilot's
+ * monetization read. Sampled only for the top-N games when sampling is enabled
+ * (see `pipeline/gamepasses.ts`), so coverage is intentionally partial.
+ */
+export const GamePassRowSchema = z.tuple([
+  z.number().int(),
+  z.string(),
+  z.number().int().nullable(),
+]);
+export type GamePassRow = z.infer<typeof GamePassRowSchema>;
+
+export const GamePassFileSchema = z.object({
+  schemaVersion: z.number().int(),
+  date: isoDate,
+  /** When this sample was taken. */
+  sampledAt: isoDateTime,
+  /** universeId -> sampled passes. */
+  games: z.record(z.string(), z.array(GamePassRowSchema)),
+});
+export type GamePassFile = z.infer<typeof GamePassFileSchema>;
+
+// ---------------------------------------------------------------------------
 // Registry — v1/registry.json
 // ---------------------------------------------------------------------------
 
@@ -126,6 +159,20 @@ export const RegistryEntrySchema = z.object({
   lastDiscoveredAt: isoDateTime,
   /** Dormant games are snapshotted once daily instead of every run. */
   tier: z.enum(["active", "dormant"]),
+  /**
+   * Game's own `created` timestamp (stable; first value we ever observed).
+   * Feeds "game age" for the breakout-teardown copilot. Optional/additive:
+   * absent on pre-v0.3 registries until the game is re-ingested.
+   */
+  createdAt: isoDateTime.optional(),
+  /** Latest `updated` timestamp observed from games.roblox.com. */
+  lastUpdatedAt: isoDateTime.optional(),
+  /**
+   * Number of distinct `updated`-timestamp changes observed over time — a
+   * proxy for how actively the developer ships. Monotonic; starts at 0 the
+   * run we first record `lastUpdatedAt`.
+   */
+  updateCount: z.number().int().optional(),
 });
 export type RegistryEntry = z.infer<typeof RegistryEntrySchema>;
 
@@ -324,6 +371,7 @@ export const HOSTED_PATHS = {
   risingNichesView: "v1/views/rising-niches.json",
   genreRevenueView: "v1/views/genre-revenue.json",
   raw: (date: string, runId: string) => `v1/raw/${date}/${runId}.json.gz`,
+  gamepasses: (date: string) => `v1/gamepasses/${date}.json.gz`,
   hourly: (date: string) => `v1/hourly/${date}.json.gz`,
   daily: (date: string) => `v1/daily/${date}.json.gz`,
   historyShard: (shard: number) => `v1/history/${shard}.json.gz`,

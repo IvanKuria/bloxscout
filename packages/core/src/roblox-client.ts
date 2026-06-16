@@ -8,12 +8,16 @@ import {
   RobloxRateLimitError,
 } from "./errors.js";
 import type {
+  Badge,
   CreatorGame,
   Game,
   GameIcon,
   GameIconSize,
+  GamePass,
   GamePlayerCount,
+  GameRecommendation,
   GameSummary,
+  GameVotes,
   Group,
   RobloxUniverseId,
   RobloxUserId,
@@ -40,10 +44,13 @@ const DEFAULT_MAX_RETRIES = 3;
  */
 export const ROBLOX_ENDPOINTS = {
   omniSearch: "https://apis.roblox.com",
+  /** Game-passes listing lives on the apis.roblox.com host (post-2025 migration). */
+  gamePasses: "https://apis.roblox.com",
   games: "https://games.roblox.com",
   users: "https://users.roblox.com",
   groups: "https://groups.roblox.com",
   thumbnails: "https://thumbnails.roblox.com",
+  badges: "https://badges.roblox.com",
 } as const;
 
 export interface RobloxClientOptions {
@@ -282,6 +289,181 @@ export class RobloxClient {
   }
 
   /**
+   * Up/down vote totals per universe via `GET /v1/games/votes?universeIds=...`.
+   * Same per-request id cap as `getGames`, so we chunk transparently at
+   * `GAMES_BATCH_SIZE`. The like-ratio derived from this is the cheapest
+   * quality signal Roblox exposes unauthenticated. Cached on the SLOW bucket —
+   * vote tallies move slowly relative to CCU. Results follow input order;
+   * missing ids are simply absent.
+   */
+  async getGameVotes(universeIds: RobloxUniverseId[]): Promise<GameVotes[]> {
+    if (universeIds.length === 0) return [];
+    const unique = [...new Set(universeIds)];
+    const chunks: number[][] = [];
+    for (let i = 0; i < unique.length; i += GAMES_BATCH_SIZE) {
+      chunks.push(unique.slice(i, i + GAMES_BATCH_SIZE));
+    }
+
+    const byId = new Map<RobloxUniverseId, GameVotes>();
+    for (const chunk of chunks) {
+      const url = new URL("/v1/games/votes", ROBLOX_ENDPOINTS.games);
+      url.searchParams.set("universeIds", chunk.join(","));
+      const data = await this.fetchJson<{
+        data?: Array<{ id?: number; upVotes?: number; downVotes?: number }>;
+      }>(url, {
+        label: "GET /v1/games/votes",
+        ttlSeconds: CACHE_TTL.SLOW,
+        cacheKey: `votes:${chunk
+          .slice()
+          .sort((a, b) => a - b)
+          .join(",")}`,
+      });
+      for (const v of data.data ?? []) {
+        if (typeof v.id !== "number") continue;
+        byId.set(v.id, {
+          universeId: v.id,
+          upVotes: typeof v.upVotes === "number" ? v.upVotes : 0,
+          downVotes: typeof v.downVotes === "number" ? v.downVotes : 0,
+        });
+      }
+    }
+
+    const ordered: GameVotes[] = [];
+    for (const id of universeIds) {
+      const v = byId.get(id);
+      if (v !== undefined) ordered.push(v);
+    }
+    return ordered;
+  }
+
+  /**
+   * Roblox's own "similar games" recommendations for a universe via
+   * `GET /v1/games/recommendations/game/{universeId}?maxRows=N`. Unauthenticated
+   * (confirmed 2026-06). Each entry carries live CCU + vote totals + creator
+   * inline, so this single request yields a full competitor cohort. Cached on
+   * the DEFAULT bucket — the graph shifts on the order of hours, not minutes.
+   * Sponsored rows are dropped (they're ad placements, not true neighbours).
+   */
+  async getRecommendations(
+    universeId: RobloxUniverseId,
+    opts: { maxRows?: number } = {},
+  ): Promise<GameRecommendation[]> {
+    if (!Number.isInteger(universeId) || universeId < 1) {
+      throw new BloxscoutError(
+        "getRecommendations: universeId must be a positive integer",
+        "VALIDATION_ERROR",
+      );
+    }
+    const maxRows = Math.max(1, Math.min(50, Math.round(opts.maxRows ?? 20)));
+    const url = new URL(
+      `/v1/games/recommendations/game/${universeId}`,
+      ROBLOX_ENDPOINTS.games,
+    );
+    url.searchParams.set("maxRows", String(maxRows));
+    const data = await this.fetchJson<{
+      games?: Array<{
+        universeId?: number;
+        name?: string;
+        playerCount?: number;
+        totalUpVotes?: number;
+        totalDownVotes?: number;
+        creatorName?: string;
+        creatorType?: string;
+        genre?: string;
+        canonicalUrlPath?: string;
+        isSponsored?: boolean;
+      }>;
+    }>(url, {
+      label: "GET /v1/games/recommendations/game/{id}",
+      ttlSeconds: CACHE_TTL.DEFAULT,
+      cacheKey: `recommendations:${universeId}:${maxRows}`,
+    });
+
+    const out: GameRecommendation[] = [];
+    for (const g of data.games ?? []) {
+      if (typeof g.universeId !== "number" || g.isSponsored) continue;
+      out.push({
+        universeId: g.universeId,
+        name: g.name ?? "",
+        playerCount: typeof g.playerCount === "number" ? g.playerCount : 0,
+        totalUpVotes: typeof g.totalUpVotes === "number" ? g.totalUpVotes : 0,
+        totalDownVotes: typeof g.totalDownVotes === "number" ? g.totalDownVotes : 0,
+        creatorName: g.creatorName ?? "",
+        creatorType: g.creatorType ?? "",
+        genre: g.genre ?? "",
+        ...(g.canonicalUrlPath ? { canonicalUrlPath: g.canonicalUrlPath } : {}),
+      });
+    }
+    return out;
+  }
+
+  /**
+   * A universe's badges with award statistics via
+   * `GET https://badges.roblox.com/v1/universes/{id}/badges?limit=N`.
+   * Unauthenticated (confirmed 2026-06). `statistics.awardedCount` is embedded
+   * inline, so one request yields a progression funnel — no per-badge stats
+   * call needed. Returns the first page only (cap 100), which covers virtually
+   * every game's badge set. Cached on the SLOW bucket — award counts drift
+   * slowly. Sorted by award count descending so the earliest/most-reached
+   * milestones lead.
+   */
+  async getUniverseBadges(
+    universeId: RobloxUniverseId,
+    opts: { limit?: number } = {},
+  ): Promise<Badge[]> {
+    if (!Number.isInteger(universeId) || universeId < 1) {
+      throw new BloxscoutError(
+        "getUniverseBadges: universeId must be a positive integer",
+        "VALIDATION_ERROR",
+      );
+    }
+    const limit = Math.max(1, Math.min(100, Math.round(opts.limit ?? 100)));
+    const url = new URL(`/v1/universes/${universeId}/badges`, ROBLOX_ENDPOINTS.badges);
+    url.searchParams.set("limit", String(limit));
+    url.searchParams.set("sortOrder", "Asc");
+    const data = await this.fetchJson<{
+      data?: Array<{
+        id?: number;
+        name?: string;
+        enabled?: boolean;
+        created?: string;
+        statistics?: {
+          pastDayAwardedCount?: number;
+          awardedCount?: number;
+          winRatePercentage?: number;
+        };
+      }>;
+    }>(url, {
+      label: "GET /v1/universes/{id}/badges",
+      ttlSeconds: CACHE_TTL.SLOW,
+      cacheKey: `badges:${universeId}:${limit}`,
+    });
+
+    const out: Badge[] = [];
+    for (const b of data.data ?? []) {
+      if (typeof b.id !== "number") continue;
+      out.push({
+        id: b.id,
+        name: b.name ?? "",
+        enabled: b.enabled ?? false,
+        awardedCount:
+          typeof b.statistics?.awardedCount === "number" ? b.statistics.awardedCount : 0,
+        pastDayAwardedCount:
+          typeof b.statistics?.pastDayAwardedCount === "number"
+            ? b.statistics.pastDayAwardedCount
+            : 0,
+        winRate:
+          typeof b.statistics?.winRatePercentage === "number"
+            ? b.statistics.winRatePercentage
+            : 0,
+        created: b.created ?? "",
+      });
+    }
+    out.sort((a, b) => b.awardedCount - a.awardedCount);
+    return out;
+  }
+
+  /**
    * Game icons / thumbnails. Default size is 512x512 PNG, non-circular.
    */
   async getGameIcons(
@@ -304,6 +486,58 @@ export class RobloxClient {
         .join(",")}`,
     });
     return data.data ?? [];
+  }
+
+  /**
+   * Game passes (monetization) for a single universe, normalized to
+   * `{ id, name, price }` where `price` is Robux (`null` = off-sale).
+   *
+   * Endpoint: `GET apis.roblox.com/game-passes/v1/universes/{id}/game-passes?passView=Full&pageSize=100`.
+   * This replaced the legacy `games.roblox.com/v1/games/{id}/game-passes`,
+   * which Roblox deprecated 2025-08-31. The legacy path returned
+   * `{ data: [...] }`; the current one returns `{ gamePasses: [...] }`. We
+   * accept either envelope so a future Roblox flip-flop doesn't silently
+   * empty the data. Public reachability of the apis.roblox.com path is not
+   * guaranteed unauthenticated — the pipeline keeps the sampling behind a
+   * flag (see `pipeline/gamepasses.ts`).
+   *
+   * Only the first page (cap 100 passes) is fetched: that covers virtually
+   * every game's catalog and keeps this a single request. Cached on the
+   * SLOW bucket since pricing changes rarely.
+   */
+  async getGamePasses(universeId: RobloxUniverseId): Promise<GamePass[]> {
+    if (!Number.isInteger(universeId) || universeId < 1) {
+      throw new BloxscoutError(
+        "getGamePasses: universeId must be a positive integer",
+        "VALIDATION_ERROR",
+      );
+    }
+    const url = new URL(
+      `/game-passes/v1/universes/${universeId}/game-passes`,
+      ROBLOX_ENDPOINTS.gamePasses,
+    );
+    url.searchParams.set("passView", "Full");
+    url.searchParams.set("pageSize", "100");
+    const data = await this.fetchJson<{
+      gamePasses?: Array<{ id?: number; name?: string; price?: number | null }>;
+      data?: Array<{ id?: number; name?: string; price?: number | null }>;
+    }>(url, {
+      label: "GET /game-passes/v1/universes/{id}/game-passes",
+      ttlSeconds: CACHE_TTL.SLOW,
+      cacheKey: `game-passes:${universeId}`,
+    });
+
+    const raw = data.gamePasses ?? data.data ?? [];
+    const passes: GamePass[] = [];
+    for (const p of raw) {
+      if (typeof p.id !== "number") continue;
+      passes.push({
+        id: p.id,
+        name: p.name ?? "",
+        price: typeof p.price === "number" ? p.price : null,
+      });
+    }
+    return passes;
   }
 
   // ---------------------------------------------------------------------------

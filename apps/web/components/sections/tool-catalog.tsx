@@ -1,89 +1,69 @@
-import { Card } from "@/components/ui/card";
-import { toolCategories, totalToolCount } from "@/lib/tools";
+import { capabilityGroups } from "@/lib/tools";
 import { previewBySlug } from "./tool-previews";
+import { Section, Eyebrow } from "./section";
+import { FadeContent } from "@/components/ui/fade-content";
 
+/**
+ * Capabilities — a dense grid of result cards (twenty/hex data-product feel),
+ * not a marketing feature list. Each card pairs the question you'd ask with the
+ * actual shape of the answer: a thin line icon, the capability, a one-line
+ * outcome, a compact live-data visual, and the real prompt that triggers it.
+ */
 export function ToolCatalog() {
   return (
-    <section
-      id="tools"
-      className="scroll-mt-16 border-b border-border bg-secondary/40"
-    >
-      <div className="mx-auto max-w-6xl px-6 py-24 sm:py-28">
-        <div className="mb-14 flex items-end justify-between gap-8">
-          <div className="max-w-2xl">
-            <p className="mb-3 inline-flex items-center gap-2 font-mono text-xs tracking-wider text-accent uppercase">
-              <span className="h-px w-6 bg-accent" aria-hidden />
-              The toolbox
-            </p>
-            <h2 className="text-3xl font-medium tracking-[-0.01em] text-foreground sm:text-4xl">
-              {totalToolCount} tools, six categories,
-              <br className="hidden sm:inline" /> one MCP server.
-            </h2>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Every tool is also a CLI subcommand. Ask your agent, or pipe the
-              JSON yourself.
-            </p>
-          </div>
-          <p className="hidden font-mono text-xs text-muted-foreground sm:block">
-            01 — 06
-          </p>
-        </div>
-
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {toolCategories.map((category, idx) => {
-            const Icon = category.icon;
-            const Preview = previewBySlug[category.slug];
-            const num = String(idx + 1).padStart(2, "0");
-            return (
-              <Card
-                key={category.slug}
-                className="group flex flex-col gap-5 border-border bg-card p-6 transition-colors hover:border-foreground/30"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-accent/10 text-accent">
-                    <Icon className="h-4.5 w-4.5" strokeWidth={2} />
-                  </div>
-                  <span className="font-mono text-xs text-muted-foreground/60 tabular-nums">
-                    {num} / 06
-                  </span>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold tracking-tight text-foreground">
-                    {category.name}
-                  </h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                    {category.blurb}
-                  </p>
-                </div>
-
-                <Preview />
-
-                <div className="mt-auto border-t border-border/70 pt-3">
-                  <p className="mb-2 font-mono text-[10px] tracking-wider text-muted-foreground/70 uppercase">
-                    {category.tools.length} tool
-                    {category.tools.length === 1 ? "" : "s"}
-                  </p>
-                  <p className="font-mono text-[12px] leading-relaxed text-foreground/80">
-                    {category.tools.map((t, i) => (
-                      <span key={t.name}>
-                        <span className="hover:text-accent transition-colors">
-                          {t.name}
-                        </span>
-                        {i < category.tools.length - 1 && (
-                          <span className="text-muted-foreground/40">
-                            {" · "}
-                          </span>
-                        )}
-                      </span>
-                    ))}
-                  </p>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+    <Section tone="muted" id="capabilities" innerClassName="py-24 sm:py-32">
+      <div className="mb-14 max-w-2xl">
+        <Eyebrow>Capabilities</Eyebrow>
+        <h2 className="mt-5 text-[2rem] leading-[1.08] font-semibold tracking-tight text-foreground sm:text-[2.6rem]">
+          Ask anything about the Roblox market.
+        </h2>
+        <p className="mt-5 text-[1.0625rem] leading-[1.6] text-muted-foreground">
+          Six core questions, each answered from live player data, with the
+          games and numbers behind every call.
+        </p>
       </div>
-    </section>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {capabilityGroups.map((group, idx) => {
+          const Preview = previewBySlug[group.slug];
+          const Icon = group.icon;
+          const prompt = group.capabilities[0]?.prompt;
+          return (
+            <FadeContent
+              key={group.slug}
+              as="article"
+              delay={(idx % 3) * 0.05}
+              className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 transition-colors hover:border-foreground/20"
+            >
+              <div className="flex items-center gap-3">
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-muted text-foreground">
+                  <Icon className="size-[18px]" strokeWidth={1.75} aria-hidden />
+                </span>
+                <h3 className="text-[15px] font-medium tracking-[-0.01em] text-foreground">
+                  {group.name}
+                </h3>
+              </div>
+
+              <p className="text-[13.5px] leading-relaxed text-muted-foreground">
+                {group.blurb}
+              </p>
+
+              {/* live-data visual */}
+              <div className="mt-1 rounded-xl border border-border bg-muted/60 p-4">
+                <Preview />
+              </div>
+
+              {/* the prompt that triggers it */}
+              {prompt ? (
+                <p className="mt-auto flex items-start gap-2 border-t border-border pt-4 text-[13px] text-muted-foreground">
+                  <span className="shrink-0 font-medium text-foreground">Ask</span>
+                  <span className="leading-snug">{prompt}</span>
+                </p>
+              ) : null}
+            </FadeContent>
+          );
+        })}
+      </div>
+    </Section>
   );
 }

@@ -415,6 +415,253 @@ describe("RobloxClient.getTrendingGames stub", () => {
   });
 });
 
+describe("RobloxClient.getGamePasses", () => {
+  let agent: MockAgent;
+  let client: RobloxClient;
+
+  beforeEach(() => {
+    ({ client, agent } = makeClient());
+  });
+
+  afterEach(async () => {
+    await agent.close();
+  });
+
+  it("normalizes the apis.roblox.com `gamePasses` envelope to {id, name, price}", async () => {
+    agent
+      .get("https://apis.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/game-passes/v1/universes/123/game-passes") })
+      .reply(200, {
+        gamePasses: [
+          { id: 1, name: "VIP", price: 199, isForSale: true },
+          { id: 2, name: "Starter Pack", price: 1000, isForSale: true },
+        ],
+        nextPageToken: null,
+      });
+
+    const passes = await client.getGamePasses(123);
+    expect(passes).toEqual([
+      { id: 1, name: "VIP", price: 199 },
+      { id: 2, name: "Starter Pack", price: 1000 },
+    ]);
+  });
+
+  it("accepts the legacy `data` envelope and treats missing/off-sale price as null", async () => {
+    agent
+      .get("https://apis.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/game-passes/v1/universes/55/game-passes") })
+      .reply(200, {
+        data: [
+          { id: 9, name: "Free Perk", price: null },
+          { id: 10, name: "Unpriced" },
+        ],
+      });
+
+    const passes = await client.getGamePasses(55);
+    expect(passes).toEqual([
+      { id: 9, name: "Free Perk", price: null },
+      { id: 10, name: "Unpriced", price: null },
+    ]);
+  });
+
+  it("returns [] for a universe with no passes", async () => {
+    agent
+      .get("https://apis.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/game-passes/v1/universes/77/game-passes") })
+      .reply(200, { gamePasses: [] });
+
+    expect(await client.getGamePasses(77)).toEqual([]);
+  });
+
+  it("rejects a non-positive universeId without making a request", async () => {
+    await expect(client.getGamePasses(0)).rejects.toBeInstanceOf(BloxscoutError);
+  });
+
+  it("caches by universe id (one network call for repeat lookups)", async () => {
+    let calls = 0;
+    agent
+      .get("https://apis.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/game-passes/v1/universes/123/game-passes") })
+      .reply(200, () => {
+        calls++;
+        return { gamePasses: [{ id: 1, name: "VIP", price: 199 }] };
+      });
+
+    await client.getGamePasses(123);
+    await client.getGamePasses(123);
+    expect(calls).toBe(1);
+  });
+});
+
+describe("RobloxClient.getGameVotes", () => {
+  let agent: MockAgent;
+  let client: RobloxClient;
+
+  beforeEach(() => {
+    ({ client, agent } = makeClient());
+  });
+
+  afterEach(async () => {
+    await agent.close();
+  });
+
+  it("normalizes {id, upVotes, downVotes} to {universeId,...} in input order", async () => {
+    agent
+      .get("https://games.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/v1/games/votes") })
+      .reply(200, {
+        data: [
+          { id: 2, upVotes: 20, downVotes: 5 },
+          { id: 1, upVotes: 100, downVotes: 10 },
+        ],
+      });
+
+    const votes = await client.getGameVotes([1, 2]);
+    expect(votes).toEqual([
+      { universeId: 1, upVotes: 100, downVotes: 10 },
+      { universeId: 2, upVotes: 20, downVotes: 5 },
+    ]);
+  });
+
+  it("chunks at GAMES_BATCH_SIZE (75 ids -> 50 + 25)", async () => {
+    const pool = agent.get("https://games.roblox.com");
+    const seenIdCounts: number[] = [];
+    pool
+      .intercept({ path: (p) => p.startsWith("/v1/games/votes") })
+      .reply(200, ({ path }) => {
+        const url = new URL(path, "https://games.roblox.com");
+        const ids = url.searchParams.get("universeIds")?.split(",") ?? [];
+        seenIdCounts.push(ids.length);
+        return { data: ids.map((id) => ({ id: Number(id), upVotes: 1, downVotes: 0 })) };
+      })
+      .times(2);
+
+    const ids = Array.from({ length: 75 }, (_, i) => i + 1);
+    await client.getGameVotes(ids);
+    expect(seenIdCounts).toEqual([50, 25]);
+  });
+
+  it("defaults missing vote fields to 0 and returns [] for no ids", async () => {
+    expect(await client.getGameVotes([])).toEqual([]);
+    agent
+      .get("https://games.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/v1/games/votes") })
+      .reply(200, { data: [{ id: 9 }] });
+    expect(await client.getGameVotes([9])).toEqual([
+      { universeId: 9, upVotes: 0, downVotes: 0 },
+    ]);
+  });
+});
+
+describe("RobloxClient.getRecommendations", () => {
+  let agent: MockAgent;
+  let client: RobloxClient;
+
+  beforeEach(() => {
+    ({ client, agent } = makeClient());
+  });
+
+  afterEach(async () => {
+    await agent.close();
+  });
+
+  it("maps the {games:[...]} envelope and drops sponsored rows", async () => {
+    agent
+      .get("https://games.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/v1/games/recommendations/game/1") })
+      .reply(200, {
+        games: [
+          {
+            universeId: 11,
+            name: "Neighbour",
+            playerCount: 500,
+            totalUpVotes: 90,
+            totalDownVotes: 10,
+            creatorName: "Studio",
+            creatorType: "Group",
+            genre: "Fighting",
+            canonicalUrlPath: "/games/22/Neighbour",
+            isSponsored: false,
+          },
+          { universeId: 99, name: "Ad", isSponsored: true },
+        ],
+      });
+
+    const recs = await client.getRecommendations(1);
+    expect(recs).toHaveLength(1);
+    expect(recs[0]).toMatchObject({
+      universeId: 11,
+      name: "Neighbour",
+      playerCount: 500,
+      totalUpVotes: 90,
+      totalDownVotes: 10,
+    });
+  });
+
+  it("rejects a non-positive universeId without a request", async () => {
+    await expect(client.getRecommendations(0)).rejects.toBeInstanceOf(BloxscoutError);
+  });
+
+  it("returns [] when the graph has no neighbours", async () => {
+    agent
+      .get("https://games.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/v1/games/recommendations/game/5") })
+      .reply(200, { games: [] });
+    expect(await client.getRecommendations(5)).toEqual([]);
+  });
+});
+
+describe("RobloxClient.getUniverseBadges", () => {
+  let agent: MockAgent;
+  let client: RobloxClient;
+
+  beforeEach(() => {
+    ({ client, agent } = makeClient());
+  });
+
+  afterEach(async () => {
+    await agent.close();
+  });
+
+  it("flattens embedded statistics and sorts by awardedCount desc", async () => {
+    agent
+      .get("https://badges.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/v1/universes/1/badges") })
+      .reply(200, {
+        data: [
+          {
+            id: 10,
+            name: "Third Sea",
+            enabled: true,
+            created: "2022-01-01T00:00:00Z",
+            statistics: { pastDayAwardedCount: 5, awardedCount: 100, winRatePercentage: 0.01 },
+          },
+          {
+            id: 11,
+            name: "Second Sea",
+            enabled: true,
+            created: "2022-01-01T00:00:00Z",
+            statistics: { pastDayAwardedCount: 9, awardedCount: 300, winRatePercentage: 0.02 },
+          },
+        ],
+      });
+
+    const badges = await client.getUniverseBadges(1);
+    expect(badges.map((b) => b.name)).toEqual(["Second Sea", "Third Sea"]);
+    expect(badges[0]).toMatchObject({ awardedCount: 300, winRate: 0.02 });
+  });
+
+  it("rejects a non-positive universeId and defaults missing stats to 0", async () => {
+    await expect(client.getUniverseBadges(0)).rejects.toBeInstanceOf(BloxscoutError);
+    agent
+      .get("https://badges.roblox.com")
+      .intercept({ path: (p) => p.startsWith("/v1/universes/7/badges") })
+      .reply(200, { data: [{ id: 1, name: "X", enabled: true }] });
+    const badges = await client.getUniverseBadges(7);
+    expect(badges[0]).toMatchObject({ awardedCount: 0, winRate: 0, pastDayAwardedCount: 0 });
+  });
+});
+
 // -----------------------------------------------------------------------------
 // Fixtures
 // -----------------------------------------------------------------------------

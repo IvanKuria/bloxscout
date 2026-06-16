@@ -42,6 +42,12 @@ const UP_AND_COMING_MAX_BASELINE = 5000;
 const UP_AND_COMING_LIMIT = 500;
 const BREAKOUT_MIN_Z = 2;
 const BREAKOUT_LIMIT = 500;
+/** Below this many z-scored breakouts, fall back to growth-based acceleration. */
+const BREAKOUT_MIN_RESULTS = 10;
+/** A growth-fallback breakout must have real scale (not a tiny game's noise). */
+const BREAKOUT_MIN_PLAYING = 300;
+/** ...and a meaningful 24h surge (percent). */
+const BREAKOUT_MIN_GROWTH = 30;
 const GENRE_TOP_GAMES = 5;
 const Z_LOOKBACK_DAYS = 8;
 
@@ -105,6 +111,39 @@ interface GameSeries {
   peaks24h: number[];
   /** oldest in-window visits observation within the last 24h. */
   oldestVisits24h: number | null;
+}
+
+/**
+ * Select the breakout cohort — the fastest-accelerating games.
+ *
+ * The ideal signal is the 24h anomaly z-score, but it needs several days of
+ * history (MIN_Z_VALUES daily buckets) and is `null` on a young or gappy
+ * dataset — which made the breakouts view collapse to empty. So this prefers
+ * z-scored breakouts when enough exist, and otherwise falls back to ranking by
+ * 24h growth above a player-count floor (real momentum, not a tiny game's
+ * noise). It auto-upgrades to pure z-score ranking as history matures, and
+ * never returns empty while there are genuine accelerators.
+ */
+export function selectBreakouts(
+  entries: ReadonlyArray<ViewEntry>,
+): ViewEntry[] {
+  const byZ = entries
+    .filter((e) => e.zScore24h !== null && e.zScore24h >= BREAKOUT_MIN_Z)
+    .sort((a, b) => (b.zScore24h ?? 0) - (a.zScore24h ?? 0));
+  if (byZ.length >= BREAKOUT_MIN_RESULTS) return byZ.slice(0, BREAKOUT_LIMIT);
+
+  // Fallback: growth-based acceleration for the games z-score can't rank yet.
+  const seen = new Set(byZ.map((e) => e.universeId));
+  const byGrowth = entries
+    .filter(
+      (e) =>
+        !seen.has(e.universeId) &&
+        e.playing >= BREAKOUT_MIN_PLAYING &&
+        e.growth24hPct !== null &&
+        e.growth24hPct >= BREAKOUT_MIN_GROWTH,
+    )
+    .sort((a, b) => (b.growth24hPct ?? 0) - (a.growth24hPct ?? 0));
+  return [...byZ, ...byGrowth].slice(0, BREAKOUT_LIMIT);
 }
 
 export function computeViews(input: ComputeViewsInput): ComputedViews {
@@ -183,10 +222,7 @@ export function computeViews(input: ComputeViewsInput): ComputedViews {
     .sort((a, b) => (b.growth24hPct ?? 0) - (a.growth24hPct ?? 0))
     .slice(0, UP_AND_COMING_LIMIT);
 
-  const breakouts: ViewEntry[] = entries
-    .filter((e) => e.zScore24h !== null && e.zScore24h >= BREAKOUT_MIN_Z)
-    .sort((a, b) => (b.zScore24h ?? 0) - (a.zScore24h ?? 0))
-    .slice(0, BREAKOUT_LIMIT);
+  const breakouts: ViewEntry[] = selectBreakouts(entries);
 
   // Build the per-genre accumulator ONCE; every genre-derived view reads it.
   const byGenre = buildGenreAcc(entries, series, runT);

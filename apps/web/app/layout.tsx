@@ -1,31 +1,16 @@
 import type { Metadata } from "next";
-import { Archivo, Geist, Geist_Mono } from "next/font/google";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
 import { Analytics } from "@vercel/analytics/next";
 import { OrganizationJsonLd } from "@/components/seo/json-ld";
+import { PostHogIdentify } from "@/components/posthog-identify";
+import { ThemeProvider } from "@/components/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { site } from "@/lib/site";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-// Display face for headings / report titles — a condensed grotesque that gives
-// the data pages their sharp "field-report" character without losing the
-// engineered feel of the mono numerics.
-const archivo = Archivo({
-  variable: "--font-archivo",
-  subsets: ["latin"],
-  display: "swap",
-  axes: ["wdth"],
-});
+// Geist — a clean neutral grotesque (OpenAI-adjacent). Geist Mono backs code.
+// Self-hosted via the `geist` package; sets --font-geist-sans / --font-geist-mono.
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -37,18 +22,17 @@ export const metadata: Metadata = {
   applicationName: site.name,
   keywords: [
     "Roblox",
-    "Roblox developer tools",
-    "MCP",
-    "Model Context Protocol",
-    "Claude Code",
-    "Cursor",
-    "Windsurf",
-    "Zed",
-    "Rotrends",
+    "AI agent",
+    "Roblox game ideas",
+    "what Roblox game to make",
+    "Roblox niche analysis",
+    "emergent Roblox niches",
+    "Roblox market analysis",
+    "Roblox game discovery",
+    "Roblox saturation",
+    "Roblox breakout games",
     "Roblox analytics",
-    "DevEx calculator",
-    "Roblox CLI",
-    "game discovery",
+    "Roblox developer tools",
   ],
   authors: [{ name: site.name }],
   creator: site.name,
@@ -89,12 +73,23 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${GeistSans.variable} ${GeistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <OrganizationJsonLd />
-        {children}
-        <Analytics />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>
+            <OrganizationJsonLd />
+            <PostHogIdentify />
+            {children}
+            <Analytics />
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,56 +1,60 @@
-import VerticalCutReveal from "@/components/fancy/vertical-cut-reveal";
-import { InstallPill } from "./install-pill";
-import { TerminalDemo } from "./terminal-demo";
-import { site } from "@/lib/site";
-import { totalToolCount } from "@/lib/tools";
+import { CtaLink } from "./cta-link";
+import { BlurText } from "@/components/ui/blur-text";
+import AnimatedContent from "@/components/ui/animated-content";
+import { HeroBackdrop } from "./hero-backdrop";
+import { AppWindow } from "./app-window";
 
+/**
+ * Hero — centered, product-led, and calm (OpenAI/ChatGPT idiom): a clean Geist
+ * headline with "AI agent" emphasized, a subhead, a pill CTA pair, and a
+ * browser window framing the REAL bloxscout agent answering with live data. A
+ * faint token-based glow gives the backdrop quiet depth.
+ */
 export function Hero() {
   return (
-    <section className="border-b border-border bg-background">
-      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-6 pt-20 pb-24 sm:pt-28 sm:pb-32 lg:flex-row lg:items-center lg:gap-16 lg:pt-32">
-        <div className="flex-1 lg:max-w-2xl">
-          <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-3 py-1 font-mono text-xs tracking-tight text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-            MCP server + CLI · {totalToolCount} tools · MIT
-          </p>
+    <section className="relative overflow-hidden bg-background">
+      <HeroBackdrop />
 
-          <h1 className="text-[44px] leading-[1.05] font-medium tracking-[-0.02em] text-foreground sm:text-[56px] lg:text-[64px]">
-            <VerticalCutReveal
-              splitBy="words"
-              staggerDuration={0.05}
-              staggerFrom="first"
-              transition={{ type: "spring", stiffness: 200, damping: 24 }}
-              containerClassName="block"
-            >
-              {site.tagline}
-            </VerticalCutReveal>
-          </h1>
+      <div className="relative mx-auto max-w-5xl px-6 pt-24 pb-24 text-center sm:pt-28 lg:pt-32">
+        <h1 className="mx-auto max-w-3xl text-[2.6rem] leading-[1.05] font-semibold tracking-tight text-foreground sm:text-[3.4rem] lg:text-[3.9rem]">
+          <span className="block">
+            The <span className="text-primary">AI agent</span> for
+          </span>
+          <BlurText
+            text="Roblox game ideas."
+            animateBy="words"
+            delay={70}
+            className="block"
+          />
+        </h1>
 
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-            Roblox developers run one of the largest game platforms on the
-            internet — without an API for the market data they need. bloxscout
-            closes that gap. Ask your agent. Read the answer. Stay in your
-            editor.
-          </p>
+        <p className="mx-auto mt-7 max-w-xl text-[1.0625rem] leading-[1.6] text-muted-foreground">
+          bloxscout reasons over the live Roblox economy to tell you what to
+          build, and whether you can actually win the niche, before you write a
+          line of code.
+        </p>
 
-          <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-            <InstallPill command={site.installCommand} />
-            <a
-              href="#tools"
-              className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
-            >
-              See the {totalToolCount} tools →
-            </a>
-          </div>
-
-          <p className="mt-3 font-mono text-xs text-muted-foreground">
-            Works in Claude Code, Cursor, Windsurf, and Zed.
-          </p>
+        <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+          <CtaLink href="/signup" size="lg">
+            Start free
+          </CtaLink>
+          <CtaLink href="#demo" variant="outline" size="lg">
+            See it work
+          </CtaLink>
         </div>
 
-        <div className="flex-1 lg:max-w-xl">
-          <TerminalDemo />
-        </div>
+        <p className="mt-6 text-[13px] text-muted-foreground">
+          Nothing to install · live data, refreshed every ~30 min
+        </p>
+
+        {/* The real product (live data) in a browser window. */}
+        <AnimatedContent
+          distance={48}
+          duration={0.9}
+          className="relative mx-auto mt-16 max-w-5xl"
+        >
+          <AppWindow />
+        </AnimatedContent>
       </div>
     </section>
   );

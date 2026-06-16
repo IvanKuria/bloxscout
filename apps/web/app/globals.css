@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* next-themes toggles `.dark` on <html>; tell Tailwind v4 dark: works by class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tailwind v4 doesn't scan node_modules — include Streamdown's dist so its
+   streamed-markdown prose classes aren't tree-shaken. Path is relative to this
+   file: apps/web/app → apps/web/node_modules. */
+@source "../node_modules/streamdown/dist/*.js";
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -13,6 +21,9 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-tint: var(--accent-tint);
+  --color-accent-2: var(--accent-2);
+  --color-accent-2-tint: var(--accent-2-tint);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -25,9 +36,9 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-archivo);
-  /* Recon console palette — dark data-surface tokens used by the
-     stat panels, sparklines and live counters on the data pages. */
+  --font-serif: var(--font-geist-sans);
+  --font-heading: var(--font-geist-sans);
+  /* Neutral data-surface tokens used by stat panels / sparklines / counters. */
   --color-console: var(--console);
   --color-console-foreground: var(--console-foreground);
   --color-console-muted: var(--console-muted);
@@ -41,38 +52,89 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* =============================================================================
+   Brand: OpenAI/ChatGPT idiom. Near-monochrome ink-on-white with a single
+   restrained ChatGPT-green accent (#10a37f) on primary actions, links, active
+   and focus. Everything else is neutral gray. Soft radii, calm surfaces.
+   ============================================================================= */
 :root {
   --background: #ffffff;
-  --foreground: #0a0a0a;
-  --muted: #6b7280;
-  --muted-foreground: #6b7280;
-  --muted-surface: #f5f5f0;
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #e2231a;
-  --accent: #e2231a;
-  --accent-foreground: #ffffff;
-  --accent-hover: #c41e16;
-  --card: #ffffff;
-  --card-foreground: #0a0a0a;
-  --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
-  --primary: #0a0a0a;
-  --primary-foreground: #ffffff;
-  --secondary: #f5f5f0;
-  --secondary-foreground: #0a0a0a;
-  --destructive: #e2231a;
-  --destructive-foreground: #ffffff;
-  --radius: 0.5rem;
+  --foreground: #0d0d0d;
+  --muted: #f7f7f8;
+  --muted-foreground: #6e6e80;
+  --muted-surface: #f7f7f8;
+  --border: rgba(13, 13, 13, 0.1);
+  --input: rgba(13, 13, 13, 0.14);
+  --ring: #10a37f;
 
-  /* Recon console surface — near-black with a faint cool cast. */
-  --console: #0b0e0f;
-  --console-foreground: #e9edf0;
-  --console-muted: #7e8a91;
-  --console-border: #1d2528;
-  --console-grid: rgba(233, 237, 240, 0.045);
-  --positive: #1faa6b;
-  --negative: #e2231a;
+  /* Single brand accent = ChatGPT green. (`--accent*` kept for back-compat with
+     existing brand usages; all now resolve to green, not the old duotone.) */
+  --accent: #10a37f;
+  --accent-foreground: #ffffff;
+  --accent-hover: #0e8f6e;
+  --accent-tint: rgba(16, 163, 127, 0.1);
+  --accent-2: #10a37f;
+  --accent-2-tint: rgba(16, 163, 127, 0.1);
+  --accent-gradient: linear-gradient(115deg, #10a37f 0%, #0e8f6e 100%);
+
+  --card: #ffffff;
+  --card-foreground: #0d0d0d;
+  --popover: #ffffff;
+  --popover-foreground: #0d0d0d;
+  --primary: #10a37f;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #0d0d0d;
+  --destructive: #e5484d;
+  --destructive-foreground: #ffffff;
+  --radius: 0.75rem; /* soft, OpenAI-ish (~12px) */
+
+  --console: #fafafa;
+  --console-foreground: #0d0d0d;
+  --console-muted: rgba(13, 13, 13, 0.55);
+  --console-border: rgba(13, 13, 13, 0.1);
+  --console-grid: rgba(13, 13, 13, 0.035);
+  --positive: #10a37f;
+  --negative: #e5484d;
+}
+
+/* Dark (ChatGPT-style) — applied when next-themes adds `.dark` to <html>. */
+.dark {
+  --background: #0d0d0d;
+  --foreground: #ececec;
+  --muted: #1a1a1a;
+  --muted-foreground: #9a9a9a;
+  --muted-surface: #1a1a1a;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.16);
+  --ring: #10a37f;
+
+  --accent: #10a37f;
+  --accent-foreground: #ffffff;
+  --accent-hover: #1aab86;
+  --accent-tint: rgba(16, 163, 127, 0.18);
+  --accent-2: #10a37f;
+  --accent-2-tint: rgba(16, 163, 127, 0.18);
+  --accent-gradient: linear-gradient(115deg, #10a37f 0%, #1aab86 100%);
+
+  --card: #171717;
+  --card-foreground: #ececec;
+  --popover: #171717;
+  --popover-foreground: #ececec;
+  --primary: #10a37f;
+  --primary-foreground: #ffffff;
+  --secondary: #1f1f1f;
+  --secondary-foreground: #ececec;
+  --destructive: #e5484d;
+  --destructive-foreground: #ffffff;
+
+  --console: #141414;
+  --console-foreground: #ececec;
+  --console-muted: rgba(255, 255, 255, 0.55);
+  --console-border: rgba(255, 255, 255, 0.1);
+  --console-grid: rgba(255, 255, 255, 0.04);
+  --positive: #1aab86;
+  --negative: #ef5e63;
 }
 
 @layer base {
@@ -80,26 +142,28 @@
   h2,
   h3,
   .font-heading {
-    font-family: var(--font-heading), var(--font-geist-sans), sans-serif;
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
 }
 
 @layer utilities {
-  /* Faint engineering grid for console panels. */
+  /* Tabular numerics so data columns line up. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+  /* Retained (legacy data pages); a faint grid for console panels. */
   .recon-grid {
     background-image:
       linear-gradient(var(--console-grid) 1px, transparent 1px),
       linear-gradient(90deg, var(--console-grid) 1px, transparent 1px);
     background-size: 22px 22px;
   }
-  /* Tabular, monospace numerics so columns line up like a readout. */
-  .tabular {
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum";
-  }
 }
 
-/* Live pulse for the concurrency indicator dot. */
+/* Live pulse for the concurrency indicator dot (retained). */
 @keyframes recon-pulse {
   0%,
   100% {
@@ -126,6 +190,5 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: "ss01", "cv11";
   }
 }

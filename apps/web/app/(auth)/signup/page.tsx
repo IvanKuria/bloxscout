@@ -7,8 +7,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Same passwordless flow as /login — magic-link / Discord both create the
-// account on first sign-in.
+// Same flow as /login: Discord OAuth creates the account on first sign-in.
 export default function SignupPage() {
-  return <AuthForm />;
+  return <AuthForm mode="signup" />;
 }

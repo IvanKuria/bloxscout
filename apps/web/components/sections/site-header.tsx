@@ -1,53 +1,46 @@
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
-import { site } from "@/lib/site";
+import { CtaLink } from "./cta-link";
+import { BrandLockup } from "@/components/brand-mark";
+import { ThemeToggle } from "@/components/theme-toggle";
+
+const NAV = [
+  { href: "/#capabilities", label: "Capabilities" },
+  { href: "/#demo", label: "How it works" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/#faq", label: "FAQ" },
+];
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 font-mono text-sm font-semibold tracking-tight text-foreground"
-        >
-          <span
-            className="inline-block h-2 w-2 rounded-full bg-accent"
-            aria-hidden
-          />
-          {site.name}
+    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <Link href="/" aria-label="bloxscout home" className="text-foreground">
+          <BrandLockup className="flex items-center gap-2 text-[15px]" />
         </Link>
 
-        <nav className="hidden items-center gap-7 text-sm text-muted-foreground sm:flex">
-          <a href="#tools" className="transition-colors hover:text-foreground">
-            Tools
-          </a>
-          <a
-            href="#integrations"
-            className="transition-colors hover:text-foreground"
-          >
-            Integrations
-          </a>
-          <a href="#faq" className="transition-colors hover:text-foreground">
-            FAQ
-          </a>
+        <nav className="hidden items-center gap-7 sm:flex">
+          {NAV.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
-        <div className="flex items-center gap-5">
-          <a
-            href={site.github}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <span>GitHub</span>
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </a>
+        <div className="flex items-center gap-1.5">
+          <ThemeToggle className="text-muted-foreground" />
           <Link
             href="/login"
-            className="inline-flex items-center rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent-hover"
+            className="hidden rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline"
           >
             Sign in
           </Link>
+          <CtaLink href="/signup" size="sm">
+            Start free
+          </CtaLink>
         </div>
       </div>
     </header>
