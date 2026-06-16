@@ -19,6 +19,7 @@ import type {
   SteamCatalogFile,
   SteamStateFile,
 } from "@bloxscout/core/hosted-format";
+import { assessReplicability } from "@bloxscout/core/steam-replicability";
 import { computeVirality } from "@bloxscout/core/steam-virality";
 
 const SCHEMA_VERSION = 1;
@@ -76,6 +77,18 @@ export async function computeSteamBreakouts(
     const prior = priorState?.apps[key];
     const ageDays = computeAgeDays(obs.releaseDate, now);
 
+    // Drop AAA / hard-to-clone titles entirely — the radar is for solo devs who
+    // want to ship a clone in days, not rebuild a AAA game. Excluded games are
+    // not tracked in state either, so they never resurface or get an AEO page.
+    const replicability = assessReplicability({
+      priceUsd: obs.priceUsd,
+      developers: obs.developers,
+      publishers: obs.publishers,
+      genres: obs.genres,
+      tags: obs.tags,
+    });
+    if (!replicability.replicable) continue;
+
     const { reviewVelocityPerDay, observationBasis } = reviewVelocity(obs, prior, ageDays, now);
     const playerVelocityPct = playerVelocity(obs, prior);
 
@@ -109,6 +122,7 @@ export async function computeSteamBreakouts(
       ownersHigh: obs.ownersHigh,
       viralityScore,
       components,
+      replicabilityScore: replicability.replicabilityScore,
       observationBasis,
     });
 
@@ -125,7 +139,9 @@ export async function computeSteamBreakouts(
     };
   }
 
-  entries.sort((a, b) => b.viralityScore - a.viralityScore);
+  // Rank by virality × replicability so the most clone-able breakouts lead —
+  // a wildly viral but AAA-complex game shouldn't top a "clone it now" list.
+  entries.sort((a, b) => rankScore(b) - rankScore(a));
 
   const view: SteamBreakoutsView = {
     schemaVersion: SCHEMA_VERSION,
@@ -144,6 +160,11 @@ export async function computeSteamBreakouts(
     },
     catalog: mergeCatalog(priorCatalog, entries, nowIso),
   };
+}
+
+/** Combined "clone it now" rank: how viral × how clone-able. */
+function rankScore(e: SteamBreakoutEntry): number {
+  return e.viralityScore * e.replicabilityScore;
 }
 
 /** Δreviews/Δdays vs the prior observation; launch-to-date fallback on first sight. */

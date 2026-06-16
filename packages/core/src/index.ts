@@ -33,6 +33,7 @@ export * from "./scheduler.js";
 export * from "./schemas.js";
 export * from "./snapshots.js";
 export * from "./steam-client.js";
+export * from "./steam-replicability.js";
 export * from "./steam-virality.js";
 export * from "./top-creators.js";
 export * from "./types.js";

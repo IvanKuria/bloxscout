@@ -30,6 +30,8 @@ function interceptAppDetails(agent: MockAgent, type: string) {
           type,
           header_image: "h.jpg",
           release_date: { date: "10 Jun, 2026" },
+          developers: ["Indie Studio"],
+          publishers: ["Indie Studio"],
         },
       },
     });
@@ -66,6 +68,8 @@ describe("SteamSource.enrich", () => {
     expect(o?.ownersHigh).toBe(2_000_000);
     expect(o?.tags).toEqual(["Casual"]);
     expect(o?.currentPlayers).toBe(50000);
+    expect(o?.developers).toEqual(["Indie Studio"]);
+    expect(o?.publishers).toEqual(["Indie Studio"]);
     expect(o?.storeUrl).toBe(`https://store.steampowered.com/app/${MECCHA}`);
   });
 

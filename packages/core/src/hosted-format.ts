@@ -382,6 +382,12 @@ export const SteamBreakoutEntrySchema = z.object({
   // --- ranking ---
   viralityScore: z.number(),
   components: ViralityComponentsSchema,
+  /**
+   * [0,1] — how clone-able the concept is for a small Roblox dev (cheap +
+   * simple + "friend slop" co-op/party traits). AAA titles are filtered out
+   * upstream; the view is ranked by virality × replicability.
+   */
+  replicabilityScore: z.number(),
   /** Honesty flag: `"first-seen"` velocity is launch-to-date, sharpens after a 2nd run. */
   observationBasis: z.enum(["two-snapshot", "first-seen"]),
 });

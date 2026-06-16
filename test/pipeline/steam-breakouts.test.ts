@@ -21,6 +21,8 @@ function obs(
     releaseDate: "2026-06-10T00:00:00.000Z",
     genres: [],
     tags: [],
+    developers: [],
+    publishers: [],
     priceUsd: null,
     reviewTotal: null,
     positivePct: null,
@@ -164,6 +166,71 @@ describe("computeSteamBreakouts", () => {
     expect(slugs).toContain("meccha-chameleon");
     // prior game retained even though not surfaced this run
     expect(r.catalog.entries.find((e) => e.appId === 999)).toBeTruthy();
+  });
+
+  it("excludes AAA games (priced/published) and keeps cheap replicable indies", async () => {
+    const r = await computeSteamBreakouts({
+      source: fakeSource([
+        obs({ externalId: 1, name: "AAA Blockbuster", priceUsd: 59.99, reviewTotal: 80000 }),
+        obs({
+          externalId: 2,
+          name: "Megapub Title",
+          priceUsd: 24.99,
+          publishers: ["Ubisoft Entertainment"],
+          reviewTotal: 60000,
+        }),
+        obs({
+          externalId: 3,
+          name: "Friend Slop",
+          priceUsd: 4.99,
+          genres: ["Indie", "Casual"],
+          tags: ["Co-op", "Multiplayer", "Funny", "Party Game"],
+          reviewTotal: 30000,
+        }),
+      ]),
+      priorState: null,
+      priorCatalog: null,
+      now: NOW,
+    });
+    const names = r.view.entries.map((e) => e.name);
+    expect(names).toContain("Friend Slop");
+    expect(names).not.toContain("AAA Blockbuster");
+    expect(names).not.toContain("Megapub Title");
+    // excluded games are not tracked in state either
+    expect(r.nextState.apps["1"]).toBeUndefined();
+    expect(r.nextState.apps["3"]).toBeTruthy();
+    expect(r.view.entries[0]?.replicabilityScore).toBeGreaterThan(0.7);
+  });
+
+  it("ranks a clone-able breakout above a more-viral but less clone-able one", async () => {
+    const r = await computeSteamBreakouts({
+      source: fakeSource([
+        // Higher raw virality, but complex + pricier → lower replicability.
+        obs({
+          externalId: 10,
+          name: "Epic CRPG",
+          priceUsd: 29.99,
+          genres: ["RPG"],
+          tags: ["Open World", "Story Rich"],
+          reviewTotal: 90000,
+          positivePct: 0.97,
+        }),
+        // Lower raw virality, but cheap friend-slop → higher replicability.
+        obs({
+          externalId: 11,
+          name: "Goofy Co-op",
+          priceUsd: 2.99,
+          genres: ["Indie", "Casual"],
+          tags: ["Co-op", "Funny", "Physics", "Party Game"],
+          reviewTotal: 30000,
+          positivePct: 0.95,
+        }),
+      ]),
+      priorState: null,
+      priorCatalog: null,
+      now: NOW,
+    });
+    expect(r.view.entries[0]?.name).toBe("Goofy Co-op");
   });
 
   it("prunes state for apps not re-observed within the retention window", async () => {

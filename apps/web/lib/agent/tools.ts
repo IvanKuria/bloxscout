@@ -214,6 +214,8 @@ export interface RadarRow {
   shortDescription: string | null;
   ageDays: number | null;
   viralityScore: number;
+  /** [0,1] — how clone-able for a small Roblox dev (cheap + simple + co-op/party). */
+  replicabilityScore: number;
   reviewVelocityPerDay: number | null;
   reviewScoreDesc: string | null;
   reviewTotal: number | null;
@@ -299,6 +301,7 @@ function toRadarRow(e: SteamBreakoutEntry): RadarRow {
     shortDescription: e.shortDescription,
     ageDays: e.ageDays,
     viralityScore: e.viralityScore,
+    replicabilityScore: e.replicabilityScore,
     reviewVelocityPerDay: e.reviewVelocityPerDay,
     reviewScoreDesc: e.reviewScoreDesc,
     reviewTotal: e.reviewTotal,
