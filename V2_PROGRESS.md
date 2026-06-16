@@ -19,7 +19,7 @@
 ### Phase 2 — Agent tools + widgets
 - [x] `apps/web/lib/cross-platform.ts` (tag→niche heuristic + `matchExternalGame` resolver) — **8 tests green** (via root vitest, relative import)
 - [x] `apps/web/lib/data.ts` getters (`getSteamBreakouts`, `getSteamCatalog`) — web tsc clean
-- [ ] tools `get_replication_radar`, `analyze_replication_target` (`lib/agent/tools.ts`) + `protocol.ts`
+- [x] tools `get_replication_radar`, `analyze_replication_target` (`lib/agent/tools.ts`) — web tsc + eslint clean; **[ ] `protocol.ts` citations still pending**
 - [ ] widgets `replication-radar.tsx`, `replication-brief.tsx` + `widgets.tsx`
 - [ ] system prompt paragraph (`lib/agent/anthropic.ts`)
 - [ ] PostHog events (server tool dispatch + client CTA)

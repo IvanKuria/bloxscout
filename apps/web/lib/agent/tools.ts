@@ -24,8 +24,15 @@ import {
   getBreakouts,
   getRisingNiches,
   getSaturation,
+  getSteamBreakouts,
+  getSteamCatalog,
   getTrending,
 } from "@/lib/data";
+import { candidateRobloxNiche, matchExternalGame } from "@/lib/cross-platform";
+import type {
+  SteamBreakoutEntry,
+  SteamCatalogEntry,
+} from "@bloxscout/core/hosted-format";
 import { enrichGame, enrichGames, type GameEnrichment } from "@/lib/enrich";
 import { genreSlug } from "@/lib/format";
 import { analyzeNiche } from "@/lib/niche";
@@ -198,12 +205,112 @@ export interface GameDetailsResult {
   note?: string;
 }
 
+/** One row in the cross-platform "replicate-this" radar widget. */
+export interface RadarRow {
+  appId: number;
+  name: string;
+  storeUrl: string;
+  headerImageUrl: string | null;
+  shortDescription: string | null;
+  ageDays: number | null;
+  viralityScore: number;
+  reviewVelocityPerDay: number | null;
+  reviewScoreDesc: string | null;
+  reviewTotal: number | null;
+  currentPlayers: number | null;
+  playerVelocityPct: number | null;
+  genres: string[];
+  tags: string[];
+  /** Heuristic hint — the agent must verify, never assert as fact. */
+  candidateRobloxNiche: string | null;
+  candidateNicheSlug: string | null;
+  observationBasis: "two-snapshot" | "first-seen";
+}
+
+export interface RadarResult {
+  ok: boolean;
+  source: "steam";
+  title: string;
+  generatedAt: string | null;
+  rows: RadarRow[];
+  disclaimer: string | null;
+  note?: string;
+}
+
+/** Grounded facts for one replication target; the agent narrates the brief over these. */
+export interface ReplicationBriefResult {
+  ok: boolean;
+  appId: number | null;
+  name: string | null;
+  storeUrl: string | null;
+  headerImageUrl: string | null;
+  shortDescription: string | null;
+  releaseDate: string | null;
+  ageDays: number | null;
+  priceUsd: number | null;
+  reviewTotal: number | null;
+  reviewVelocityPerDay: number | null;
+  reviewScoreDesc: string | null;
+  positivePct: number | null;
+  currentPlayers: number | null;
+  ownersLow: number | null;
+  ownersHigh: number | null;
+  genres: string[];
+  tags: string[];
+  candidateRobloxNiche: string | null;
+  candidateNicheSlug: string | null;
+  viralityScore: number | null;
+  observationBasis: "two-snapshot" | "first-seen" | null;
+  /** Section scaffold the agent writes the prose brief against. */
+  briefSections: string[];
+  disclaimer: string | null;
+  note?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 /** Shared live client for the single-game-details tool's identity/vote lookups. */
 const roblox = new RobloxClient();
+
+/** Section scaffold for the agent-narrated Roblox adaptation brief. */
+const BRIEF_SECTIONS = [
+  "core_loop",
+  "keep_for_roblox",
+  "cut_for_roblox",
+  "monetization_fit",
+  "art_style",
+  "suggested_niche",
+] as const;
+
+const RADAR_EMPTY_NOTE =
+  "The cross-platform radar hasn't published yet — it runs once a day off " +
+  "Steam's trending lists. Treat this as “not available yet,” not “nothing is trending.”";
+
+/** Map a published breakout entry to a radar widget row, attaching the niche hint. */
+function toRadarRow(e: SteamBreakoutEntry): RadarRow {
+  const hint = candidateRobloxNiche(e.tags, e.genres);
+  return {
+    appId: e.appId,
+    name: e.name,
+    storeUrl: e.storeUrl,
+    headerImageUrl: e.headerImageUrl,
+    shortDescription: e.shortDescription,
+    ageDays: e.ageDays,
+    viralityScore: e.viralityScore,
+    reviewVelocityPerDay: e.reviewVelocityPerDay,
+    reviewScoreDesc: e.reviewScoreDesc,
+    reviewTotal: e.reviewTotal,
+    currentPlayers: e.currentPlayers,
+    playerVelocityPct: e.playerVelocityPct,
+    genres: e.genres,
+    tags: e.tags,
+    candidateRobloxNiche: hint?.niche ?? null,
+    candidateNicheSlug: hint?.slug ?? null,
+    observationBasis: e.observationBasis,
+  };
+}
 
 function clampLimit(input: unknown, fallback: number, max: number): number {
   const n = typeof input === "number" ? input : Number(input);
@@ -971,6 +1078,180 @@ export const COPILOT_TOOLS: CopilotTool[] = [
         note: enrichment.thinHistory
           ? "No tracked history yet, so growth windows and the CCU series are unavailable for this game."
           : undefined,
+      };
+    },
+  },
+
+  {
+    def: {
+      name: "get_replication_radar",
+      description:
+        "Get external games (currently Steam) going VIRAL right now that are " +
+        "strong candidates to clone or adapt as a Roblox game, ranked by " +
+        "virality velocity (review/player growth + recency). Call this when the " +
+        "user asks what to clone, what's blowing up on Steam, which indie games " +
+        "to copy, or wants fresh Roblox game ideas sourced from other platforms. " +
+        "The window to ship a Roblox version is days — surface the fastest risers. " +
+        "Renders an interactive radar widget. `candidateRobloxNiche` is a HINT to " +
+        "verify, not a fact; owner counts are estimate bands; honor observationBasis.",
+      input_schema: {
+        type: "object",
+        properties: {
+          limit: {
+            type: "integer",
+            description: "How many breakout games to return (1-25). Default 10.",
+          },
+          source: {
+            type: "string",
+            description: "External source. Only 'steam' is supported today (default).",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<RadarResult> {
+      const limit = clampLimit(input.limit, 10, 25);
+      const view = await getSteamBreakouts();
+      const base: RadarResult = {
+        ok: Boolean(view),
+        source: "steam",
+        title: "Going viral off-platform — Roblox clone candidates",
+        generatedAt: view?.generatedAt ?? null,
+        rows: [],
+        disclaimer: view?.disclaimer ?? null,
+      };
+      if (!view) return { ...base, note: RADAR_EMPTY_NOTE };
+      const rows = view.entries.slice(0, limit).map(toRadarRow);
+      return { ...base, rows, note: rows.length === 0 ? RADAR_EMPTY_NOTE : undefined };
+    },
+  },
+
+  {
+    def: {
+      name: "analyze_replication_target",
+      description:
+        "Pull the full Steam signals for ONE external game so you can write a " +
+        "Roblox adaptation brief. Call when the user names a specific game to " +
+        "adapt — e.g. 'give me a Roblox version of MECCHA CHAMELEON', 'how would " +
+        "I clone <game>', or after they pick one from the radar. Provide gameName " +
+        "or appId. YOU write the brief in prose over the returned facts, covering " +
+        "each of briefSections (core loop; what to keep vs cut for the Roblox " +
+        "audience; monetization fit; art/style; suggested niche). Treat " +
+        "candidateRobloxNiche as a hint, owners as a band (never exact sales), and " +
+        "honor observationBasis. Renders a brief widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          gameName: {
+            type: "string",
+            description: "Name of the external game (matched loosely).",
+          },
+          appId: {
+            type: "integer",
+            description: "Steam appId, if known (preferred — exact match).",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<ReplicationBriefResult> {
+      const gameName = typeof input.gameName === "string" ? input.gameName : undefined;
+      const appIdNum = Number(input.appId);
+      const appId = Number.isInteger(appIdNum) ? appIdNum : undefined;
+      const empty: ReplicationBriefResult = {
+        ok: false,
+        appId: null,
+        name: null,
+        storeUrl: null,
+        headerImageUrl: null,
+        shortDescription: null,
+        releaseDate: null,
+        ageDays: null,
+        priceUsd: null,
+        reviewTotal: null,
+        reviewVelocityPerDay: null,
+        reviewScoreDesc: null,
+        positivePct: null,
+        currentPlayers: null,
+        ownersLow: null,
+        ownersHigh: null,
+        genres: [],
+        tags: [],
+        candidateRobloxNiche: null,
+        candidateNicheSlug: null,
+        viralityScore: null,
+        observationBasis: null,
+        briefSections: [...BRIEF_SECTIONS],
+        disclaimer: null,
+      };
+      if (!gameName && appId === undefined) {
+        return { ...empty, note: "Tell me which game — a name or a Steam appId." };
+      }
+
+      const [view, catalog] = await Promise.all([getSteamBreakouts(), getSteamCatalog()]);
+
+      // Prefer the live breakouts view (full signals); fall back to the durable catalog.
+      const entry = view ? matchExternalGame({ gameName, appId }, view.entries) : null;
+      if (entry) {
+        const hint = candidateRobloxNiche(entry.tags, entry.genres);
+        return {
+          ok: true,
+          appId: entry.appId,
+          name: entry.name,
+          storeUrl: entry.storeUrl,
+          headerImageUrl: entry.headerImageUrl,
+          shortDescription: entry.shortDescription,
+          releaseDate: entry.releaseDate,
+          ageDays: entry.ageDays,
+          priceUsd: entry.priceUsd,
+          reviewTotal: entry.reviewTotal,
+          reviewVelocityPerDay: entry.reviewVelocityPerDay,
+          reviewScoreDesc: entry.reviewScoreDesc,
+          positivePct: entry.positivePct,
+          currentPlayers: entry.currentPlayers,
+          ownersLow: entry.ownersLow,
+          ownersHigh: entry.ownersHigh,
+          genres: entry.genres,
+          tags: entry.tags,
+          candidateRobloxNiche: hint?.niche ?? null,
+          candidateNicheSlug: hint?.slug ?? null,
+          viralityScore: entry.viralityScore,
+          observationBasis: entry.observationBasis,
+          briefSections: [...BRIEF_SECTIONS],
+          disclaimer: view?.disclaimer ?? null,
+        };
+      }
+
+      const cat: SteamCatalogEntry | null = catalog
+        ? matchExternalGame({ gameName, appId }, catalog.entries)
+        : null;
+      if (cat) {
+        const hint = candidateRobloxNiche(cat.tags, cat.genres);
+        return {
+          ...empty,
+          ok: true,
+          appId: cat.appId,
+          name: cat.name,
+          storeUrl: cat.storeUrl,
+          headerImageUrl: cat.headerImageUrl,
+          shortDescription: cat.shortDescription,
+          releaseDate: cat.releaseDate,
+          genres: cat.genres,
+          tags: cat.tags,
+          candidateRobloxNiche: hint?.niche ?? null,
+          candidateNicheSlug: hint?.slug ?? null,
+          viralityScore: cat.bestViralityScore,
+          note:
+            "Not on the live breakouts radar right now — using catalog metadata, " +
+            "so live review/player velocity isn't available. Brief from concept + tags.",
+        };
+      }
+
+      return {
+        ...empty,
+        note:
+          "I don't have that game on the cross-platform radar yet (it scans Steam's " +
+          "trending lists). You can still describe it and I'll reason about a Roblox adaptation.",
       };
     },
   },
