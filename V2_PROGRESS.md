@@ -9,8 +9,8 @@
 - [x] `packages/core/src/steam-virality.ts` + tests (pure scoring) — **green (15 tests)**
 - [x] `packages/core/src/hosted-format.ts` — `SteamBreakouts*` + `SteamState*` + `SteamCatalog*` schemas, `HOSTED_PATHS` (+3 paths) — **core builds clean**
 - [x] `packages/core/src/steam-client.ts` (undici, MockAgent-injectable) + tests — **9 tests green**; `SteamApiError` added to `errors.ts`
-- [ ] `packages/core/src/external-sources.ts` (`ExternalSource` iface + `SteamSource`)
-- [ ] `pipeline/steam-breakouts.ts` (`computeSteamBreakouts`) + tests
+- [x] `packages/core/src/external-sources.ts` (`ExternalSource` iface + `SteamSource`) — **3 tests green**
+- [x] `pipeline/steam-breakouts.ts` (`computeSteamBreakouts` → view/state/catalog) + tests — **8 tests green**; full typecheck (both tsconfigs) clean
 - [ ] `pipeline/run.ts` flag-gated `--steam-radar` stage; `pipeline/validate.ts`
 - [ ] `packages/core/src/hosted-data.ts` `getSteamBreakoutsView` / catalog + `index.ts`
 
@@ -34,6 +34,7 @@
 
 ## Iteration log
 - **Iter 1:** branch created; read existing patterns (`concentration.ts`, `growth.ts`, test style). Implemented pure virality scoring `steam-virality.ts` (review-velocity 0.45 / player-velocity 0.25 / recency 0.20 / reception 0.10; reuses `logistic`). 15 unit tests pass incl. a MECCHA-CHAMELEON-like case scoring >80. Committed `5fdfd43`.
+- **Iter 4:** `external-sources.ts` (`ExternalSource` iface + `SteamSource` adapter, best-effort sub-signals, skips non-`game` types) + `pipeline/steam-breakouts.ts` (`computeSteamBreakouts`: candidates→enrich→velocity vs prior state→virality→ranked view + next state + accumulating catalog with slugs/prune). 11 new tests (8 stage incl. first-seen vs two-snapshot, ranking, catalog merge, prune; 3 adapter via MockAgent). Full repo typecheck clean. 35 Steam tests green total. Committed.
 - **Iter 3:** added `SteamApiError` (errors.ts) + `steam-client.ts` mirroring `roblox-client` transport (injectable dispatcher/cache/sleep, backoff, Retry-After). Methods: `getFeaturedApps`, `getAppDetails`, `getReviewSummary`, `getSteamSpy`, `getCurrentPlayers` + `parseOwnersBand`. 9 MockAgent tests green (incl. MECCHA fixtures, 5xx-retry). Core builds clean. Committed.
 - **Iter 2:** added `SteamBreakouts*` / `SteamAppState`+`SteamStateFile` / `SteamCatalog*` Zod schemas + 3 `HOSTED_PATHS` entries to `hosted-format.ts`. Caught + fixed nodenext ESM import (`./concentration.js`) via `build:core` gate. Core builds clean; hosted-format + virality tests green (23). Committed.
 
