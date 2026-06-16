@@ -11,8 +11,10 @@
 - [x] `packages/core/src/steam-client.ts` (undici, MockAgent-injectable) + tests — **9 tests green**; `SteamApiError` added to `errors.ts`
 - [x] `packages/core/src/external-sources.ts` (`ExternalSource` iface + `SteamSource`) — **3 tests green**
 - [x] `pipeline/steam-breakouts.ts` (`computeSteamBreakouts` → view/state/catalog) + tests — **8 tests green**; full typecheck (both tsconfigs) clean
-- [ ] `pipeline/run.ts` flag-gated `--steam-radar` stage; `pipeline/validate.ts`
-- [ ] `packages/core/src/hosted-data.ts` `getSteamBreakoutsView` / catalog + `index.ts`
+- [x] `pipeline/run.ts` flag-gated `--steam-radar` stage (+`--steam-enrich-limit`); `pipeline/validate.ts` `validateSteamBreakouts` — **typecheck clean**
+- [x] `packages/core/src/hosted-data.ts` `getSteamBreakoutsView` + `getSteamCatalog` + `index.ts` barrel — **full suite 344 tests green**
+
+**✅ Phase 1 backend COMPLETE** (scoring → schemas → client → adapter → stage → pipeline wiring → validation → read-side). Live `--steam-radar` smoke run against real Steam + a bloxscout-data checkout is deferred to the morning report (network/data-repo + one-live-call policy).
 
 ### Phase 2 — Agent tools + widgets
 - [ ] `apps/web/lib/cross-platform.ts` (tag→niche heuristic, resolver)
@@ -40,4 +42,5 @@
 
 ## MORNING REPORT — needs Ivan
 _(empty so far)_
+- **Live Steam shape check (do once):** run `tsx pipeline/run.ts --data-dir ../bloxscout-data --skip-discovery --steam-radar --steam-enrich-limit 10` once to confirm real Steam `featuredcategories`/`appdetails`/`appreviews` JSON still matches the client's parsing, and that `v1/views/steam-breakouts.json` + `v1/external/steam/{state,catalog}.json` write. (Loop kept to fixtures to respect Steam rate limits / one-live-call policy.)
 - Reminder (known up front): publishing the real `steam-breakouts.json`/`catalog.json` to the live CDN needs a pipeline run against the `bloxscout-data` repo + the GitHub Action; live-data QA and any Vercel/PostHog dashboard toggles are human steps. All code/tests/build will be done on the branch.

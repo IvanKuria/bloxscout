@@ -33,12 +33,19 @@ import {
   type RawRunFile,
   type RegistryFile,
   RegistryFileSchema,
+  type SteamCatalogFile,
+  SteamCatalogFileSchema,
+  type SteamStateFile,
+  SteamStateFileSchema,
 } from "@bloxscout/core/hosted-format";
+import { SteamSource } from "@bloxscout/core/external-sources";
 import { RobloxClient } from "@bloxscout/core/roblox-client";
+import { SteamClient } from "@bloxscout/core/steam-client";
 import type { Game } from "@bloxscout/core/types";
 import { discoverGames } from "./discover.js";
 import { DEFAULT_GAMEPASS_TOP_N, sampleGamePasses, selectGamePassSampleIds } from "./gamepasses.js";
 import { snapshotInBatches } from "./ingest.js";
+import { computeSteamBreakouts } from "./steam-breakouts.js";
 import {
   listDailyDates,
   listRawDates,
@@ -55,7 +62,11 @@ import {
   upsertDiscovered,
 } from "./registry.js";
 import { aggregateDaily, aggregateHourly, buildHistoryShards } from "./rollup.js";
-import { validateGamePassFile, validateRunOutputs } from "./validate.js";
+import {
+  validateGamePassFile,
+  validateRunOutputs,
+  validateSteamBreakouts,
+} from "./validate.js";
 import { computeViews } from "./views.js";
 
 const MAX_TRACKED = 15_000;
@@ -113,6 +124,10 @@ async function main(): Promise<void> {
       // is not guaranteed unauthenticated, hence the gate.
       "sample-gamepasses": { type: "boolean", default: false },
       "gamepass-top-n": { type: "string" },
+      // Optional cross-platform "replicate-this" radar (off by default). Hits
+      // Steam's public endpoints; runs once/day to stay rate-limit-safe.
+      "steam-radar": { type: "boolean", default: false },
+      "steam-enrich-limit": { type: "string" },
     },
   });
   const dataDir = values["data-dir"];
@@ -238,6 +253,49 @@ async function main(): Promise<void> {
     }
     writeJsonFile(join(dataDir, HOSTED_PATHS.gamepasses(today)), gamePassFile);
     log(`gamepasses: captured passes for ${Object.keys(sampled).length}/${sampleIds.length} games`);
+  }
+
+  // -------------------------------------------------------------------------
+  // Optional cross-platform "replicate-this" radar (flag-gated, once/day)
+  // -------------------------------------------------------------------------
+  if (values["steam-radar"] && isFirstRunOfDay) {
+    const priorStateRaw = readJsonFile(join(dataDir, HOSTED_PATHS.steamState));
+    const priorStateParsed =
+      priorStateRaw === null ? null : SteamStateFileSchema.safeParse(priorStateRaw);
+    const priorState: SteamStateFile | null =
+      priorStateParsed?.success === true ? priorStateParsed.data : null;
+
+    const priorCatalogRaw = readJsonFile(join(dataDir, HOSTED_PATHS.steamCatalog));
+    const priorCatalogParsed =
+      priorCatalogRaw === null ? null : SteamCatalogFileSchema.safeParse(priorCatalogRaw);
+    const priorCatalog: SteamCatalogFile | null =
+      priorCatalogParsed?.success === true ? priorCatalogParsed.data : null;
+
+    const enrichLimit = values["steam-enrich-limit"]
+      ? Number(values["steam-enrich-limit"])
+      : undefined;
+
+    log("steam-radar: scanning Steam breakouts…");
+    const source = new SteamSource({ client: new SteamClient({ userAgent: INGEST_USER_AGENT }) });
+    const { view, nextState, catalog } = await computeSteamBreakouts({
+      source,
+      priorState,
+      priorCatalog,
+      now: now.getTime(),
+      enrichLimit,
+    });
+
+    const steamErrors = validateSteamBreakouts({ view, state: nextState, catalog });
+    if (steamErrors.length > 0) {
+      for (const error of steamErrors) console.error(`[ingest] VALIDATION FAILED: ${error}`);
+      process.exit(1);
+    }
+    writeJsonFile(join(dataDir, HOSTED_PATHS.steamBreakoutsView), view);
+    writeJsonFile(join(dataDir, HOSTED_PATHS.steamState), nextState);
+    writeJsonFile(join(dataDir, HOSTED_PATHS.steamCatalog), catalog);
+    log(
+      `steam-radar: ${view.entries.length} breakouts, ${catalog.entries.length} catalog entries`,
+    );
   }
 
   // -------------------------------------------------------------------------

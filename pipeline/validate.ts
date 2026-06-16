@@ -14,6 +14,12 @@ import {
   RawRunFileSchema,
   RisingNichesViewSchema,
   SaturationViewSchema,
+  type SteamBreakoutsView,
+  SteamBreakoutsViewSchema,
+  type SteamCatalogFile,
+  SteamCatalogFileSchema,
+  type SteamStateFile,
+  SteamStateFileSchema,
 } from "@bloxscout/core/hosted-format";
 import type { ComputedViews } from "./views.js";
 
@@ -91,4 +97,29 @@ export function validateGamePassFile(file: GamePassFile): string[] {
     return [`gamepass file fails schema: ${parsed.error.message.slice(0, 300)}`];
   }
   return [];
+}
+
+/**
+ * Schema-validate the Steam radar artifacts before publishing. The stage is
+ * flag-gated, so this is only called when the files were produced. A malformed
+ * artifact aborts the run like any other bad view.
+ */
+export function validateSteamBreakouts(input: {
+  view: SteamBreakoutsView;
+  state: SteamStateFile;
+  catalog: SteamCatalogFile;
+}): string[] {
+  const errors: string[] = [];
+  const checks = [
+    ["steam-breakouts view", SteamBreakoutsViewSchema, input.view],
+    ["steam state", SteamStateFileSchema, input.state],
+    ["steam catalog", SteamCatalogFileSchema, input.catalog],
+  ] as const;
+  for (const [name, schema, value] of checks) {
+    const parsed = schema.safeParse(value);
+    if (!parsed.success) {
+      errors.push(`${name} fails schema: ${parsed.error.message.slice(0, 300)}`);
+    }
+  }
+  return errors;
 }

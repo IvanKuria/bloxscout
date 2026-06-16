@@ -21,6 +21,7 @@ export * from "./cache.js";
 export * from "./calculators.js";
 export * from "./concentration.js";
 export * from "./errors.js";
+export * from "./external-sources.js";
 export * from "./genre-monetization.js";
 export * from "./genre-seeds.js";
 export * from "./growth.js";
@@ -31,6 +32,8 @@ export * from "./roblox-client.js";
 export * from "./scheduler.js";
 export * from "./schemas.js";
 export * from "./snapshots.js";
+export * from "./steam-client.js";
+export * from "./steam-virality.js";
 export * from "./top-creators.js";
 export * from "./types.js";
 
