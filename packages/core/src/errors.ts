@@ -8,6 +8,7 @@ export type BloxscoutErrorCode =
   | "ROBLOX_NOT_FOUND"
   | "ROBLOX_RATE_LIMITED"
   | "ROBLOX_BAD_REQUEST"
+  | "STEAM_API_ERROR"
   | "VALIDATION_ERROR"
   | "NOT_IMPLEMENTED";
 
@@ -42,6 +43,24 @@ export class RobloxApiError extends BloxscoutError {
   ) {
     super(message, init.code ?? "ROBLOX_API_ERROR");
     this.name = "RobloxApiError";
+    this.statusCode = init.statusCode;
+    this.endpoint = init.endpoint;
+    this.body = init.body;
+  }
+}
+
+/** Generic non-2xx (or network) failure from a Steam public endpoint. */
+export class SteamApiError extends BloxscoutError {
+  public readonly statusCode: number;
+  public readonly endpoint: string;
+  public readonly body: string | undefined;
+
+  constructor(
+    message: string,
+    init: { statusCode: number; endpoint: string; body?: string },
+  ) {
+    super(message, "STEAM_API_ERROR");
+    this.name = "SteamApiError";
     this.statusCode = init.statusCode;
     this.endpoint = init.endpoint;
     this.body = init.body;
