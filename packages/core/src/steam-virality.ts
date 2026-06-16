@@ -8,7 +8,7 @@
  * Shared by the pipeline stage (`pipeline/steam-breakouts.ts`) so the scoring
  * lives in one tested place — the analog of `concentration.ts` / `growth.ts`.
  */
-import { logistic } from "./concentration";
+import { logistic } from "./concentration.js";
 
 /** Inputs to the virality score. `null` means "signal unavailable". */
 export interface ViralitySignals {
