@@ -124,9 +124,7 @@ interface GameSeries {
  * noise). It auto-upgrades to pure z-score ranking as history matures, and
  * never returns empty while there are genuine accelerators.
  */
-export function selectBreakouts(
-  entries: ReadonlyArray<ViewEntry>,
-): ViewEntry[] {
+export function selectBreakouts(entries: ReadonlyArray<ViewEntry>): ViewEntry[] {
   const byZ = entries
     .filter((e) => e.zScore24h !== null && e.zScore24h >= BREAKOUT_MIN_Z)
     .sort((a, b) => (b.zScore24h ?? 0) - (a.zScore24h ?? 0));

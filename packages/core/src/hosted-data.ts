@@ -144,11 +144,7 @@ export class HostedDataClient {
    * and label/genre. Cached on the SLOW bucket — the registry moves slowly.
    */
   async getRegistry(): Promise<RegistryFile | null> {
-    return this.fetchValidated(
-      HOSTED_PATHS.registry,
-      RegistryFileSchema,
-      CACHE_TTL.SLOW,
-    );
+    return this.fetchValidated(HOSTED_PATHS.registry, RegistryFileSchema, CACHE_TTL.SLOW);
   }
 
   /** One game's registry entry by universe id, or `null` when absent. */

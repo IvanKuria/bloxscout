@@ -355,10 +355,7 @@ export class RobloxClient {
       );
     }
     const maxRows = Math.max(1, Math.min(50, Math.round(opts.maxRows ?? 20)));
-    const url = new URL(
-      `/v1/games/recommendations/game/${universeId}`,
-      ROBLOX_ENDPOINTS.games,
-    );
+    const url = new URL(`/v1/games/recommendations/game/${universeId}`, ROBLOX_ENDPOINTS.games);
     url.searchParams.set("maxRows", String(maxRows));
     const data = await this.fetchJson<{
       games?: Array<{
@@ -453,9 +450,7 @@ export class RobloxClient {
             ? b.statistics.pastDayAwardedCount
             : 0,
         winRate:
-          typeof b.statistics?.winRatePercentage === "number"
-            ? b.statistics.winRatePercentage
-            : 0,
+          typeof b.statistics?.winRatePercentage === "number" ? b.statistics.winRatePercentage : 0,
         created: b.created ?? "",
       });
     }

@@ -547,9 +547,7 @@ describe("RobloxClient.getGameVotes", () => {
       .get("https://games.roblox.com")
       .intercept({ path: (p) => p.startsWith("/v1/games/votes") })
       .reply(200, { data: [{ id: 9 }] });
-    expect(await client.getGameVotes([9])).toEqual([
-      { universeId: 9, upVotes: 0, downVotes: 0 },
-    ]);
+    expect(await client.getGameVotes([9])).toEqual([{ universeId: 9, upVotes: 0, downVotes: 0 }]);
   });
 });
 

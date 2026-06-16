@@ -1,8 +1,4 @@
-import type {
-  HourlyFile,
-  RawRunFile,
-  ViewEntry,
-} from "@bloxscout/core/hosted-format";
+import type { HourlyFile, RawRunFile, ViewEntry } from "@bloxscout/core/hosted-format";
 import { describe, expect, it } from "vitest";
 import { emptyRegistry, upsertDiscovered } from "../../pipeline/registry.js";
 import { computeViews, selectBreakouts } from "../../pipeline/views.js";
@@ -224,9 +220,7 @@ describe("selectBreakouts", () => {
   });
 
   it("never returns empty while a real accelerator exists", () => {
-    const out = selectBreakouts([
-      viewEntry({ universeId: 1, playing: 4000, growth24hPct: 120 }),
-    ]);
+    const out = selectBreakouts([viewEntry({ universeId: 1, playing: 4000, growth24hPct: 120 })]);
     expect(out.length).toBe(1);
   });
 });
