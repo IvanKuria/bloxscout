@@ -23,6 +23,8 @@ import type {
   RankedView,
   RisingNichesView,
   SaturationView,
+  SteamBreakoutsView,
+  SteamCatalogFile,
   ViewEntry,
 } from "@bloxscout/core/hosted-format";
 
@@ -34,6 +36,8 @@ export type {
   SaturationView,
   RisingNichesView,
   GenreRevenueView,
+  SteamBreakoutsView,
+  SteamCatalogFile,
 };
 
 /** Shared client. Default base URL = the live hosted CDN. */
@@ -80,6 +84,28 @@ export const getRisingNiches = cache((): Promise<RisingNichesView | null> =>
 
 export const getGenreRevenue = cache((): Promise<GenreRevenueView | null> =>
   client.getGenreRevenueView(),
+);
+
+// ---------------------------------------------------------------------------
+// v2 cross-platform "replicate-this" radar (Steam breakouts + durable catalog)
+// Not on the CDN until this branch merges + the cron runs with --steam-radar;
+// `null` means "radar still computing" — render the shell + honest empty state.
+// ---------------------------------------------------------------------------
+
+export const getSteamBreakouts = cache((): Promise<SteamBreakoutsView | null> =>
+  client.getSteamBreakoutsView(),
+);
+
+export const getSteamCatalog = cache((): Promise<SteamCatalogFile | null> =>
+  client.getSteamCatalog(),
+);
+
+/** One durable catalog entry by its URL slug. `null` when the catalog or slug is absent. */
+export const getSteamCatalogEntryBySlug = cache(
+  async (slug: string): Promise<SteamCatalogFile["entries"][number] | null> => {
+    const catalog = await getSteamCatalog();
+    return catalog?.entries.find((e) => e.slug === slug) ?? null;
+  },
 );
 
 /**

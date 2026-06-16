@@ -73,7 +73,10 @@ jobs:
           fi
 
       - name: Run ingestion pipeline
-        run: pnpm exec tsx pipeline/run.ts --data-dir data 2>&1 | tee ingest-output.log
+        # --steam-radar self-gates to the first run of each day (isFirstRunOfDay),
+        # so the cross-platform radar refreshes once daily; --steam-enrich-limit
+        # caps Steam calls to stay rate-limit-safe.
+        run: pnpm exec tsx pipeline/run.ts --data-dir data --steam-radar --steam-enrich-limit 30 2>&1 | tee ingest-output.log
         shell: bash
 
       - name: Commit and push dataset

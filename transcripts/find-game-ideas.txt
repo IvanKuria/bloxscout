@@ -1,0 +1,118 @@
+0:00I paid a topdev $300 to teach me how he finds Roblox game ideas. And if you think this is cap, let me just show you
+0:088 secondssome quick proof. Okay, this is me talking to one Cole. If you guys don't know him, he basically made this game,
+0:1616 secondsMy Singing Brain Runt, with almost 300 million visits. Sold it for a bag to a big studio. He also has this game, Hide or Die, with almost a billion visits.
+0:2525 secondsI'm sure you guys have seen this on your homepage. And for all the haters, here's legitimately a screenshot. I don't know
+0:3232 secondshow I can make this any more clear. A screenshot of me paying this dude $300 via PayPal for some consultation. Okay.
+0:4343 secondsSo, what he gave me is something called the checklist. Okay. Now, my intention
+0:5151 secondsis to make this a three-part series. In this first part, we're going to go over the first thing in Cole's checklist, and
+0:5959 secondsthat is, has this game idea been done outside of Roblox before? And this is the caveat, and worked. Okay. Okay.
+1:071 minute, 7 secondsLet's dive in. Has this game idea been done outside of Roblox before and worked? Simply, what I'm going to do, guys, is I'm going to go over all of the
+1:151 minute, 15 secondsmethods that I've discovered on how to find Roblox game ideas. Stick with me till the end because I'm going to go over my favorite method and I think it
+1:231 minute, 23 secondsis definitely the most untapped. Reason I say that is because this specific method that I'll end up mentioning
+1:291 minute, 29 secondstowards the end is a method that I post about on Twitter and it pissed off the most people. So, usually when people get
+1:371 minute, 37 secondsmad, you know you're hitting the right button. Anyways, the first method to finding Roblox game ideas off platform
+1:441 minute, 44 secondsis called Delete This Bro. Okay, I'm just [ __ ] with you guys. First place
+1:511 minute, 51 secondsreally is just old school old school flash games, man. This is not a surprise to some of you seasoned devs. But if you
+1:591 minute, 59 secondslook at like the Forge, you know, Fire Attack, I think the dev's name is. He's talked about this publicly that the Forge was heavily inspired by this flash
+2:062 minutes, 6 secondsgame called Jack Smith. Okay, now a lot of you young kids probably don't even know what a flash game is, man. Like, I'm as [ __ ] We grew up playing these
+2:142 minutes, 14 secondsgames on our internet browsers. Okay, in my day and age, dude, I grew up there was a shared family computer, dog. Okay, so take a guess how [ __ ] old I am.
+2:242 minutes, 24 secondsAnyways, The Abyss, again, inspired by a flash game called The Fisher Cat. Okay, how do you actually find these flash
+2:322 minutes, 32 secondsgames? Well, here's some sites. And again, I'm just making this so easy for you guys. Okay, first one is Addicting
+2:382 minutes, 38 secondsGames. My OGs, you guys already know, man. I grew up playing this [ __ ] Balloons Tower Defense, for example, inspired this game called Pop a Balloon,
+2:472 minutes, 47 secondswhich is um made by another YouTuber. I can't remember the name of of his channel off the top of my head, but he's a G. Love his content. He even openly
+2:562 minutes, 56 secondstalks about this game being heavily inspired by Bluance Tower Defense. Okay, a sneaky one is cool math games. All
+3:043 minutes, 4 secondsright, you guys already know like we played this [ __ ] in school because it wasn't blocked. If you just go here, top
+3:113 minutes, 11 seconds10, okay, you can find games that are the most popular on this site. Now, when I'm looking on these sites, what am I
+3:203 minutes, 20 secondslooking for? Let me actually show you guys really quick. So, like Tiny Fishing, this was a game idea I was playing with a while back. What I'm
+3:273 minutes, 27 secondslooking for is signals of demand. What do I mean by that? Okay, I mean basically a quantifiable number that
+3:353 minutes, 35 secondsshows that people are actually interested in this core loop. Okay, here you can see this game has 3 million ratings. Now, this is a 2D flash game.
+3:453 minutes, 45 secondsOkay, it's going to take a little bit of creativity to turn this into
+3:523 minutes, 52 secondsa 3D working Roblox game. Okay, speaking of 3D games, this one is personally my favorite place to find flash games or
+4:014 minutes, 1 secondjust like internet browser games. It's crazy games. Reason being is they have games made by the Unity engine. Okay? So
+4:104 minutes, 10 secondswhat that means is some of these games are 3D and they're already 3D, bro. Makes it even easier for you to translate it to
+4:184 minutes, 18 secondsRoblox. So if you go here, you go popular games and just look through here, man. Okay.
+4:254 minutes, 25 secondsI personally prefer games that are like, you know, maybe tycoon simulator games, games that can be played with friends.
+4:324 minutes, 32 secondsLike you guys can have fun with this, right? Go multiplayer, dig deeper into it. Um, personally, I think a huge underserved market on Roblox is PvP cart
+4:424 minutes, 42 secondsgames. And that's validated here. Like, if I click in here, you'll see this game has been played a ton. Um, I've even talked to my buddy about this. This was
+4:504 minutes, 50 secondsactually one of his original ideas, but this is a great execution of it. And for some reason, crazy games just [ __ ] bugs my computer, dude. So, bear with
+4:594 minutes, 59 secondsme. But yeah, if you look here, man, this is what I'm looking for is like 200,000 votes. Okay, a bonus tip would
+5:055 minutes, 5 secondsbe to scroll down and see if any content creators have made content on the game because that's also a signal of demand.
+5:155 minutes, 15 secondsOkay, 113,000 views four years ago. I'll show you guys like an example.
+5:215 minutes, 21 secondsAnd I guess I thought I was slick in my last video, but a ton of you guys sniped this game that I'm prototyping. Airport security, right?
+5:305 minutes, 30 secondsGreat little loop this game has here.
+5:325 minutes, 32 seconds85,000 votes. Not much. But what was interesting to me is a big YouTuber played it, okay, years ago.
+5:425 minutes, 42 secondsAnd that for me is signal of demand of either the core fantasy, which is like being an airport TSA agent, or just like
+5:515 minutes, 51 secondsit having hilarious, funny, clippable moments. 6.2 million views four years ago. These are the things you guys want to start look to look for is actual data
+6:006 minutesthat backs up that this is a good game idea. Not just being on most popular, but like dig a little bit deeper, see if content creators have played it.
+6:066 minutes, 6 secondsIdeally, it's not already executed on Roblox. So, like for this game, for example, like what I would do is then go look on Roblox, see what other airport
+6:156 minutes, 15 secondssecurity games exist, what genre are they in, and then see if they're really fulfilling that same core fantasy that this game is fulfilling. And I'm going
+6:236 minutes, 23 secondsto make future videos about core fantasy because I'm starting to learn about it and I think it's really really powerful when it comes to game ideation. And yeah, that's a lot of yapping.
+6:316 minutes, 31 secondsAnyways, honorable mention newgrounds.com. Dude, some of my old heads watching this, man. Like we grew up on this [ __ ] dude. Old school. Old
+6:396 minutes, 39 secondsschool. Okay, you go here. You can go games. You can go popular. Same kind of deal, right? Just look for signals of
+6:476 minutes, 47 secondsdemand. Okay. Now, again, what you're looking for, just to summarize, is how many people played it. You know, things like up votes, content creators made vid
+6:556 minutes, 55 secondsvideos about it. Either ideally for me, I think it's good if it was years ago.
+6:596 minutes, 59 secondsThat means that there was a point in time when there's demand for it. There probably still is demand for it. Just no one has made a newer updated version of
+7:077 minutes, 7 secondsthat core loop. Okay, moving on to the next place to find game ideas offplatform,
+7:157 minutes, 15 secondsXbox Game Pass. Okay. Now, I just want to make a quick mention that what Cole told me here, he has said publicly. If
+7:247 minutes, 24 secondsyou do some digging in uh YouTube videos he's been in. So, Cole, don't hate me, bro. [laughter] All right. Um, but Xbox
+7:317 minutes, 31 secondsGame Pass. So, I'm a PC gamer. I have Game Pass. I also have an Xbox. You guys probably have already spotted this, but again, pattern recognition, right?
+7:407 minutes, 40 secondsQuarantine Zone, The Last Check, huge game. Basically, Zombie Borderline made the exact same game. And I was playing this recently. There's actually a few
+7:497 minutes, 49 secondsgames that came up on Roblox that use that same core loop. I literally think it's just called Quarantine Zone. Okay.
+7:587 minutes, 58 secondsQuarantine Zone. Yeah. Right here. And he'll he literally even says this game was inspired by Quarantine Zone. I mean, Quarantine Border. Okay. [laughter]
+8:068 minutes, 6 secondsSo, Xbox Game Pass, if you are like a console gamer, very underrated place to find game ideas. Okay. Again, demand signals, good reviews, play the game.
+8:168 minutes, 16 secondsAsk yourself, would a kid understand how to play this game? Because I think a real talent and skill that developers have is taking an adult game like
+8:258 minutes, 25 secondsQuarantine Zone, which is obviously rated M, and dumbing down the mechanics so that it's readable to a large audience on Roblox. I think that is a
+8:348 minutes, 34 secondshuge skill that very high-end developers have. Next one, digging a hole. Now, I don't know if this came before or after Roblox, so don't get pissed off at me
+8:438 minutes, 43 secondsfor this one, bro. But if you look at Dig to Escape, Dig the Backyard, right?
+8:478 minutes, 47 secondsAgain, for this one specifically, I don't know which one came first.
+8:518 minutes, 51 secondsWhatever. Moving on to the next one. The most underrated and my personal favorite is Tik Tok challenges. Okay, I posted
+8:588 minutes, 58 secondsabout this on Twitter. If you're not following me on Twitter, um it's somewhere on my YouTube channel. You guys can follow me there. But Tik Tok
+9:059 minutes, 5 secondschallenges, okay? How to find game ideas that are Tik Tok challenges. Just [ __ ] scroll Tik Tok, bro. Like, I
+9:139 minutes, 13 secondsdon't know what else to tell you. Okay, look at Bomb Chip, right? If you look at Bomb Chip, 260 million visits. Okay,
+9:209 minutes, 20 secondsvery easy miniame to make. This is why it's personally my favorite. All right, there's obviously balancing. It still takes talent to execute this, but I
+9:309 minutes, 30 secondsthink the time required to actually dev a miniame challenge like this is very low. If you look at like games like Blindshot, I mean Silent Assassins,
+9:389 minutes, 38 secondsgames like this. That's why it's my personal favorite and it's untapped in my opinion. So, if you guys know anything about the bomb chip challenge,
+9:459 minutes, 45 secondslike look it up on Tik Tok. It's all over the place. This dev was really smart and made it into a game. Okay, here's another example. The lying challenge. I don't know if you guys have
+9:549 minutes, 54 secondsseen this challenge on TikTok, but it's basically like person on the left describes what they have in their hands and then this person tries to guess it from my understanding. I don't [ __ ]
+10:0210 minutes, 2 secondsknow. Maybe I misunderstood that. I haven't watched videos like that in a while. I don't even watch this type of content, so don't get pissed off at me, bro. Whatever. Okay. 78 million visits.
+10:1310 minutes, 13 secondsExact same thing. Lying challenge. I mean, this is smart, dude. Right? It It's taking like a little cultural phenomena and and turning it into a
+10:2110 minutes, 21 secondsgame, right? Because people seeing this challenge probably want to do it with their friends, but they can't because maybe their friend lives in a different country. I don't know, dude. So now they
+10:2910 minutes, 29 secondscan play the same challenge with their friends, but in a Roblox experience. So it's smart, man. Here's another one.
+10:3510 minutes, 35 secondsRubber band Watermelon. Almost 20 million visits. Quick, easy games in my opinion, dude. So highly, highly
+10:4210 minutes, 42 secondsunderrated. Just scroll TikTok, look at challenges, and yeah, man. Now for some honorable mentions. Okay, the iOS and
+10:5210 minutes, 52 secondsGoogle Play Store. A lot of devs probably know about this one already, but just see what's popping on iOS, dude. See what's popping on Google Play
+10:5910 minutes, 59 secondsStore. If you guys have seen this game, like there's so many It's like a meme that this is like a fake mobile game.
+11:0511 minutes, 5 secondsOkay. Well, this dev actually turned it into a Roblox game, 11 mil visits. It
+11:1311 minutes, 13 secondshad like 13k CCU at one point. I I was watching this game like a hawk. kind of died low-key, but hey, this guy got his
+11:2111 minutes, 21 secondsbag, right? He capitalized on that [ __ ] So, that was smart. Kudos to him. If you look at Cole's game, right, My Singing Brain Rot, it was based on this popular game called My Singing Monsters, right?
+11:3211 minutes, 32 secondsAgain, demand signals, dude. 50 million downloads. All right, this is already majorly a kids game, so there's not much
+11:4011 minutes, 40 secondsyou have to rework. He just skinned it for something that was popping at the same time. Super smart of a man. I mean, he made a bag on this. Like, shout out
+11:4711 minutes, 47 secondsto him, bro. So, super mega bonus, lowkey Minecraft mini games, dude. Okay, I'm
+11:5611 minutes, 56 secondstalking like Spliffe, Bedw Wars, [ __ ] like that. You know, you guys have seen this, right? Bedw Wars and Minecraft. I don't know my old OGs. I used to Twitch
+12:0412 minutes, 4 secondsstream [ __ ] Minecraft, dude. Back in like 2014, I want to say, dog. Anyways, Bedw Wars
+12:1212 minutes, 12 secondsMinecraft. Um, another one is old school Garry's Mod games. Okay, so if you look at Cole's game here, Hide or Die. What
+12:2012 minutes, 20 secondsis it actually? It's just Garry's Mod Prop Hunt, dude. Okay, this was a huge,
+12:2612 minutes, 26 secondshuge hit back in the day. Again, demand signals, bro. Right. Demand signals. And
+12:3312 minutes, 33 secondshe, again, super smart of him, changed it and made it 6v6. Okay? Because what
+12:4012 minutes, 40 secondshappens is a lot of kids will see big YouTubers playing a game like Prop Hunt,
+12:4612 minutes, 46 secondslet's say, for example, and Prop Hunt's only on Steam. And let's say, for example, Prop Hunt cost $20. Okay? Well,
+12:5412 minutes, 54 secondsmaybe the kid doesn't have a PC. The kid doesn't have a $20, but he really likes the game. He watches content creators play the game. Okay? So that is what I
+13:0213 minutes, 2 secondscall a gap in the market where there's demand for the game for a younger from a younger audience, but no one is
+13:1013 minutes, 10 secondsfulfilling that demand. And that's what Cole did here with Hide or Die. Super smart of him, dude. Right. He saw comments on a YouTube short of a
+13:1913 minutes, 19 secondsYouTuber playing Prop Hunt and someone was commenting, "Where can I play this game? Where can I play this game? I don't have a PC. I wish I could play this game." That's another quick tip,
+13:2713 minutes, 27 secondsguys, is if you're actually watching some content creators play games is look for,
+13:3413 minutes, 34 secondsokay, look for comments like, I wish I could play this game.
+13:4113 minutes, 41 secondsWhere can I play this game? These are again signals of demand, dude.
+13:4813 minutes, 48 secondsOkay, these are signals of demand. And again, for me, the winner out of all of these because we just went over a lot, dude.
+13:5513 minutes, 55 secondsAs promised at the end of the video, my personal favorite Tik Tok challenges.
+13:5913 minutes, 59 secondsOkay, just to summarize again, easy to make mini games. When I posted on Twitter, I got the most comments. This
+14:0714 minutes, 7 secondsis my favorite [ __ ] comment to receive, dude. [laughter]
+14:1314 minutes, 13 seconds[gasps]
+14:1414 minutes, 14 secondsOh, dude. When I see this comment, that's when I know I'm hitting the right button cuz like, dude, I love talking [ __ ] I mean, it's all love at the end
+14:2214 minutes, 22 secondsof the day, right? Everyone deserves to succeed, man. And it's an abundance mentality. None of this [ __ ] should be gatekept because in my opinion
+14:2914 minutes, 29 secondsI game ideas are everywhere. They're super abundant. Okay. What's actually difficult is execution and making sure
+14:3614 minutes, 36 secondsthat people do what they're going to say they're going to do and finding good talented devs to execute your vision. So that's why I'm bullish on just sharing
+14:4514 minutes, 45 secondsall this [ __ ] sauce. So anyways, if you guys like this video, let me know in the comments below. Also, [ __ ] crazy. 2K subs in a week. I super grateful.
+14:5414 minutes, 54 secondsLike dude, I've had so many YouTube channels in my life. I've never had one blow up this fast. So, shout out to you guys. I really appreciate the love. I am going to make a Discord server soon. I'm
+15:0315 minutes, 3 secondsjust an old man and I might need help setting it up. And yeah, comment below.
+15:0715 minutes, 7 secondsLet me know what you guys thought of this video and stay tuned. This was part one. For part two, we'll go over some more of this stuff. And yeah, that's it.

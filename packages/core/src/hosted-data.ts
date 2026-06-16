@@ -35,6 +35,10 @@ import {
   RisingNichesViewSchema,
   type SaturationView,
   SaturationViewSchema,
+  type SteamBreakoutsView,
+  SteamBreakoutsViewSchema,
+  type SteamCatalogFile,
+  SteamCatalogFileSchema,
   shardOf,
 } from "./hosted-format.js";
 
@@ -126,6 +130,23 @@ export class HostedDataClient {
       GenreRevenueViewSchema,
       CACHE_TTL.DEFAULT,
     );
+  }
+
+  /**
+   * Cross-platform "replicate-this" radar — external games (Steam) going viral
+   * now, ranked by virality velocity. `null` until first published (see above).
+   */
+  async getSteamBreakoutsView(): Promise<SteamBreakoutsView | null> {
+    return this.fetchValidated(
+      HOSTED_PATHS.steamBreakoutsView,
+      SteamBreakoutsViewSchema,
+      CACHE_TTL.DEFAULT,
+    );
+  }
+
+  /** Durable catalog of every external game surfaced — powers /roblox-version-of pages. */
+  async getSteamCatalog(): Promise<SteamCatalogFile | null> {
+    return this.fetchValidated(HOSTED_PATHS.steamCatalog, SteamCatalogFileSchema, CACHE_TTL.SLOW);
   }
 
   /** Hosted time-series for one game, or `null` if untracked/unavailable. */

@@ -344,6 +344,106 @@ export const GenreRevenueViewSchema = z.object({
 export type GenreRevenueView = z.infer<typeof GenreRevenueViewSchema>;
 
 // ---------------------------------------------------------------------------
+// Cross-platform "replicate-this" radar (external sources, Steam-first)
+//   - view:    v1/views/steam-breakouts.json   (transient, ranked breakouts)
+//   - state:   v1/external/steam/state.json     (prior obs for velocity)
+//   - catalog: v1/external/steam/catalog.json   (accumulating, durable SEO)
+// ---------------------------------------------------------------------------
+
+const ViralityComponentsSchema = z.object({
+  reviewVelocity: z.number(),
+  playerVelocity: z.number(),
+  recency: z.number(),
+  reception: z.number(),
+});
+
+export const SteamBreakoutEntrySchema = z.object({
+  source: z.literal("steam"),
+  appId: z.number().int(),
+  name: z.string(),
+  storeUrl: z.string(),
+  headerImageUrl: z.string().nullable(),
+  shortDescription: z.string().nullable(),
+  releaseDate: z.string().nullable(),
+  ageDays: z.number().nullable(),
+  genres: z.array(z.string()),
+  /** Steam user tags — drive the candidate Roblox-niche mapping. */
+  tags: z.array(z.string()),
+  priceUsd: z.number().nullable(),
+  // --- signals ---
+  reviewTotal: z.number().int().nullable(),
+  reviewVelocityPerDay: z.number().nullable(),
+  reviewScoreDesc: z.string().nullable(),
+  positivePct: z.number().nullable(),
+  currentPlayers: z.number().int().nullable(),
+  playerVelocityPct: z.number().nullable(),
+  ownersLow: z.number().int().nullable(),
+  ownersHigh: z.number().int().nullable(),
+  // --- ranking ---
+  viralityScore: z.number(),
+  components: ViralityComponentsSchema,
+  /** Honesty flag: `"first-seen"` velocity is launch-to-date, sharpens after a 2nd run. */
+  observationBasis: z.enum(["two-snapshot", "first-seen"]),
+});
+export type SteamBreakoutEntry = z.infer<typeof SteamBreakoutEntrySchema>;
+
+export const SteamBreakoutsViewSchema = z.object({
+  schemaVersion: z.number().int(),
+  generatedAt: isoDateTime,
+  source: z.literal("steam"),
+  disclaimer: z.string(),
+  entries: z.array(SteamBreakoutEntrySchema),
+});
+export type SteamBreakoutsView = z.infer<typeof SteamBreakoutsViewSchema>;
+
+/** Per-app prior observation, keyed by appId, used to compute velocity across runs. */
+export const SteamAppStateSchema = z.object({
+  name: z.string(),
+  firstSeenAt: isoDateTime,
+  lastReviewTotal: z.number().int().nullable(),
+  lastReviewAt: isoDateTime.nullable(),
+  lastPlayers: z.number().int().nullable(),
+  lastPlayersAt: isoDateTime.nullable(),
+  releaseDate: z.string().nullable(),
+  genres: z.array(z.string()),
+  tags: z.array(z.string()),
+});
+export type SteamAppState = z.infer<typeof SteamAppStateSchema>;
+
+export const SteamStateFileSchema = z.object({
+  schemaVersion: z.number().int(),
+  generatedAt: isoDateTime,
+  apps: z.record(z.string(), SteamAppStateSchema),
+});
+export type SteamStateFile = z.infer<typeof SteamStateFileSchema>;
+
+/** Durable catalog entry — one per external game ever surfaced; powers `/roblox-version-of/[slug]`. */
+export const SteamCatalogEntrySchema = z.object({
+  slug: z.string(),
+  source: z.literal("steam"),
+  appId: z.number().int(),
+  name: z.string(),
+  storeUrl: z.string(),
+  headerImageUrl: z.string().nullable(),
+  shortDescription: z.string().nullable(),
+  releaseDate: z.string().nullable(),
+  genres: z.array(z.string()),
+  tags: z.array(z.string()),
+  firstSeenAt: isoDateTime,
+  lastSeenAt: isoDateTime,
+  /** Best virality score observed while on the radar — for ordering catalog pages. */
+  bestViralityScore: z.number(),
+});
+export type SteamCatalogEntry = z.infer<typeof SteamCatalogEntrySchema>;
+
+export const SteamCatalogFileSchema = z.object({
+  schemaVersion: z.number().int(),
+  generatedAt: isoDateTime,
+  entries: z.array(SteamCatalogEntrySchema),
+});
+export type SteamCatalogFile = z.infer<typeof SteamCatalogFileSchema>;
+
+// ---------------------------------------------------------------------------
 // Meta — v1/meta.json
 // ---------------------------------------------------------------------------
 
@@ -370,6 +470,9 @@ export const HOSTED_PATHS = {
   saturationView: "v1/views/saturation.json",
   risingNichesView: "v1/views/rising-niches.json",
   genreRevenueView: "v1/views/genre-revenue.json",
+  steamBreakoutsView: "v1/views/steam-breakouts.json",
+  steamState: "v1/external/steam/state.json",
+  steamCatalog: "v1/external/steam/catalog.json",
   raw: (date: string, runId: string) => `v1/raw/${date}/${runId}.json.gz`,
   gamepasses: (date: string) => `v1/gamepasses/${date}.json.gz`,
   hourly: (date: string) => `v1/hourly/${date}.json.gz`,

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getFreshness, getGenres, getTrending } from "@/lib/data";
+import { getFreshness, getGenres, getSteamCatalog, getTrending } from "@/lib/data";
 import { topMatchups } from "@/lib/compare";
 import { LEARN_ENTRIES } from "@/lib/learn";
 import { genreSlug as toGenreSlug, slugify } from "@/lib/format";
@@ -12,7 +12,11 @@ const GAME_URL_CAP = 1000;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { generatedAt } = await getFreshness();
-  const [trending, genres] = await Promise.all([getTrending(), getGenres()]);
+  const [trending, genres, steamCatalog] = await Promise.all([
+    getTrending(),
+    getGenres(),
+    getSteamCatalog(),
+  ]);
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${site.url}/`, lastModified: generatedAt, changeFrequency: "daily", priority: 1 },
@@ -28,6 +32,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${site.url}/most-profitable-roblox-game-genres`, lastModified: generatedAt, changeFrequency: "daily", priority: 0.9 },
     { url: `${site.url}/rising-roblox-niches`, lastModified: generatedAt, changeFrequency: "daily", priority: 0.9 },
     { url: `${site.url}/what-roblox-game-should-i-make`, lastModified: generatedAt, changeFrequency: "daily", priority: 0.9 },
+    // Cross-platform "replicate-this" radar hub.
+    { url: `${site.url}/steam-games-to-clone-on-roblox`, lastModified: generatedAt, changeFrequency: "daily", priority: 0.9 },
     // Calculators (static, high-volume search intent).
     { url: `${site.url}/calculators/devex`, lastModified: generatedAt, changeFrequency: "monthly", priority: 0.7 },
     { url: `${site.url}/calculators/revenue`, lastModified: generatedAt, changeFrequency: "monthly", priority: 0.7 },
@@ -98,6 +104,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
+  // Programmatic "Roblox version of <X>" AEO pages, from the durable catalog.
+  const robloxVersionPages: MetadataRoute.Sitemap = (steamCatalog?.entries ?? []).map((e) => ({
+    url: `${site.url}/roblox-version-of/${e.slug}`,
+    lastModified: generatedAt,
+    changeFrequency: "daily" as const,
+    priority: 0.6,
+  }));
+
   return [
     ...staticPages,
     ...genrePages,
@@ -105,5 +119,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...revenuePages,
     ...statusPages,
     ...comparePages,
+    ...robloxVersionPages,
   ];
 }

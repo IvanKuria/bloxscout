@@ -1,0 +1,936 @@
+0:00
+Guys, this is going to be how the Roblox
+0:02
+algorithm works. Specifically, the home
+0:04
+recommendation algorithm explained like
+0:06
+you're five years old. So, I'm going to
+0:07
+try to really simplify this for you.
+0:10
+Okay, this video might piss a lot of
+0:12
+people off cuz there's a lot of debate
+0:14
+for some reason on how this algorithm
+0:16
+works, but I'm going to take a very
+0:18
+objective perspective and just chop this
+0:21
+up for you guys so there's no longer
+0:23
+ambiguity on why your game doesn't hit
+0:25
+ALGO or why it dies, how much you should
+0:28
+spend on ads, how often should you run
+0:31
+ads. All those questions I'm going to
+0:33
+answer to the best of my ability in this
+0:36
+video. Also, thanks for the love on the
+0:38
+previous videos. First things first, you
+0:40
+have a game, right? You want to launch a
+0:43
+game. Cool. Now, how do you actually get
+0:44
+into algo? The first thing you need is
+0:47
+traffic to your game. What is traffic?
+0:50
+Now, again, this might seem stupid
+0:52
+simple, but what's the title of this
+0:54
+video? Explain like you're 5 years old.
+0:56
+Okay, what is traffic? Most common one
+0:59
+is people run Roblox ads. Okay, another
+1:02
+one that you can do if you have no money
+1:05
+to run ads is you can post short form
+1:08
+content. Okay, you've seen clips all
+1:10
+over Tik Tok talking about this new
+1:12
+Roblox game XYZ allows you to do ABC.
+1:16
+Okay, YouTube shorts. There's also a
+1:19
+method that you can use which is free
+1:21
+UGC. I don't know [ __ ] about this one,
+1:23
+but it's interesting. I might do some
+1:24
+research and make a video on this one.
+1:26
+Comment below if you want to see some
+1:28
+sauce on that cuz I need to learn that
+1:29
+myself personally. Okay, but the TLDDR
+1:32
+is you want to launch a game, you have
+1:34
+your game, the first thing you need is
+1:36
+traffic. Okay. So, what happens is you
+1:39
+have a brand new game, okay, that has
+1:43
+zero visits. Let's say most common
+1:45
+method, you run Roblox ads, okay? What
+1:49
+happens when you start running Roblox
+1:50
+ads? Well, this is from the official
+1:53
+Roblox documentation. Okay? Nothing in
+1:56
+this video is going to be just pulled
+1:58
+out of my ass. It's going to be from
+2:00
+Roblox official documentation, which
+2:02
+some people don't trust, dude. I don't
+2:04
+[ __ ] understand why. Okay, you guys
+2:06
+need to understand, I'm going to go on a
+2:08
+quick tangent. I'm going to wrap it back
+2:09
+up. Is Roblox is a business that thrives
+2:13
+on creatormade content. So why would
+2:16
+they ever gatekeep how their algorithm
+2:18
+works? They want you to succeed. They're
+2:20
+looking for the next steal a brain rot.
+2:22
+They're looking for the next grow a
+2:23
+garden because that's what makes them
+2:25
+money. So they are radically transparent
+2:27
+with how their algorithm works. Tangent
+2:30
+over. Back to this. You launch ads, you
+2:32
+get initial data. Okay, this is a
+2:36
+screenshot from the official
+2:37
+documentation. Okay, what Roblox is
+2:40
+going to do is it's going to look at the
+2:44
+initial data. Now, we're talking about I
+2:47
+mean all of the metrics, okay, we're
+2:48
+talking about average play time,
+2:51
+D1, okay, D7, like I don't even know why
+2:56
+I'm typing these out. Like, you guys
+2:57
+should know this [ __ ] monetization,
+2:59
+okay? So, average revenue per paying
+3:01
+user, okay? Conversion rate, all that
+3:04
+[ __ ] They look at all this [ __ ] from
+3:07
+your initial players from ads. Okay?
+3:10
+Now, here's something someone also never
+3:13
+told me is Roblox just released this
+3:15
+feature. And again, a lot of this video
+3:17
+is just going over [ __ ] that's public on
+3:19
+the internet, but people just don't do
+3:20
+their own research. So, I'm trying to
+3:21
+consolidate it into a simple video for
+3:23
+you guys. There's this feature called
+3:25
+beta mode. Okay. What does beta mode do?
+3:29
+From my understanding, what beta mode
+3:31
+does is it will prevent
+3:34
+Okay, it actually says right here, while
+3:36
+in beta mode, your experience will not
+3:38
+be shown in home recommendations. Okay,
+3:41
+so if you want to launch a game and get
+3:46
+it in ALGO with the best stats possible,
+3:49
+it might be worthwhile
+3:51
+turning your game into beta mode. That's
+3:53
+what I'm doing with my current game
+3:54
+here. Okay, beta mode basically prevents
+3:57
+the algo from showing your game on the
+4:00
+homepage. All right, now let's we're
+4:03
+getting off topic. Let's go back to
+4:04
+this. You launch ads, you get the
+4:05
+initial data. Roblox is going to look at
+4:07
+these following metrics. Okay, just as
+4:09
+like soft signals just to kind of get a
+4:11
+gauge like, hey, how well is this game
+4:14
+doing? Okay, it's pretty much the only
+4:16
+time it will really pull data from your
+4:19
+ads traffic for the most part from my
+4:21
+understanding. Okay, not always true.
+4:23
+I'll get into it in a second. Okay. Then
+4:26
+what's going to happen is Roblox is
+4:28
+going to be like, "Okay, we kind of now
+4:30
+have a feel for what this game is, what
+4:33
+genre it is, what kind of players play
+4:35
+it, you know, based on the data they
+4:37
+collected." Okay, mind you, the players
+4:40
+that come from ads are nowhere near the
+4:43
+same as the players that come from home
+4:46
+algo because home Algo is players that
+4:50
+are your specific audience. They're more
+4:51
+likely to engage. They spend more higher
+4:53
+D1, higher D7, higher play time. You
+4:55
+guys have seen this, right? But don't be
+4:57
+freaked out if you launch a game and you
+4:59
+have low stats initially. It's because
+5:00
+this is cold traffic. Cold traffic just
+5:03
+basically means and you have to think
+5:05
+about how the ads actually work is
+5:10
+Roblox ads optimize for the cheapest
+5:15
+possible player to your game. Okay, this
+5:18
+is not the most qualified player to your
+5:20
+game. This is the cheapest possible
+5:23
+player to get to your game. That's why
+5:24
+you guys see like you can get players to
+5:27
+your game for fractions of cents, but
+5:30
+they're not qualified. So, don't freak
+5:32
+out if you launch a game and you see
+5:34
+what looks like a bunch of bots just
+5:36
+standing in the [ __ ] lobby like,
+5:37
+"Dude, I've seen it." Okay? But what
+5:39
+they'll do is they'll see out of all
+5:40
+these players they're sending you, which
+5:42
+ones are actually engaging. Okay? And
+5:45
+then they'll start to use those signals
+5:47
+from my understanding, okay, to rank you
+5:50
+against, let's just say broadly the
+5:53
+genre as a whole. Okay? Now, what's
+5:55
+interesting, and I'm going to call out
+5:56
+some [ __ ] creators real quick, and
+5:58
+I've seen this in a ton of Roblox
+6:00
+videos, is people will look at their
+6:01
+stats, and I want to show you guys
+6:03
+something. Okay? Can you see here where
+6:05
+it says experiences with similar
+6:07
+players? Okay? I'll see a lot of
+6:10
+YouTubers, they'll go like this. They
+6:12
+don't even explain it. Okay? They'll
+6:14
+just be like, "Yeah, this is my game.
+6:15
+Look at the stats. You know, mostly
+6:17
+green here and yeah, we're crushing, but
+6:19
+we only have 100 CCU. Why is that?"
+6:21
+Okay, that's because
+6:24
+this is how my game Farmer Die compares
+6:28
+to the survival genre as a whole. It's
+6:31
+It's not that terrible, right? But when
+6:33
+I look at Farmer Die versus games that
+6:37
+have players that are my exact target
+6:39
+audience, you'll see all my stats go
+6:41
+down. Okay? Okay, so keep that in mind
+6:42
+when you're watching YouTubers. Take
+6:44
+note of what they're actually selecting
+6:46
+here. Okay. Now, what they're going to
+6:50
+do is first and foremost, they're going
+6:51
+to rank you across the entire genre.
+6:53
+This video might be longer than I
+6:54
+expected, by the way, cuz I just want to
+6:56
+get this out there. Okay. Now,
+6:59
+initially, all your stats might be
+7:00
+green. You're like, "Dude, we're [ __ ]
+7:02
+crushing it." This is what happened with
+7:03
+Farmer Die. Like, when we first
+7:05
+launched, dude, most if not all these
+7:07
+stats were green. We didn't have D7
+7:09
+retention yet because the game had been
+7:11
+out for like two days. So, we're like,
+7:12
+"Oh, we're going to [ __ ] crush,
+7:14
+right?" But what starts to happen is
+7:16
+after Roblox basically says, "Okay,
+7:19
+we're going to now compare you to every
+7:22
+game in the survival genre, they start
+7:24
+to get even more data. Okay, this is
+7:26
+when the ALGO kicks in. Now, how long
+7:28
+does it take for the ALGO to kick in?"
+7:30
+Honestly, the faster you can feed it
+7:32
+data at this stage, the faster you'll
+7:35
+get into ALGO. This is why, in my
+7:37
+opinion, you've seen games absolutely
+7:40
+explode in like two or three days
+7:41
+because it's usually big studios that
+7:43
+have deep pockets. They can spend like
+7:44
+10 grand in a day just to get pump it
+7:47
+with data. Now, before they even pump it
+7:49
+with data, they've probably been,
+7:54
+what have they been doing? They've
+7:56
+probably been testing in beta mode. So,
+8:00
+they are optimizing their game for
+8:03
+better stats. every single one of these
+8:04
+stats they make better and better and
+8:06
+better and better. So by the time they
+8:08
+turn off beta mode and there they tell
+8:10
+Roblox, hey we are ready to go to
+8:13
+algorithm they've already optimized all
+8:15
+these stats using ad traffic only and
+8:18
+then when they start getting ranked dude
+8:21
+they explode because they've already
+8:22
+optimized all their metrics. Okay so
+8:26
+what happens next? You get your initial
+8:28
+data they rank you against the genre as
+8:31
+a whole. Okay. And then what they're
+8:34
+going to do is they're going to have
+8:35
+even more data now. So they're going to
+8:37
+start to see, okay, people that are
+8:38
+playing your game, they're also playing
+8:40
+these other games. They're going to rank
+8:41
+you against games that have your exact
+8:43
+audience. Okay? And they make this
+8:44
+[ __ ] cut and dry, dude. Like, let me
+8:46
+show you guys this. If I go to analytics
+8:48
+acquisition,
+8:50
+home recommendations, right? This is for
+8:52
+farmer or die benchmark experiences with
+8:55
+similar players. Okay, this is exactly
+8:59
+my competition. They make it so cut and
+9:02
+dry. They're basically saying, "Hey,
+9:03
+Tizzy, how does your game
+9:06
+stack up against other games that your
+9:09
+players also play and they'll tell you,
+9:11
+dude?" And that's when your stats will
+9:14
+probably start to take a [ __ ] Okay,
+9:15
+[laughter]
+9:16
+so let me explain something to you guys
+9:19
+cuz a lot of people are like, "Why does
+9:20
+my game die?" Because it starts off
+9:22
+good. You know, farmer die. We even
+9:24
+peaked at 2k CCU and then it [ __ ]
+9:27
+died, right? Cuz initially, dude, what
+9:29
+happened with Farmer Dies? Like, we were
+9:31
+crushing our competitors and then came
+9:34
+in other games with way better stats and
+9:37
+they stole our players. And that's just
+9:38
+how it works. It's a winner takes all
+9:40
+economy for the most part. Okay, I want
+9:43
+to break down the ALGO in a simple
+9:46
+analogy like you're 5 years old. I want
+9:48
+you guys to think of a farmers market.
+9:50
+Okay, what's a farmers market? Well, if
+9:53
+you ever been to one, you know, they
+9:55
+sell oranges, maybe pineapples,
+9:56
+watermelons, whatever. Think of this as,
+9:59
+let's say, the survival genre, farmers
+10:01
+market. Okay, who's at the first line?
+10:04
+99 Nights in the forest. Then you have
+10:06
+Baker or Die hovering around 30k CCU
+10:08
+these days. 100 Days at C is around like
+10:10
+4K CCU. You have the simulation genre,
+10:14
+right? Steal a brain rod, grow a garden,
+10:16
+you know, kick a lucky block. Those ones
+10:19
+are, you know, also honorable mentions,
+10:21
+but I just put some of the OGs in there
+10:22
+for example sake.
+10:25
+So, what happens
+10:27
+is Roblox
+10:29
+has,
+10:31
+let's say, for example sake, 10,000
+10:34
+players that are going to go to the
+10:36
+survival genre market. Now, this
+10:39
+specifically is the home algo survival
+10:42
+genre market. Okay, this is the entrance
+10:44
+of the market. If you guys know anything
+10:46
+about, you know, business psychology or
+10:49
+like placement of where your business is
+10:51
+in terms of where people actually walk,
+10:54
+whoever is at the front of the line
+10:55
+usually gets the most eyeballs. Okay, so
+10:58
+Roblox is like, "Okay, we have 10,000
+11:00
+people coming to the survival genre
+11:02
+farmers market today. Who do we want to
+11:05
+show them first? Which game do we want
+11:08
+them to see first?" It's obviously going
+11:10
+to be something like 99 Nights in the
+11:12
+Forest. Why? It has the best stats, high
+11:15
+retention, good monetization. They know
+11:18
+that thing makes them money, so they're
+11:20
+keeping it in their farmers market. They
+11:22
+also have Baker Die, which is second,
+11:24
+and then, for example, 100 Days at Sea,
+11:25
+which is third. These are just examples.
+11:27
+Okay,
+11:29
+so this is the survival genre market.
+11:32
+Now, what's interesting about the ALGO
+11:34
+is it won't always be like this survival
+11:37
+genre market won't just be games in the
+11:40
+survival genre. It could be adjacent
+11:42
+games like you know survive 99 days from
+11:47
+robots that is mostly a survival game
+11:51
+but maybe it has some RPG elements.
+11:53
+Okay, so what I mean by that is like
+11:55
+these games aren't exact copies of
+11:59
+Farmer Die. You guys need to understand
+12:00
+that they just have similar game loop,
+12:03
+similar mechanics, okay? Like Dead Meals
+12:05
+Cook or Die. I have Farmer Die. Baker
+12:07
+Die was on here for a while. Okay, even
+12:09
+Alien Ranch was on here for a while.
+12:11
+Okay, now what you guys need to
+12:13
+understand
+12:15
+is if your game starts dying, just run
+12:18
+more ads can be
+12:21
+some of the worst advice mostly. Okay,
+12:25
+and here's why. Remember this farmers
+12:27
+market analogy.
+12:29
+When you're running ads, you're
+12:31
+basically competing in a whole separate
+12:33
+market. Okay, because Roblox apart from
+12:37
+the initial data collection
+12:40
+does not use data from your players ads
+12:44
+to further push you in the home algo for
+12:48
+the most part. There's a caveat which
+12:49
+I'm going to get into. Okay, so if your
+12:52
+game's dying and someone's like, "Hey,
+12:53
+just spend more money on ads." That's
+12:55
+bad advice. Why is that bad advice?
+12:58
+Because you guys notice here, this is
+13:01
+the home algo market, right? Farmer D is
+13:03
+not on here. If I wanted to get farmer
+13:06
+die on here and someone told me run more
+13:07
+ads, I'm thinking, oh, I'll just run ads
+13:09
+and I'll get farmer die on here, right?
+13:12
+Oh, boom. There's farmer die. Now I'm in
+13:13
+the home algo because I'm running ads.
+13:15
+That's not how it works. Why? Because
+13:17
+these are two separate farmers markets.
+13:22
+Okay, this is the sponsored ads market.
+13:25
+This is the home algo market. I can run
+13:28
+ads and get in the sponsored ads market,
+13:32
+but that doesn't necessarily mean I'm
+13:33
+going to get in the home algo market.
+13:35
+Why? Because Roblox is always trying to
+13:38
+determine,
+13:40
+should we put farmer die closer to the
+13:44
+entrance in the home algo market so more
+13:46
+people can see it. And when they're
+13:48
+asking themselves that question, they're
+13:50
+looking at your stats. Okay? So, if you
+13:53
+start running ads and you haven't
+13:55
+updated your game that improve any of
+13:57
+your stats, and again, this might be
+13:59
+self-explanatory to some of you
+14:01
+experienced devs, but what's the title
+14:03
+of this video? Explain like you're 5
+14:05
+years old. Okay? If you do not make
+14:07
+updates that improve your stats, it's
+14:11
+not going to do anything if you run ads,
+14:14
+dude. Okay? You need to make updates
+14:16
+that make a meaningful improvement to
+14:18
+your game. So, what I would do is don't
+14:22
+just look here, bro. Okay? Don't just
+14:25
+look at your overview. I can't tell you
+14:28
+how crazy it is to me that this is a
+14:30
+common misconception that these stats
+14:32
+don't really mean [ __ ] when it comes to
+14:35
+getting the algo. You want to go to
+14:38
+acquisition,
+14:40
+home recommendations, okay? Click this
+14:42
+[ __ ] tab right here. Scroll down and
+14:44
+they will tell you cut and dry. Hey,
+14:48
+this is how your QPTR looks in
+14:51
+comparison to other games that have your
+14:55
+player base. Deep playthrough rate,
+14:56
+7-day play time per user, 7-day play
+14:59
+days per user. The only reason I think
+15:01
+Farmer or Die is even still live is
+15:03
+because we have a very high intentional
+15:05
+co-play. The game was designed to be
+15:07
+played co-op.
+15:09
+And you can see we're way above
+15:10
+benchmark. Okay, we have low mono. I
+15:14
+mean, all of our stats are low besides
+15:15
+this. That's why I think it is barely
+15:17
+surviving. So, if you want to get into
+15:22
+ALGO, you simply need to improve your
+15:25
+stats. Like, dude, it's so
+15:27
+self-explanatory, but this is kind of
+15:29
+the process I would take is like I
+15:32
+would, again, this is long. If you've
+15:34
+already lost me, I don't know. It's your
+15:36
+[ __ ] fault, dude. I'm giving you
+15:37
+literally free information, so suck it.
+15:40
+So, this is what I would do, bro. Okay.
+15:43
+To get my game improved, run ads. Okay.
+15:48
+Then you're going to look at these
+15:49
+stats. Okay. Then Roblox will start to
+15:54
+hit ALGO. Then what are you going to do?
+15:56
+You're again going to look at these
+15:58
+stats. Okay. Now, what you're going to
+16:01
+do though is look at your worst stat.
+16:04
+Let's say it's D1 because we all have
+16:06
+[ __ ] retention problems. Farmer
+16:08
+shitty retention. So let's say it's D1.
+16:11
+Okay. Now, just make an update, a
+16:14
+meaningful update that's going to
+16:15
+improve D1. Okay, now that you've made
+16:19
+that update that's going to improve D1,
+16:21
+now it makes sense to run ads to get
+16:23
+even more players. Okay, run ads. Why?
+16:29
+Why would I run ads again after I've
+16:31
+already hit ALGO? because I just made a
+16:32
+meaningful update and I want to collect
+16:35
+again more initial data
+16:39
+so that way Roblox has more data
+16:43
+and they can be like wait you know
+16:44
+farmer die actually they improved their
+16:47
+D1 maybe they do would deserve a spot
+16:48
+here maybe we should give them some more
+16:51
+[ __ ] eyeballs and now I'm getting
+16:54
+traffic and now I let's say update
+16:55
+playtime they're like okay cool
+16:57
+playtime's up dude now you're beating
+16:59
+this game oh let's say I improve of D7.
+17:02
+They're like, "Okay, cool. Now you're in
+17:03
+the second spot, right?" And then one
+17:05
+day, boom, this is going to be me one
+17:08
+day. I'm just [ __ ] trolling, but
+17:11
+maybe I'm not. Anyways, that's how the
+17:14
+algo works from my understanding. If you
+17:17
+disagree, let me know in the comments
+17:19
+below. Let's have a [ __ ] argument
+17:20
+about it. I don't give a [ __ ] dude.
+17:22
+This is what I wish someone told me from
+17:23
+the beginning. So, you can definitely
+17:26
+run more ads, dude, but only makes sense
+17:28
+to run ads after you've made meaningful
+17:30
+updates. And honestly, if you're already
+17:32
+getting a ton of traffic from the algo,
+17:33
+you don't have to keep starting and
+17:35
+stopping and running ads because Roblox
+17:37
+will keep using that new data. They use
+17:40
+a 7-day window of data. Okay? So, if you
+17:44
+push a huge update, don't freak out if
+17:46
+your stats don't drastically improve the
+17:48
+next day, okay? or you don't all of a
+17:50
+sudden get tons of new players the next
+17:52
+day because they use a rolling 7-day
+17:54
+window which I can explain in a later
+17:56
+video if you don't understand what that
+17:58
+means. Just let me know in the comments
+17:59
+below. But yeah, man. Yap sesh over. Um,
+18:03
+honestly, this just fired me up because
+18:05
+I see this [ __ ] all over. People are
+18:07
+just like, "Yeah, I spend a [ __ ]
+18:08
+thousand bucks a month on ads and I'm
+18:10
+still not an algo." And the reason is
+18:11
+because you're not updating your game to
+18:12
+improve the stats. So TLDDR is [ __ ]
+18:15
+improve your game. That's it. Peace.

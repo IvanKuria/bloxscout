@@ -1,0 +1,986 @@
+0:00
+How to pump out high quality Roblox
+0:03
+games fast. If you've ever wondered how
+0:06
+top devs are able to just pump out such
+0:09
+high quality Roblox games really quick.
+0:11
+I'm talking a new game every week, this
+0:14
+video is for you. And I'm going to get
+0:16
+into like the entire process like
+0:17
+project management process that I think
+0:19
+is the most efficient personally. And um
+0:22
+talked to a top dev recently. He taught
+0:24
+me most of what I'm saying in this
+0:26
+video. And I've also learned by just
+0:28
+spending a lot of money on devs and
+0:29
+being burned. All right, let's just
+0:31
+[ __ ] dive straight in. Dude, the
+0:32
+reality is this platform moves
+0:34
+incredibly fast. Okay, so the point I'm
+0:37
+trying to make is ideas are cheap and
+0:39
+everywhere and execution is all that
+0:41
+matters. Okay, and this is coming from a
+0:43
+guy that loves marketing, loves coming
+0:44
+up with game ideas, loves doing the
+0:46
+research, but execution is all that
+0:48
+matters. All right. Now, why am I
+0:50
+qualified to talk about this? Well, I
+0:52
+used to run a marketing agency, which is
+0:54
+a people business. So, I understand
+0:56
+project management. I understand scoping
+0:59
+projects. I understand making sure
+1:01
+things are met on deadlines. Am I a top
+1:03
+Roblox dev? Not yet. We're getting
+1:06
+there. Okay. But I want to help you guys
+1:09
+in this video. Basically go over
+1:11
+everything I learned when it comes to
+1:13
+hiring. let me save you a ton of time
+1:15
+and money because dude, I've spent so
+1:16
+much time and money trying to find good
+1:19
+Roblox developers.
+1:22
+And it is easily the biggest bottleneck
+1:25
+in this business in my opinion. Ideas
+1:27
+are everywhere. That's not the
+1:28
+bottleneck. Market research is not the
+1:30
+bottleneck. It's finding good talent
+1:32
+that can actually execute on time.
+1:34
+Because something unique about the
+1:35
+Roblox space is a lot of the talent is
+1:38
+young, unprofessional, and will ghost
+1:41
+you and doesn't get [ __ ] done on time
+1:43
+and lazy as [ __ ] Just to cut it, just
+1:46
+to put it straight to you, a lot of the
+1:49
+Roblox talent is super lazy because
+1:51
+they're 14 years old and they've never
+1:53
+ran a business before. Okay. Now, first
+1:56
+tip I'm going to give you guys is hire
+1:57
+from Twitter. Okay. Twitter is goated
+1:59
+for hiring. Now, here's kind of the
+2:02
+caveat. You kind of gota lar a little
+2:04
+bit on Twitter, okay? You gotta post
+2:06
+[ __ ] on Twitter. You got to talk about
+2:07
+what you're working on. You got to sound
+2:09
+like you know what you're talking about.
+2:10
+When I first got started, dude, I knew
+2:12
+nothing about Roblox, okay? All I knew
+2:14
+was just fundamental business principles
+2:17
+from running an ecom agency. So, I just
+2:19
+started taking what I knew from the ecom
+2:21
+space and applying it to Roblox and just
+2:24
+laring on Twitter and started to build a
+2:25
+little reputation. Okay, YouTube hella
+2:28
+untapped. I've hired a few absolute
+2:30
+Chads from YouTube, great programmers or
+2:33
+mutual connections. Now, if you're an
+2:36
+investor, because I actually had some
+2:37
+investor bros hit me up, crypto bros,
+2:39
+deep pockets, right? It's like, we have
+2:42
+30k to make a game. We just want to pump
+2:45
+out games. Here's the thing, dude. I
+2:46
+tried to come in this space just
+2:48
+thinking I could throw money around and
+2:49
+it doesn't work like that. Okay? I spent
+2:52
+four grand on my first game and it was a
+2:54
+very, very shitty game. We never even
+2:56
+launched it and I got
+2:58
+I'm not gonna say anything about it. I
+3:00
+think I paid way too much for it. Okay,
+3:02
+four grand is crazy for the game that we
+3:04
+built there. But anyways, what I want
+3:07
+you guys to understand is this Roblox
+3:10
+base since most of the kids are
+3:12
+teenagers, it kind of is a clout chasing
+3:15
+fest a little bit. What I mean by that
+3:16
+is you need to have a good reputation
+3:19
+for these people to trust you. Okay, I
+3:21
+can't tell you how OP me having a
+3:23
+YouTube channel has been for hiring
+3:25
+because people that I'm vetting, they
+3:27
+can see my videos. They can see I'm
+3:28
+serious. They can see I'm not [ __ ]
+3:30
+around. And I want to make games and I
+3:31
+want to make them fast. I want to make
+3:32
+them high quality. Okay? If you think
+3:35
+you can come into Roblox just with a bag
+3:37
+and no reputation, you're going to get
+3:39
+cooked, bro. Okay? You need to have a
+3:42
+little bit of a rep. So, you kind of
+3:43
+need to LAR a little bit. [laughter]
+3:46
+I I don't know how else to say it.
+3:47
+Anyways, because this is what I found
+3:50
+is, and the top dev told me this. He
+3:52
+said he doesn't hire anyone that doesn't
+3:53
+have at least 30 mutual connections with
+3:55
+a bun discord. Okay? Unfortunately,
+3:57
+that's just the nature of the game.
+3:58
+That's just how this game works. It's
+4:00
+really who you know or people know you
+4:03
+from Twitter, they know you from
+4:04
+YouTube. You got to build a reputation,
+4:06
+man. And the only way to build a good
+4:08
+rep, there's kind of two ways.
+4:11
+The most obvious one is make a hit game,
+4:13
+okay? or LAR on YouTube and Twitter like
+4:16
+me or do a combo of both. Okay. Now,
+4:19
+Farmer Die, obviously it's not a huge
+4:21
+massive game, but 3.5 million visits,
+4:23
+it's something and it's still making
+4:25
+money. Okay, that's enough for a dev
+4:27
+that I'm looking at hiring to know, hey,
+4:28
+this guy's serious. He's ran games in
+4:30
+the past that make money and he's not
+4:32
+[ __ ] around. He's not some
+4:33
+14-year-old that's saying, "Hey, I will
+4:35
+hire on percent." Okay, so when I say
+4:39
+LAR on YouTube and Twitter, what do I
+4:41
+mean? It's like, dude, just whatever
+4:42
+you're learning, just just post about
+4:44
+it. Like, don't be afraid to sound
+4:46
+stupid, dude. Okay, if you look at my
+4:49
+bio here, what does it say? Sharing my
+4:51
+learnings. Okay, when I first got
+4:53
+started, I just started sharing things
+4:55
+that I thought were sauce or I thought
+4:58
+that I had learned some stuff. Now, did
+5:00
+I get flamed on Twitter a ton in the
+5:01
+beginning? Like, hell yeah, dude. But
+5:03
+who cares? Like, don't be afraid to
+5:05
+build in public, okay? Don't be afraid
+5:07
+to look like an idiot. And who gives a
+5:10
+crap, man? People will get to know you.
+5:12
+All right? And it's important for
+5:14
+hiring, bro. It is OP. If you look at
+5:16
+all the top devs, they have a very good
+5:18
+rep. And how they do it, they made a hit
+5:20
+game. Okay? But if you don't have a hit
+5:22
+game right now, you got to start
+5:23
+building a little bit of a presence in
+5:25
+my opinion. I think personal branding in
+5:27
+the space is highly, highly underrated
+5:29
+and super OP. Okay? Because making a hit
+5:32
+game, this could take you a while, man.
+5:34
+Especially if you don't have funds,
+5:35
+you're just grinding, grinding,
+5:36
+grinding. I would kind of do both here.
+5:39
+Okay, network and work on making the hit
+5:42
+games. Combo of both. Anyways, that
+5:44
+point's over. Now, when it comes to
+5:46
+hiring, best type of dev to hire is
+5:49
+what's called a T-shaped employee. What
+5:51
+is a T-shaped employee? Okay, let's do a
+5:54
+quick Google search. A T-shaped employee
+5:56
+is a professional who possesses deep
+5:59
+specialized expertise in one specific
+6:01
+area. for example, a programmer combined
+6:05
+with a broad working knowledge and
+6:06
+collaborative skills across multiple
+6:08
+other disciplines. Okay, so what this
+6:10
+means is when you're hiring a
+6:11
+programmer, see if he can also do
+6:14
+building or see if he can also do UI.
+6:16
+Okay, when you're hiring a builder, see
+6:18
+if he can also do modeling, see if he
+6:20
+can also do animations. This is the team
+6:22
+that I ran for Farmer Die. It was
+6:24
+literally just a two-man team. The
+6:25
+programmer also did animations, also did
+6:27
+UI, the builder also did modeling. Okay,
+6:31
+you don't need a big team, guys. A big
+6:33
+team is not a flex. All right, one thing
+6:37
+that one Cole told me is like he used to
+6:39
+have a big team. Now he just runs a
+6:41
+four-man team. A lot of these top devs
+6:42
+I've talked to, they run lean and mean
+6:45
+teams. You just need a dialedin team,
+6:48
+bro. Okay, first thing again, make sure
+6:51
+they're T-shaped. So, example, you hire
+6:53
+a programmer, but he also does UI. Okay,
+6:56
+or you hire a builder, but he also does
+6:57
+models and animation. Now again, how do
+7:00
+you hire? I mean, LAR a little bit on
+7:02
+Twitter and just make a hiring post,
+7:03
+dude. Let's see. I think I've deleted
+7:05
+them, but like I have been able to hire
+7:07
+same day within the hour sometimes. I
+7:10
+probably deleted. Yeah. No, here we go.
+7:11
+Looking to hire builder, modeler, blah
+7:12
+blah blah. Right. Hired this guy within
+7:16
+the next hour. Like literally, just cuz
+7:18
+I have a little bit of a following. 2.8K
+7:20
+impressions. Now, you want to make these
+7:21
+guys a um a reasonable offer. like you
+7:25
+need to understand the market rates,
+7:26
+understand what's a good price, talk
+7:28
+with some mutuals and um button it down
+7:31
+that way. Okay. Now, something to note
+7:33
+which I'll get into, but always always
+7:35
+sign a contract. Do not work with
+7:37
+someone that is not willing to sign a
+7:38
+contract. Okay. It's how you are
+7:40
+professional. It's how you agree on the
+7:42
+scope of the project. And let's just get
+7:44
+into that. Okay. You as the game
+7:47
+designer producer, which is what my role
+7:50
+is, by the way, if you guys didn't know,
+7:51
+I don't know how to code. Okay? I'm a
+7:52
+producer designer. You need to get clear
+7:55
+on what's called an so statement of
+7:57
+work. Okay, it is your job to manage the
+8:00
+scope of the project and agree upfront.
+8:02
+Okay, this is how it goes. Before
+8:06
+anything, you need to get clear on
+8:07
+exactly what you need built. I'm talking
+8:09
+about for your programmer and your
+8:10
+modeler UI, everything. All the frames,
+8:13
+all the models, everything you need to
+8:15
+get clear on in terms of what's called
+8:17
+an MVP, minimal viable product. Okay,
+8:21
+this in my opinion is all that matters
+8:23
+at first. You want to make sure that you
+8:24
+get your core loop done so you can play
+8:26
+test it with players and play testers
+8:28
+and make sure that the game is even fun.
+8:30
+Is is is it even viable? A little hack
+8:33
+that I've done recently since I don't
+8:34
+know how to program is you can get a
+8:36
+working prototype with AI before ever
+8:38
+hiring a dev. Okay. And dude, this is OP
+8:43
+in my opinion because you find a game
+8:46
+idea within the next couple hours, you
+8:47
+can use Claude to get it up and running
+8:50
+using just basic parts and free models
+8:52
+in studio. Last thing before we get into
+8:56
+basically the process of project
+8:58
+management is just some tips for hiring,
+9:01
+right? Always make sure that they're in
+9:02
+the same time zone. This is just for
+9:04
+communication.
+9:06
+This is so if your scriptor is making
+9:07
+something and then he needs a model.
+9:09
+Boom. Modelers in the same time zone. He
+9:11
+can get it done within the next couple
+9:12
+hours. Always, always, always get a
+9:14
+contract signed.
+9:17
+Contract terms. This is what I've been
+9:19
+taught. Paid upon completion is
+9:20
+preferred. And again, devs will only do
+9:22
+this if you have a trusted reputation.
+9:24
+Okay? Because there's a lot of scammers
+9:26
+in this space. Unfortunately, that
+9:27
+ruined it for all of us serious
+9:28
+operators. And it just sucks. All right?
+9:30
+I've tried 50% upfront. I've tried
+9:34
+paying in full upfront. Anytime you pay
+9:36
+in full upfront, you're cooked. The
+9:37
+kid's gonna take two weeks to deliver.
+9:39
+It's terrible. Okay, 50% upfront.
+9:42
+I always prefer paid upon completion,
+9:45
+but I mean, you don't have to be super
+9:47
+strict. You can negotiate, but paid upon
+9:49
+completion is the best. And in order for
+9:51
+this to work, again, you need to agree
+9:53
+on the statement of work, which is
+9:56
+basically in your contract outlining
+9:57
+everything that the person is going to
+10:00
+deliver in exchange for this money. Now,
+10:02
+it's your job as the project
+10:04
+manager/producer to make sure that
+10:06
+you're not adding a ton of [ __ ] in there
+10:08
+that's not in the original agreement or
+10:10
+you're going to piss off your team.
+10:11
+Okay? I know this cuz I've been a
+10:13
+freelancer. I've also ran agencies and I
+10:15
+just know that when expectations are not
+10:18
+met on either side, people get resentful
+10:19
+and it's just not fair to your team.
+10:21
+Okay? So, you need to agree upfront,
+10:24
+hey, this is what you're building. And
+10:26
+of course, you're going to get ideas as
+10:27
+things go on. You're going to want to
+10:29
+give them ideas, but try to refrain as
+10:31
+much as possible and try to stick as
+10:32
+much as possible to that original
+10:34
+agreement as to not piss off your team
+10:37
+because it will bog down your
+10:39
+programmer, your builder. They'll just
+10:41
+be like, "Bro, this is not what we
+10:42
+agreed upon. I'm not getting paid for
+10:44
+this." Just agree up front, frontload
+10:47
+all that [ __ ] and stick to the plan.
+10:49
+Okay? If you need to make a new contract
+10:51
+for new [ __ ] then get it done. Now,
+10:52
+let's get into this. Okay? the whole
+10:54
+process from ideiation to actually
+10:56
+building the game. First things first,
+10:59
+market research. Find your game idea. I
+11:01
+have tons of videos on this, okay? Check
+11:03
+the other videos on my channel. What
+11:05
+you're then going to do is you're going
+11:07
+to put this game idea into what's called
+11:09
+a game design document. Okay, game
+11:11
+design document basically outlines like
+11:13
+what is the game, what do players do in
+11:15
+the game, how do players level up,
+11:16
+economy, progression. It's basically
+11:18
+just like an outline. It's I also use it
+11:21
+as like the statement of work for the
+11:22
+programmer. So, like what I'll do is
+11:24
+I'll make a game design document and I
+11:26
+can show you guys an example in future
+11:27
+videos if you want to see one. I'll make
+11:29
+a game design document and I'll just
+11:30
+give it to AI. I'll say, "Hey AI, just
+11:32
+tell me out of this game design document
+11:35
+what the programmer specifically needs
+11:36
+to do." Okay. Now, once you have your
+11:38
+game design document, this is kind of
+11:39
+like the scope of the project. That's
+11:41
+the way I like to think of it. Okay.
+11:43
+You're then going to take that scope.
+11:45
+You're going to put it into Trello.
+11:47
+Okay. Okay, I like to make a column for
+11:49
+programmer, column for builder, column
+11:51
+for UI, just all the necessities. And I
+11:53
+like to chunk down this game design
+11:55
+document into actionable task. So for my
+11:57
+programmer, it's like, hey, this system,
+11:59
+that system, that system. Give explicit
+12:01
+details for each system, for each card,
+12:03
+if that makes sense. Now,
+12:06
+I've learned a lot just managing
+12:07
+developers, not even just in Roblox, but
+12:09
+in the ecom space, because I used to
+12:10
+manage a lot of web design, graphic
+12:13
+design people. I mean, tons of different
+12:15
+types of developers. Okay, best way to
+12:17
+communicate in my opinion, this is just
+12:19
+a little side tip, is use something
+12:21
+called Loom. Record a video. Okay, this
+12:25
+is super helpful for them to understand
+12:27
+exactly what you want done. And if
+12:29
+they're not doing what you want done,
+12:30
+it's because you suck at communication.
+12:31
+So add pictures for references.
+12:37
+And of course, you're going to want to
+12:38
+give references
+12:40
+to games. So, like for example, for my
+12:42
+programmer, if I'm like, "Hey dude, I
+12:44
+want this system and it's going to
+12:45
+function exactly like it is in this
+12:47
+game." I give them a link to the game
+12:49
+that has the system that we want to
+12:50
+implement into our game, if that makes
+12:51
+sense. And I'll record a video going
+12:53
+over this typically. Okay? Or if you
+12:56
+don't want to do videos, just hop on a
+12:57
+call with them, make sure that you're
+12:58
+clear on everything. Okay? Now, you have
+13:01
+everything in Trello. What you're going
+13:02
+to do is go into phase one. Okay? I've
+13:04
+had to learn this the hard way because
+13:05
+I've tried hiring Scriptor and Builder
+13:08
+at the same time. And what I've been
+13:09
+taught and what I'm going to do for my
+13:11
+next project is I'm going to get all the
+13:13
+models, builds, and UI done first before
+13:16
+ever getting a programmer in there.
+13:17
+Okay, this is specifically just for your
+13:19
+core loop. This is what I've been
+13:20
+taught. So get your models, builds, and
+13:23
+UI done before the programmer goes in.
+13:26
+Okay, because what I've noticed with
+13:27
+programmers is
+13:30
+if they go into an empty studio
+13:32
+workplace and they're just using parts
+13:33
+and free models, it's not as motivating,
+13:35
+right? But if they come into a place
+13:38
+where the world is already built, they
+13:40
+just need to bring it to life and it's
+13:42
+way way more motivating. Okay? And
+13:45
+again, another reason why your team
+13:47
+should be in the same time zone is
+13:49
+because they'll end up motivating each
+13:50
+other. If the builder sees that the
+13:53
+programmer is making progress, the
+13:55
+programmer sees that the builder's
+13:56
+making progress, it's just like, "Fuck
+13:57
+yeah, this is real. We're doing this,
+13:58
+right? It's exciting." So that's how you
+14:01
+keep momentum. Now phase two, programmer
+14:05
+gets in there. All builds and UI are
+14:07
+done. They're going to bring the core
+14:08
+loop to life. Now, and again, this is
+14:11
+just for an MVP. What's an MVP? Minimal
+14:13
+viable product. Okay, MVP equals minimal
+14:17
+viable product. It's kind of like a SAS
+14:21
+term, but basically just means like the
+14:24
+bare bones basics of the game working,
+14:27
+core loop, and some progression. Okay,
+14:30
+that is what we're talking about in this
+14:31
+video. I'm not talking about scoping an
+14:33
+entire game with a live ops and
+14:35
+everything. Okay, I'm talking about
+14:36
+getting an MVP out. Now, what happens?
+14:40
+Builder UI, everything's done. Core
+14:42
+loop's done. Programmer has scripted it.
+14:44
+You just want to play test the [ __ ] out
+14:45
+of it. Think to yourself, is this good
+14:47
+to launch? Okay, a lot of devs get this
+14:49
+wrong. They overthink. I know that you
+14:51
+guys get passionate about what you're
+14:52
+building, but dude, just launch and see
+14:55
+how players respond because the quicker
+14:57
+you can get live players in there, the
+14:58
+quicker you can get data, okay?
+15:00
+Different schools of thought. Ideally,
+15:01
+you can get play testers before you even
+15:03
+go live. We'll talk about that in later
+15:04
+videos. Now, is it good to launch? Yes.
+15:07
+Just [ __ ] launch that [ __ ] Start
+15:09
+spending on ads. Look at feedback. You
+15:11
+can do beta mode if you want. I know you
+15:13
+guys have tons of questions about beta
+15:14
+mode. Maybe I'll answer in different
+15:16
+videos, but we're talking about project
+15:18
+management here. Okay. Is it good to
+15:20
+launch? No. Personally, what I do just
+15:23
+to speed things up is once the MVP is
+15:26
+built, but I don't feel like it's
+15:28
+fine-tuned enough, I'll download a copy,
+15:31
+okay, a backup file of the game, and
+15:33
+I'll use AI to tweak some things. Why
+15:35
+does this speed things up? Well, because
+15:36
+you got to think about communication
+15:38
+slows things down, right? So, if I have
+15:40
+a gut feeling like, hey, this game, it
+15:42
+feels good, but it just needs this one
+15:44
+thing changed. I don't want to have to
+15:46
+wait for my programmer to then go change
+15:49
+it and then I play it and then I have
+15:51
+another request and then he go change it
+15:52
+and I play it. That's going to slow
+15:54
+things down. So to reduce the headache
+15:57
+for your programmer because you guys got
+15:59
+to stick to scope or they're going to
+16:00
+get pissed off, right? It's just not
+16:02
+fair to them. What you can do again,
+16:04
+download a copy, a backup. If you have
+16:07
+ideas, just tweak it with AI, get it
+16:09
+feeling right, and then once it feels
+16:12
+right, then you can go back to your
+16:13
+programmer. Okay? after several
+16:14
+different iteration cycles, maybe two or
+16:16
+three, you can go back to programmer,
+16:17
+hey, this is exactly what I know needs
+16:19
+to get changed in order to add that next
+16:22
+level of polish for this game. Okay,
+16:25
+so once that's done, again, you just
+16:27
+bring it back back to the programmer and
+16:29
+then is it good to launch? No. Go back
+16:31
+to prototyping. Okay, you can prototype
+16:33
+in a in a silo with AI. All right, and
+16:37
+then bring it back to your programmer to
+16:38
+make sure that it actually functions and
+16:39
+the code scales. Okay, so that was a lot
+16:42
+of yap. Lot a lot of yap. Hope this was
+16:45
+helpful. Man, this is a video that I
+16:46
+hope I wished that someone
+16:49
+showed me early days when I was just
+16:51
+trying to figure out how do I actually
+16:52
+pump out these high quality Roblox games
+16:55
+fast. Okay, hopefully that answer you
+16:57
+guys questions. If you have any
+16:59
+questions, let me know in the comments
+17:00
+below what do you want to see next in a
+17:02
+video. And that's it. Peace. Love y'all.
