@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* next-themes toggles `.dark` on <html>; tell Tailwind v4 dark: works by class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Tailwind v4 doesn't scan node_modules — include Streamdown's dist so its
    streamed-markdown prose classes aren't tree-shaken. Path is relative to this
    file: apps/web/app → apps/web/node_modules. */
@@ -31,13 +34,11 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  --font-sans: var(--font-host-grotesk);
-  --font-mono: var(--font-azeret-mono);
-  /* All-sans: any stray `font-serif` falls back to the grotesque, not a serif. */
-  --font-serif: var(--font-host-grotesk);
-  --font-heading: var(--font-host-grotesk);
-  /* Recon console palette — neutral data-surface tokens used by the
-     stat panels, sparklines and live counters on the data pages. */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-geist-sans);
+  --font-heading: var(--font-geist-sans);
+  /* Neutral data-surface tokens used by stat panels / sparklines / counters. */
   --color-console: var(--console);
   --color-console-foreground: var(--console-foreground);
   --color-console-muted: var(--console-muted);
@@ -45,63 +46,95 @@
   --color-console-grid: var(--console-grid);
   --color-positive: var(--positive);
   --color-negative: var(--negative);
-  --radius-sm: calc(var(--radius) - 2px);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 4px);
-  --radius-xl: calc(var(--radius) + 8px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* =============================================================================
+   Brand: OpenAI/ChatGPT idiom. Near-monochrome ink-on-white with a single
+   restrained ChatGPT-green accent (#10a37f) on primary actions, links, active
+   and focus. Everything else is neutral gray. Soft radii, calm surfaces.
+   ============================================================================= */
 :root {
-  /* NEAR-MONOCHROME. Charcoal ink on white, hairline charcoal borders, soft
-     off-white panels. Text hierarchy is built from charcoal opacity. No brand
-     red anywhere — the "accent" is charcoal ink. */
-  --ink: 23 23 29; /* #17171d — a cool near-black (hex.tech's ink register) */
-
   --background: #ffffff;
-  --foreground: #17171d;
-  --muted: rgba(23, 23, 29, 0.6);
-  --muted-foreground: rgba(23, 23, 29, 0.6);
-  --muted-surface: #f5f5f7;
-  --border: rgba(23, 23, 29, 0.1);
-  --input: rgba(23, 23, 29, 0.16);
-  --ring: rgba(23, 23, 29, 0.55);
+  --foreground: #0d0d0d;
+  --muted: #f7f7f8;
+  --muted-foreground: #6e6e80;
+  --muted-surface: #f7f7f8;
+  --border: rgba(13, 13, 13, 0.1);
+  --input: rgba(13, 13, 13, 0.14);
+  --ring: #10a37f;
 
-  /* Brand = a magenta→amber DUOTONE. `--accent` (magenta) is the primary
-     signal; `--accent-2` (amber) is its partner. Most brand moments use the
-     GRADIENT between them (.bg-gradient-accent / .text-gradient / .accent-bar),
-     not a single flat colour — that's what keeps it from reading basic. Used on
-     eyebrows, data bars, sparklines, the hero motif, the featured tier, links
-     and focus. Primary BUTTONS stay charcoal (read off --foreground). The whole
-     surface (homepage + agent app) shares this duotone. */
-  --accent: #ff2d87; /* magenta */
+  /* Single brand accent = ChatGPT green. (`--accent*` kept for back-compat with
+     existing brand usages; all now resolve to green, not the old duotone.) */
+  --accent: #10a37f;
   --accent-foreground: #ffffff;
-  --accent-hover: #e81f76;
-  --accent-tint: #ffe7f1; /* faint magenta wash */
-  --accent-2: #ffab2e; /* amber */
-  --accent-2-tint: #fff2db; /* faint amber wash */
-  --accent-gradient: linear-gradient(115deg, var(--accent) 0%, var(--accent-2) 100%);
+  --accent-hover: #0e8f6e;
+  --accent-tint: rgba(16, 163, 127, 0.1);
+  --accent-2: #10a37f;
+  --accent-2-tint: rgba(16, 163, 127, 0.1);
+  --accent-gradient: linear-gradient(115deg, #10a37f 0%, #0e8f6e 100%);
 
   --card: #ffffff;
-  --card-foreground: #1c1c1c;
+  --card-foreground: #0d0d0d;
   --popover: #ffffff;
-  --popover-foreground: #1c1c1c;
-  --primary: #1c1c1c;
+  --popover-foreground: #0d0d0d;
+  --primary: #10a37f;
   --primary-foreground: #ffffff;
-  --secondary: #f4f4f4;
-  --secondary-foreground: #1c1c1c;
-  --destructive: #8a8a8a;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #0d0d0d;
+  --destructive: #e5484d;
   --destructive-foreground: #ffffff;
-  --radius: 0.5rem; /* cards ~8px; buttons override to 4px */
+  --radius: 0.75rem; /* soft, OpenAI-ish (~12px) */
 
-  /* Neutral data-surface tokens (app widgets only). */
   --console: #fafafa;
-  --console-foreground: #1c1c1c;
-  --console-muted: rgba(28, 28, 28, 0.55);
-  --console-border: rgba(28, 28, 28, 0.1);
-  --console-grid: rgba(28, 28, 28, 0.035);
-  /* Muted semantic data colors — for app widgets ONLY, never decorative. */
-  --positive: #2f7d5b;
-  --negative: #9a4a3f;
+  --console-foreground: #0d0d0d;
+  --console-muted: rgba(13, 13, 13, 0.55);
+  --console-border: rgba(13, 13, 13, 0.1);
+  --console-grid: rgba(13, 13, 13, 0.035);
+  --positive: #10a37f;
+  --negative: #e5484d;
+}
+
+/* Dark (ChatGPT-style) — applied when next-themes adds `.dark` to <html>. */
+.dark {
+  --background: #0d0d0d;
+  --foreground: #ececec;
+  --muted: #1a1a1a;
+  --muted-foreground: #9a9a9a;
+  --muted-surface: #1a1a1a;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.16);
+  --ring: #10a37f;
+
+  --accent: #10a37f;
+  --accent-foreground: #ffffff;
+  --accent-hover: #1aab86;
+  --accent-tint: rgba(16, 163, 127, 0.18);
+  --accent-2: #10a37f;
+  --accent-2-tint: rgba(16, 163, 127, 0.18);
+  --accent-gradient: linear-gradient(115deg, #10a37f 0%, #1aab86 100%);
+
+  --card: #171717;
+  --card-foreground: #ececec;
+  --popover: #171717;
+  --popover-foreground: #ececec;
+  --primary: #10a37f;
+  --primary-foreground: #ffffff;
+  --secondary: #1f1f1f;
+  --secondary-foreground: #ececec;
+  --destructive: #e5484d;
+  --destructive-foreground: #ffffff;
+
+  --console: #141414;
+  --console-foreground: #ececec;
+  --console-muted: rgba(255, 255, 255, 0.55);
+  --console-border: rgba(255, 255, 255, 0.1);
+  --console-grid: rgba(255, 255, 255, 0.04);
+  --positive: #1aab86;
+  --negative: #ef5e63;
 }
 
 @layer base {
@@ -109,67 +142,28 @@
   h2,
   h3,
   .font-heading {
-    font-family: var(--font-host-grotesk), system-ui, sans-serif;
-    font-weight: 300;
-    letter-spacing: -0.04em;
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
 }
 
 @layer utilities {
-  /* Faint engineering grid for console panels. */
+  /* Tabular numerics so data columns line up. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+  /* Retained (legacy data pages); a faint grid for console panels. */
   .recon-grid {
     background-image:
       linear-gradient(var(--console-grid) 1px, transparent 1px),
       linear-gradient(90deg, var(--console-grid) 1px, transparent 1px);
     background-size: 22px 22px;
   }
-  /* Tabular, monospace numerics so columns line up like a readout. */
-  .tabular {
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum";
-  }
 }
 
-/* Section scheme wrapper — the twenty.com rhythm. Sections alternate
-   background + foreground via data-scheme; dividers, not rules, do the work.
-   light → #fff, muted → #f4f4f4, dark → #1c1c1c. */
-@layer base {
-  [data-scheme="light"] {
-    --background: #ffffff;
-    --foreground: #1c1c1c;
-    background-color: var(--background);
-    color: var(--foreground);
-  }
-  [data-scheme="muted"] {
-    --background: #f4f4f4;
-    --foreground: #1c1c1c;
-    background-color: var(--background);
-    color: var(--foreground);
-  }
-  [data-scheme="dark"] {
-    --background: #1c1c1c;
-    --foreground: #ffffff;
-    --muted: rgba(255, 255, 255, 0.6);
-    --muted-foreground: rgba(255, 255, 255, 0.6);
-    --border: rgba(255, 255, 255, 0.14);
-    --muted-surface: #262626;
-    --card: #232323;
-    --card-foreground: #ffffff;
-    --secondary: #2a2a2a;
-    /* The duotone stays vivid on charcoal; tints become translucent. */
-    --accent: #ff4d99;
-    --accent-foreground: #ffffff;
-    --accent-hover: #ff6fac;
-    --accent-tint: rgba(255, 45, 135, 0.16);
-    --accent-2: #ffbb55;
-    --accent-2-tint: rgba(255, 171, 46, 0.16);
-    --accent-gradient: linear-gradient(115deg, var(--accent) 0%, var(--accent-2) 100%);
-    background-color: var(--background);
-    color: var(--foreground);
-  }
-}
-
-/* Live pulse for the concurrency indicator dot. */
+/* Live pulse for the concurrency indicator dot (retained). */
 @keyframes recon-pulse {
   0%,
   100% {

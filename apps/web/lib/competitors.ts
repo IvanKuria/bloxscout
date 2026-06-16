@@ -11,6 +11,7 @@
 import "server-only";
 import { cache } from "react";
 import { RobloxClient } from "@bloxscout/core/roblox-client";
+import { enrichGames, type GameEnrichment } from "@/lib/enrich";
 import { pickGameMatch } from "@/lib/resolve-game";
 import { getThumbnails } from "@/lib/thumbnails";
 
@@ -26,7 +27,17 @@ export interface CompetitorRow {
   creatorName: string | null;
   genre: string | null;
   thumbnailUrl: string | null;
+  /**
+   * Faithful hosted signals for this competitor (growth windows, CCU series,
+   * age, dev cadence, favorites/visits). Present only for the top competitors
+   * we enrich to control token cost; `undefined` means "not available yet",
+   * never zero. Added additively for the reasoning copilot.
+   */
+  enrichment?: GameEnrichment;
 }
+
+/** How many top competitors get the hosted-signal enrichment (token control). */
+const ENRICH_TOP_N = 12;
 
 export interface CompetitorMapResult {
   ok: boolean;
@@ -125,12 +136,19 @@ export const mapCompetitors = cache(
       .slice()
       .sort((a, b) => b.playerCount - a.playerCount)
       .slice(0, cap);
-    const thumbs = await getThumbnails(sorted.map((r) => r.universeId));
+    const [thumbs, enrichment] = await Promise.all([
+      getThumbnails(sorted.map((r) => r.universeId)),
+      enrichGames(
+        sorted.map((r) => r.universeId),
+        ENRICH_TOP_N,
+      ),
+    ]);
 
     const rows: CompetitorRow[] = sorted.map((r) => {
       const up = Math.max(0, r.totalUpVotes);
       const down = Math.max(0, r.totalDownVotes);
       const totalVotes = up + down;
+      const e = enrichment.get(r.universeId);
       return {
         universeId: r.universeId,
         name: r.name,
@@ -140,6 +158,7 @@ export const mapCompetitors = cache(
         creatorName: r.creatorName || null,
         genre: r.genre || null,
         thumbnailUrl: thumbs.get(r.universeId) ?? null,
+        ...(e ? { enrichment: e } : {}),
       };
     });
 

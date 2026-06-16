@@ -26,6 +26,7 @@ import {
   getSaturation,
   getTrending,
 } from "@/lib/data";
+import { enrichGame, enrichGames, type GameEnrichment } from "@/lib/enrich";
 import { genreSlug } from "@/lib/format";
 import { analyzeNiche } from "@/lib/niche";
 import type { NicheAnalysisResult } from "@/lib/niche";
@@ -41,7 +42,9 @@ import { estimateRetention } from "@/lib/retention";
 import type { RetentionResult } from "@/lib/retention";
 import { estimateRevenue } from "@/lib/revenue";
 import type { RevenueResult } from "@/lib/revenue";
+import { pickGameMatch } from "@/lib/resolve-game";
 import { getThumbnails } from "@/lib/thumbnails";
+import { RobloxClient } from "@bloxscout/core/roblox-client";
 
 // Re-export the niche-scan result types so the widget layer imports its props
 // from the same place as the other tool results (type-only; erased at build).
@@ -60,6 +63,8 @@ export type {
 export type { CompetitorMapResult, CompetitorRow } from "@/lib/competitors";
 export type { RetentionResult, RetentionStep } from "@/lib/retention";
 export type { IconAnalysisResult, IconTraits } from "@/lib/icon-analysis";
+// Faithful per-game signal bundle attached to rows + returned by get_game_details.
+export type { GameEnrichment, CcuPoint } from "@/lib/enrich";
 
 /** A JSON-Schema-ish object the Anthropic SDK accepts as `input_schema`. */
 type JsonSchema = {
@@ -103,7 +108,17 @@ export interface RankRow {
   zScore24h: number | null;
   /** 150×150 game icon URL, or null when unavailable. */
   thumbnailUrl: string | null;
+  /**
+   * Faithful hosted signals (growth windows, CCU series, age, dev cadence,
+   * favorites/visits). Present only for the top rows we enrich to control token
+   * cost; `undefined` means "not available yet", never zero. Added additively
+   * for the reasoning copilot.
+   */
+  enrichment?: GameEnrichment;
 }
+
+/** How many top ranking rows get the hosted-signal enrichment (token control). */
+const ENRICH_TOP_N = 12;
 
 export interface RankingResult {
   ok: boolean;
@@ -157,9 +172,38 @@ export interface RisingResult {
   note?: string;
 }
 
+/**
+ * Everything known about ONE game, for a deep single-game dive: identity + live
+ * stats + the faithful hosted enrichment (history, growth windows, age, dev
+ * cadence, like-ratio WITH raw counts, favorites/visits). Every derived figure
+ * is `null` when its source is thin — the model weights confidence itself.
+ */
+export interface GameDetailsResult {
+  ok: boolean;
+  universeId: number | null;
+  name: string | null;
+  genre: string | null;
+  creatorName: string | null;
+  /** Live concurrent players right now. `null` when the live fetch failed. */
+  playing: number | null;
+  /** Up-votes / down-votes / total / ratio (0..1). Counts let the model weight the ratio. */
+  upVotes: number | null;
+  downVotes: number | null;
+  totalVotes: number | null;
+  likeRatio: number | null;
+  /** 150×150 game icon URL, or null when unavailable. */
+  thumbnailUrl: string | null;
+  /** Faithful hosted signals (growth windows, CCU series, age, cadence, favorites/visits). */
+  enrichment: GameEnrichment | null;
+  note?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/** Shared live client for the single-game-details tool's identity/vote lookups. */
+const roblox = new RobloxClient();
 
 function clampLimit(input: unknown, fallback: number, max: number): number {
   const n = typeof input === "number" ? input : Number(input);
@@ -196,6 +240,23 @@ async function thumbsFor(
   entries: ReadonlyArray<{ universeId: number }>,
 ): Promise<Map<number, string | null>> {
   return getThumbnails(entries.map((e) => e.universeId));
+}
+
+/**
+ * Attach the faithful hosted-signal enrichment to the top ranking rows (bounded
+ * to ENRICH_TOP_N for token control). Rows beyond the cap are returned as-is so
+ * the widget still shows them, just without the deep series.
+ */
+async function withEnrichment(rows: RankRow[]): Promise<RankRow[]> {
+  if (rows.length === 0) return rows;
+  const enrichment = await enrichGames(
+    rows.map((r) => r.universeId),
+    ENRICH_TOP_N,
+  );
+  return rows.map((r) => {
+    const e = enrichment.get(r.universeId);
+    return e ? { ...r, enrichment: e } : r;
+  });
 }
 
 function toGauge(e: {
@@ -285,7 +346,7 @@ export const COPILOT_TOOLS: CopilotTool[] = [
         .sort((a, b) => b.playing - a.playing)
         .slice(0, limit);
       const thumbs = await thumbsFor(top);
-      const rows = top.map((e) => toRankRow(e, thumbs));
+      const rows = await withEnrichment(top.map((e) => toRankRow(e, thumbs)));
       return {
         ...base,
         rows,
@@ -360,7 +421,7 @@ export const COPILOT_TOOLS: CopilotTool[] = [
         kind: "breakouts",
         title: "Breakout games",
         generatedAt,
-        rows: top.map((e) => toRankRow(e, thumbs)),
+        rows: await withEnrichment(top.map((e) => toRankRow(e, thumbs))),
         note: derived
           ? "Ranked by 24h growth; anomaly scoring sharpens this as more history accrues."
           : undefined,
@@ -767,6 +828,150 @@ export const COPILOT_TOOLS: CopilotTool[] = [
         universeId:
           typeof input.universeId === "number" ? input.universeId : undefined,
       });
+    },
+  },
+
+  {
+    def: {
+      name: "get_game_details",
+      description:
+        "Get EVERYTHING known about ONE game in a single call — its identity, " +
+        "live CCU, like-ratio with raw up/down vote counts, plus the faithful " +
+        "hosted signals: 24h/7d/30d CCU growth, a compact CCU history series, " +
+        "game age, dev update cadence, and favorites/visits engagement. Call " +
+        "this for a deep dive on a specific named game ('tell me about <game>', " +
+        "'how is <game> doing?', 'is <game> growing or fading?') when you want " +
+        "the full picture rather than one slice. Many figures are null when the " +
+        "hosted history is thin — reason from what's present, say 'not enough " +
+        "data yet' for the rest. Pass `gameName` or `universeId`. Renders a " +
+        "game-details widget.",
+      input_schema: {
+        type: "object",
+        properties: {
+          gameName: {
+            type: "string",
+            description: "A game's name (e.g. 'Grow a Garden'). Resolved live.",
+          },
+          universeId: {
+            type: "integer",
+            description: "A game's Roblox universe id (alternative to gameName).",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    async execute(input): Promise<GameDetailsResult> {
+      const gameName =
+        typeof input.gameName === "string" ? input.gameName.trim() : "";
+      const universeIdIn =
+        typeof input.universeId === "number" ? input.universeId : undefined;
+
+      const base: GameDetailsResult = {
+        ok: false,
+        universeId: null,
+        name: null,
+        genre: null,
+        creatorName: null,
+        playing: null,
+        upVotes: null,
+        downVotes: null,
+        totalVotes: null,
+        likeRatio: null,
+        thumbnailUrl: null,
+        enrichment: null,
+      };
+
+      // Resolve to a concrete universe + live game record.
+      let universeId: number | null = null;
+      let name: string | null = null;
+      let genre: string | null = null;
+      let creatorName: string | null = null;
+      let playing: number | null = null;
+      let fbUp: number | null = null;
+      let fbDown: number | null = null;
+
+      try {
+        if (universeIdIn && universeIdIn > 0) {
+          universeId = universeIdIn;
+          const [g] = await roblox.getGames([universeIdIn]);
+          if (g) {
+            name = g.name;
+            genre = g.genre || null;
+            creatorName = g.creator?.name ?? null;
+            playing = g.playing;
+          }
+        } else if (gameName) {
+          const matches = await roblox.searchGames(gameName, { limit: 5 });
+          const m = pickGameMatch(gameName, matches);
+          if (m) {
+            universeId = m.universeId;
+            name = m.name;
+            creatorName = m.creatorName || null;
+            playing = typeof m.playerCount === "number" ? m.playerCount : null;
+            fbUp = typeof m.totalUpVotes === "number" ? m.totalUpVotes : null;
+            fbDown =
+              typeof m.totalDownVotes === "number" ? m.totalDownVotes : null;
+            // Pull full detail for genre + authoritative live CCU.
+            const [g] = await roblox.getGames([m.universeId]);
+            if (g) {
+              genre = g.genre || null;
+              playing = g.playing;
+              creatorName = g.creator?.name ?? creatorName;
+            }
+          }
+        }
+      } catch {
+        // fall through to the not-found path below
+      }
+
+      if (universeId === null) {
+        return {
+          ...base,
+          note: gameName
+            ? "Couldn't find that game on Roblox right now. Check the name, or pass a universe id."
+            : "Pass a game name or a universe id.",
+        };
+      }
+
+      // Votes (precise endpoint, with the search-row totals as fallback) +
+      // thumbnail + the faithful hosted enrichment, all in parallel.
+      const [votes, thumbs, enrichment] = await Promise.all([
+        roblox.getGameVotes([universeId]).catch(() => []),
+        getThumbnails([universeId]),
+        enrichGame(universeId),
+      ]);
+
+      let up: number | null = votes[0]?.upVotes ?? null;
+      let down: number | null = votes[0]?.downVotes ?? null;
+      if (up === null && fbUp !== null && fbDown !== null) {
+        up = fbUp;
+        down = fbDown;
+      }
+      up = up === null ? null : Math.max(0, up);
+      down = down === null ? null : Math.max(0, down);
+      const totalVotes = up !== null && down !== null ? up + down : null;
+      const likeRatio =
+        totalVotes !== null && totalVotes > 0 && up !== null
+          ? up / totalVotes
+          : null;
+
+      return {
+        ok: true,
+        universeId,
+        name,
+        genre,
+        creatorName,
+        playing,
+        upVotes: up,
+        downVotes: down,
+        totalVotes,
+        likeRatio,
+        thumbnailUrl: thumbs.get(universeId) ?? null,
+        enrichment,
+        note: enrichment.thinHistory
+          ? "No tracked history yet, so growth windows and the CCU series are unavailable for this game."
+          : undefined,
+      };
     },
   },
 ];

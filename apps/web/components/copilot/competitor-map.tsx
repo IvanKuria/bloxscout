@@ -3,7 +3,8 @@
 /**
  * CompetitorMap · inline widget for `map_competitors`. A ranked table of the
  * games Roblox's own recommendation graph treats as adjacent to the anchor,
- * each with live CCU and a like-ratio chip. The CCU bar is the single accent.
+ * each with live CCU and a like-ratio chip. The CCU bar is the single accent;
+ * the like-ratio uses the positive/negative data tokens.
  */
 import Link from "next/link";
 import { GameAvatar } from "@/components/copilot/game-avatar";
@@ -14,12 +15,12 @@ function ratioTone(ratio: number | null): string {
   if (ratio === null) return "text-muted-foreground";
   if (ratio >= 0.85) return "text-positive";
   if (ratio >= 0.65) return "text-foreground";
-  return "text-accent";
+  return "text-negative";
 }
 
 function Row({ row, max }: { row: CompetitorRow; max: number }) {
   return (
-    <li className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted-surface/50">
+    <li className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/50">
       <GameAvatar name={row.name} src={row.thumbnailUrl} className="size-9" />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <Link
@@ -28,9 +29,9 @@ function Row({ row, max }: { row: CompetitorRow; max: number }) {
         >
           {displayName(row.name)}
         </Link>
-        <div className="h-1 w-full overflow-hidden rounded-full bg-muted-surface">
+        <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
           <div
-            className="h-full rounded-full bg-accent"
+            className="h-full rounded-full bg-primary"
             style={{ width: `${(row.playing / max) * 100}%` }}
             aria-hidden
           />
@@ -55,14 +56,14 @@ export function CompetitorMap({ result }: { result: CompetitorMapResult }) {
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-primary"
             aria-hidden
           />
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">
+          <span className="text-sm font-medium text-foreground">
             {result.anchorName ? `Competitors · ${result.anchorName}` : "Competitors"}
           </span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           Players now
         </span>
       </div>
@@ -80,7 +81,7 @@ export function CompetitorMap({ result }: { result: CompetitorMapResult }) {
       )}
 
       {result.rows.length > 0 ? (
-        <div className="border-t border-border px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+        <div className="border-t border-border px-4 py-2.5 text-xs text-muted-foreground">
           {compact(result.totalPlaying)} players across {result.rows.length} neighbours · Roblox recommendation graph
         </div>
       ) : null}

@@ -19,9 +19,9 @@ function Step({ step }: { step: RetentionStep }) {
         <span className="truncate text-sm font-medium text-foreground">
           {step.badgeName}
         </span>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted-surface">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <div
-            className="h-full rounded-full bg-accent"
+            className="h-full rounded-full bg-primary"
             style={{ width: `${pct}%` }}
             aria-hidden
           />
@@ -47,14 +47,14 @@ export function RetentionFunnel({ result }: { result: RetentionResult }) {
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-primary"
             aria-hidden
           />
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">
+          <span className="text-sm font-medium text-foreground">
             {result.name ?? "Game"} · progression
           </span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           Badge funnel
         </span>
       </div>
@@ -80,8 +80,8 @@ export function RetentionFunnel({ result }: { result: RetentionResult }) {
         </p>
       )}
 
-      <div className="flex items-start gap-2 border-t border-border bg-muted-surface/40 px-4 py-2.5">
-        <span className="mt-0.5 shrink-0 rounded-md bg-accent/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-accent">
+      <div className="flex items-start gap-2 border-t border-border bg-muted/40 px-4 py-2.5">
+        <span className="mt-0.5 shrink-0 rounded-md border border-border bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
           Very low confidence
         </span>
         <p className="text-xs leading-relaxed text-muted-foreground">

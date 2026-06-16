@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 
 // Same flow as /login: Discord OAuth creates the account on first sign-in.
 export default function SignupPage() {
-  return <AuthForm />;
+  return <AuthForm mode="signup" />;
 }

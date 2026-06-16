@@ -22,13 +22,25 @@ import {
   isCopilotConfigured,
   SYSTEM_PROMPT,
 } from "@/lib/agent/anthropic";
-import { type ChatStreamEvent, encodeEvent } from "@/lib/agent/protocol";
+import {
+  type ChatStreamEvent,
+  citationSource,
+  encodeEvent,
+  type MessagePart,
+} from "@/lib/agent/protocol";
 import { CLAUDE_TOOL_DEFS, TOOL_BY_NAME } from "@/lib/agent/tools";
 import {
   appendAssistantMessage,
   appendUserMessage,
   ensureConversation,
 } from "@/lib/agent/store";
+import { FREE_DAILY_RUNS } from "@/lib/limits";
+import {
+  captureServer,
+  captureServerException,
+  distinctIdFrom,
+  flushPostHog,
+} from "@/lib/posthog/server";
 import { getEntitlement } from "@/lib/supabase/account";
 import { createClient } from "@/lib/supabase/server";
 
@@ -59,8 +71,9 @@ export async function POST(request: NextRequest) {
 
   // Require an authenticated user (defense in depth).
   let userId: string;
+  let supabase: Awaited<ReturnType<typeof createClient>> | null = null;
   try {
-    const supabase = await createClient();
+    supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -72,7 +85,12 @@ export async function POST(request: NextRequest) {
     // Auth not configured on this deployment — still allow chat to function so
     // the spine is demoable; persistence below will simply no-op.
     userId = "anonymous";
+    supabase = null;
   }
+
+  // Distinct id for analytics: prefer the browser's forwarded PostHog id so
+  // server events stitch to the same person, else the authenticated user id.
+  const distinctId = distinctIdFrom(request, userId);
 
   // Resolve the tier once so we can gate paid tools (e.g. vision). Best-effort:
   // any failure (incl. anonymous/no-Supabase) falls back to the free tier.
@@ -84,6 +102,45 @@ export async function POST(request: NextRequest) {
     }
   } catch {
     isPaid = false;
+  }
+
+  // Free-tier daily quota. Paid users are never metered (we skip the RPC). The
+  // RPC atomically checks + increments and only counts allowed runs, so doing
+  // it here — before any model tokens are spent — both enforces the cap and
+  // saves spend on the rejected turn. Failures fail OPEN (a metering hiccup
+  // must never hard-block the agent); the cap is re-checked on the next turn.
+  let runsRemaining: number | null = null;
+  if (!isPaid && userId !== "anonymous" && supabase) {
+    try {
+      const { data, error } = await supabase.rpc("consume_agent_run", {
+        p_limit: FREE_DAILY_RUNS,
+      });
+      // SECURITY DEFINER fn returns TABLE(...) => supabase-js yields an array.
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!error && row) {
+        runsRemaining = Math.max(0, FREE_DAILY_RUNS - (row.used ?? 0));
+        if (row.allowed === false) {
+          captureServer(distinctId, "copilot_quota_hit", {
+            used: row.used ?? FREE_DAILY_RUNS,
+            limit: FREE_DAILY_RUNS,
+          });
+          await flushPostHog();
+          return NextResponse.json(
+            {
+              error: `You've used all ${FREE_DAILY_RUNS} free runs for today. Upgrade to Pro for unlimited copilot access.`,
+              code: "quota_exceeded",
+              limit: FREE_DAILY_RUNS,
+              used: row.used ?? FREE_DAILY_RUNS,
+            },
+            { status: 429 },
+          );
+        }
+      } else if (error) {
+        console.error("[chat] consume_agent_run failed", error);
+      }
+    } catch (err) {
+      console.error("[chat] quota check threw", err);
+    }
   }
 
   let body: ChatRequestBody;
@@ -124,26 +181,35 @@ export async function POST(request: NextRequest) {
   );
   await appendUserMessage(conversationId, userText);
 
+  captureServer(distinctId, "copilot_run_started", { conversationId, isPaid });
+
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      // Accumulators for persistence of the assistant turn.
-      let assistantText = "";
-      const widgetPayloads: Array<{
-        toolCallId: string;
-        toolName: string;
-        args: unknown;
-        result: unknown;
-        isError?: boolean;
-      }> = [];
+      // Ordered parts for persistence — text and widgets in production order so
+      // a reloaded thread replays exactly as it streamed (interleaved).
+      const parts: MessagePart[] = [];
+      const appendTextDelta = (delta: string) => {
+        const last = parts[parts.length - 1];
+        if (last && last.kind === "text") {
+          last.text += delta;
+        } else {
+          parts.push({ kind: "text", text: delta });
+        }
+      };
 
       const send = (ev: ChatStreamEvent) => {
         controller.enqueue(encoder.encode(encodeEvent(ev)));
       };
 
+      // Track agent activity for the run_completed analytics event.
+      let toolsCalled = 0;
+      let turnsTaken = 0;
+
       try {
         for (let turn = 0; turn < MAX_TURNS; turn++) {
+          turnsTaken = turn + 1;
           // Stream one model response. Adaptive thinking per claude-api skill.
           const mstream = client.messages.stream({
             model: COPILOT_MODEL,
@@ -155,8 +221,13 @@ export async function POST(request: NextRequest) {
           });
 
           mstream.on("text", (delta: string) => {
-            assistantText += delta;
+            appendTextDelta(delta);
             send({ type: "text-delta", text: delta });
+          });
+
+          // Surface the model's reasoning as a live thought block (not persisted).
+          mstream.on("thinking", (delta: string) => {
+            if (delta) send({ type: "thinking-delta", text: delta });
           });
 
           const final = await mstream.finalMessage();
@@ -178,6 +249,11 @@ export async function POST(request: NextRequest) {
           const toolResults: Anthropic.ToolResultBlockParam[] = [];
           for (const tu of toolUses) {
             const args = (tu.input ?? {}) as Record<string, unknown>;
+            toolsCalled += 1;
+            captureServer(distinctId, "copilot_tool_invoked", {
+              toolName: tu.name,
+              conversationId,
+            });
             send({
               type: "tool-call",
               toolCallId: tu.id,
@@ -217,19 +293,27 @@ export async function POST(request: NextRequest) {
               }
             }
 
+            const fetchedAt = new Date().toISOString();
             send({
               type: "tool-result",
-              toolCallId: tu.id,
-              toolName: tu.name,
-              result,
-              isError,
-            });
-            widgetPayloads.push({
               toolCallId: tu.id,
               toolName: tu.name,
               args,
               result,
               isError,
+              fetchedAt,
+            });
+            // Push as an ordered widget part (after any preamble text part),
+            // carrying citation provenance for the "Data cited" footer.
+            parts.push({
+              kind: "widget",
+              toolCallId: tu.id,
+              toolName: tu.name,
+              args,
+              result,
+              isError,
+              source: citationSource(tu.name),
+              fetchedAt,
             });
 
             toolResults.push({
@@ -246,29 +330,39 @@ export async function POST(request: NextRequest) {
 
         send({ type: "done" });
 
-        // Persist the assistant turn (text + widget payloads) for replay.
-        await appendAssistantMessage(
+        captureServer(distinctId, "copilot_run_completed", {
           conversationId,
-          assistantText,
-          widgetPayloads,
-        );
+          turns: turnsTaken,
+          toolsCalled,
+        });
+
+        // Persist the assistant turn as ordered parts for faithful replay.
+        await appendAssistantMessage(conversationId, parts);
       } catch (err) {
+        captureServerException(distinctId, err, { route: "chat" });
         send({
           type: "error",
           message:
             err instanceof Error ? err.message : "The agent hit an error.",
         });
       } finally {
+        // Flush analytics before the stream closes — serverless teardown can
+        // otherwise drop in-flight events. Never block stream start on this.
+        await flushPostHog();
         controller.close();
       }
     },
   });
 
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "application/x-ndjson; charset=utf-8",
-      "Cache-Control": "no-store, no-transform",
-      "X-Conversation-Id": conversationId,
-    },
-  });
+  const headers: Record<string, string> = {
+    "Content-Type": "application/x-ndjson; charset=utf-8",
+    "Cache-Control": "no-store, no-transform",
+    "X-Conversation-Id": conversationId,
+  };
+  // Let the client surface "N of 3 free runs left today" without a round-trip.
+  if (runsRemaining !== null) {
+    headers["X-Runs-Remaining"] = String(runsRemaining);
+  }
+
+  return new Response(stream, { headers });
 }

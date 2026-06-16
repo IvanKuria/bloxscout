@@ -1,27 +1,16 @@
 import type { Metadata } from "next";
-import { Host_Grotesk, Azeret_Mono } from "next/font/google";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
 import { Analytics } from "@vercel/analytics/next";
 import { OrganizationJsonLd } from "@/components/seo/json-ld";
+import { PostHogIdentify } from "@/components/posthog-identify";
+import { ThemeProvider } from "@/components/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { site } from "@/lib/site";
 import "./globals.css";
 
-// The whole type system is Host Grotesk — a refined, low-contrast grotesque.
-// Headings run light (300); we carry 600/700 so display lines can set a single
-// word bold (e.g. the hero's "AI agent"). All-sans, twenty.com's type voice.
-const hostGrotesk = Host_Grotesk({
-  variable: "--font-host-grotesk",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-});
-
-// Mono — labels, buttons, numerics. Used uppercase for UI chrome.
-const azeretMono = Azeret_Mono({
-  variable: "--font-azeret-mono",
-  subsets: ["latin"],
-  weight: ["300", "500"],
-  display: "swap",
-});
+// Geist — a clean neutral grotesque (OpenAI-adjacent). Geist Mono backs code.
+// Self-hosted via the `geist` package; sets --font-geist-sans / --font-geist-mono.
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -84,12 +73,23 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${hostGrotesk.variable} ${azeretMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${GeistSans.variable} ${GeistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <OrganizationJsonLd />
-        {children}
-        <Analytics />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>
+            <OrganizationJsonLd />
+            <PostHogIdentify />
+            {children}
+            <Analytics />
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

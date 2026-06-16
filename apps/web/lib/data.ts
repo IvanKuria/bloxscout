@@ -153,6 +153,14 @@ export const getGameHistory = cache((universeId: number) =>
   client.getGameHistory(universeId),
 );
 
+/** Full hosted game registry (per-game age + dev ship cadence). `null` when unavailable. */
+export const getRegistry = cache(() => client.getRegistry());
+
+/** One game's registry entry (createdAt, updateCount, lastUpdatedAt). `null` when absent. */
+export const getRegistryEntry = cache((universeId: number) =>
+  client.getRegistryEntry(universeId),
+);
+
 // ---------------------------------------------------------------------------
 // Freshness
 // ---------------------------------------------------------------------------

@@ -36,14 +36,14 @@ function WidgetShell({
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-primary"
             aria-hidden
           />
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">
+          <span className="text-sm font-medium text-foreground">
             {result.title}
           </span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           {result.kind === "breakouts" ? "Acceleration" : "Live CCU"}
         </span>
       </div>
@@ -67,7 +67,7 @@ export function RankingWidget({ result }: { result: RankingResult }) {
         header: "#",
         enableSorting: false,
         cell: ({ row }) => (
-          <span className="tabular font-mono text-xs text-muted-foreground">
+          <span className="tabular text-xs text-muted-foreground">
             {row.index + 1}
           </span>
         ),
@@ -101,7 +101,7 @@ export function RankingWidget({ result }: { result: RankingResult }) {
             <div className="flex flex-col items-end gap-1">
               <span className="tabular text-foreground">{int(v)}</span>
               <span
-                className="h-0.5 rounded-full bg-accent/60"
+                className="h-0.5 rounded-full bg-primary/60"
                 style={{ width: `${Math.max(6, (v / maxPlaying) * 64)}px` }}
                 aria-hidden
               />
@@ -122,7 +122,7 @@ export function RankingWidget({ result }: { result: RankingResult }) {
         cell: ({ row }) => (
           <span
             className={cn(
-              "tabular font-mono text-xs",
+              "tabular text-xs",
               (row.original.zScore24h ?? 0) >= 2
                 ? "text-positive"
                 : "text-muted-foreground",
@@ -176,7 +176,7 @@ export function RankingWidget({ result }: { result: RankingResult }) {
                       key={header.id}
                       scope="col"
                       className={cn(
-                        "px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground",
+                        "px-4 py-2.5 text-xs font-normal text-muted-foreground",
                         alignRight ? "text-right" : "text-left",
                       )}
                     >
@@ -217,7 +217,7 @@ export function RankingWidget({ result }: { result: RankingResult }) {
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className="transition-colors hover:bg-muted-surface/50"
+                className="transition-colors hover:bg-muted/50"
               >
                 {row.getVisibleCells().map((cell) => (
                   <td
@@ -235,7 +235,7 @@ export function RankingWidget({ result }: { result: RankingResult }) {
           </tbody>
         </table>
       </div>
-      <div className="flex items-center justify-between border-t border-border px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+      <div className="flex items-center justify-between border-t border-border px-4 py-2.5 text-xs text-muted-foreground">
         <span>{result.rows.length} games</span>
         <span>{compact(maxPlaying)} peak CCU · click a header to sort</span>
       </div>

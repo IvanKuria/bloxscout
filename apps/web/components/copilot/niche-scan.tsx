@@ -6,8 +6,9 @@
  * A LIVE niche competition scan: the verdict (open / contested / locked /
  * thin), the headline numbers (games, total CCU, top-1/top-3 dominance), and a
  * leaderboard of the matched games · each with its icon, a one-line
- * description, and its share of the niche's players. Light surface, hairline
- * borders, one red accent; the verdict tone is the only color signal.
+ * description, and its share of the niche's players. Calm near-monochrome
+ * surface, soft borders, a single green accent; the verdict tone is the only
+ * extra color signal.
  */
 import Link from "next/link";
 import type { NicheAnalysisResult, NicheGameRow, NicheVerdict } from "@/lib/agent/tools";
@@ -25,13 +26,13 @@ const VERDICT: Record<
   thin: { label: "Thin market · little proven demand", tone: "muted" },
 };
 
-// Verdict chip colours — green when there's room, magenta when it's harder,
-// neutral when the market is thin.
+// Verdict chip colours — green when there's room, a neutral foreground when
+// it's harder, muted when the market is thin.
 const TONE_CHIP: Record<string, string> = {
   good: "border-positive/30 bg-positive/10 text-positive",
-  warn: "border-accent/25 bg-accent/[0.08] text-accent",
-  bad: "border-accent/25 bg-accent/[0.08] text-accent",
-  muted: "border-border bg-muted-surface text-muted-foreground",
+  warn: "border-border bg-muted text-foreground",
+  bad: "border-border bg-muted text-foreground",
+  muted: "border-border bg-muted text-muted-foreground",
 };
 
 function pct(n: number): string {
@@ -41,7 +42,7 @@ function pct(n: number): string {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-card px-3 py-2.5">
-      <span className="block font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+      <span className="block text-xs text-muted-foreground">
         {label}
       </span>
       <span className="tabular mt-1 block text-sm font-medium text-foreground">
@@ -53,7 +54,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function LeaderRow({ g, maxShare }: { g: NicheGameRow; maxShare: number }) {
   return (
-    <li className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted-surface/50">
+    <li className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50">
       <GameAvatar name={g.name} src={g.thumbnailUrl} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <Link
@@ -67,9 +68,9 @@ function LeaderRow({ g, maxShare }: { g: NicheGameRow; maxShare: number }) {
             {g.description}
           </span>
         ) : null}
-        <div className="mt-0.5 h-1.5 w-full overflow-hidden rounded-full bg-muted-surface">
+        <div className="mt-0.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <div
-            className="h-full rounded-full bg-accent"
+            className="h-full rounded-full bg-primary"
             style={{ width: `${(g.share / maxShare) * 100}%` }}
             aria-hidden
           />
@@ -79,7 +80,7 @@ function LeaderRow({ g, maxShare }: { g: NicheGameRow; maxShare: number }) {
         <span className="tabular text-sm font-medium text-foreground">
           {compact(g.playing)}
         </span>
-        <span className="tabular font-mono text-[11px] text-muted-foreground">
+        <span className="tabular text-[11px] text-muted-foreground">
           {pct(g.share)}
         </span>
       </div>
@@ -96,14 +97,14 @@ export function NicheScan({ result }: { result: NicheAnalysisResult }) {
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-primary"
             aria-hidden
           />
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">
+          <span className="text-sm font-medium text-foreground">
             {result.title}
           </span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           Live scan
         </span>
       </div>
@@ -121,7 +122,7 @@ export function NicheScan({ result }: { result: NicheAnalysisResult }) {
                 {meta.label}
               </span>
               {result.whiteSpace ? (
-                <span className="rounded-md border border-positive/30 bg-positive/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-positive">
+                <span className="rounded-md border border-positive/30 bg-positive/10 px-2 py-0.5 text-xs font-medium text-positive">
                   White space
                 </span>
               ) : null}
@@ -134,7 +135,7 @@ export function NicheScan({ result }: { result: NicheAnalysisResult }) {
             </div>
           </div>
 
-          <div className="border-t border-border px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+          <div className="border-t border-border px-4 py-2.5 text-xs text-muted-foreground">
             Who&apos;s winning the niche now
           </div>
           <ul className="flex flex-col divide-y divide-border">
@@ -174,7 +175,7 @@ export function NicheScan({ result }: { result: NicheAnalysisResult }) {
       )}
 
       {result.note ? (
-        <p className="border-t border-border bg-muted-surface/40 px-4 py-2.5 text-xs leading-relaxed text-muted-foreground">
+        <p className="border-t border-border bg-muted/40 px-4 py-2.5 text-xs leading-relaxed text-muted-foreground">
           {result.note}
         </p>
       ) : null}

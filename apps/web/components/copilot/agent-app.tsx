@@ -17,6 +17,7 @@
  * Collapsible rail on desktop; a Sheet on mobile.
  */
 import { Menu, PanelLeft } from "lucide-react";
+import posthog from "posthog-js";
 import * as React from "react";
 import {
   ConversationSidebar,
@@ -72,6 +73,7 @@ export function AgentApp() {
   }, []);
 
   const selectThread = React.useCallback((id: string) => {
+    posthog.capture("thread_selected");
     setActiveId(id);
     setHydrateId(id);
     setThreadKey((k) => k + 1);
@@ -79,6 +81,7 @@ export function AgentApp() {
   }, []);
 
   const newChat = React.useCallback(() => {
+    posthog.capture("new_chat_clicked");
     setActiveId(null);
     setHydrateId(null);
     setThreadKey((k) => k + 1);
@@ -115,6 +118,7 @@ export function AgentApp() {
   }, []);
 
   const renameThread = React.useCallback((id: string, title: string) => {
+    posthog.capture("thread_renamed");
     setConversations((prev) =>
       prev.map((c) => (c.id === id ? { ...c, title } : c)),
     );
@@ -127,6 +131,7 @@ export function AgentApp() {
 
   const deleteThread = React.useCallback(
     (id: string) => {
+      posthog.capture("thread_deleted");
       setConversations((prev) => prev.filter((c) => c.id !== id));
       if (activeId === id) newChat();
       void fetch(`/api/conversations/${id}`, { method: "DELETE" }).catch(
@@ -154,7 +159,7 @@ export function AgentApp() {
     <div className="flex h-full w-full">
       {/* Desktop rail */}
       {!collapsed ? (
-        <aside className="hidden w-[17rem] shrink-0 border-r border-border md:block">
+        <aside className="hidden w-[17rem] shrink-0 border-r border-border bg-muted/30 md:block">
           {sidebar("panel")}
         </aside>
       ) : null}
@@ -164,14 +169,14 @@ export function AgentApp() {
         <SheetContent>{sidebar("sheet")}</SheetContent>
       </Sheet>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col bg-background">
         {/* Compact in-thread toolbar: mobile menu + desktop expand-rail */}
-        <div className="flex items-center gap-2 border-b border-border px-3 py-2 md:px-4">
+        <div className="flex h-12 items-center gap-2 border-b border-border px-3 md:px-4">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
             aria-label="Open conversations"
-            className="grid size-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted-surface hover:text-foreground md:hidden"
+            className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
           >
             <Menu className="size-4" />
           </button>
@@ -180,7 +185,7 @@ export function AgentApp() {
               type="button"
               onClick={() => setCollapsed(false)}
               aria-label="Expand conversations"
-              className="hidden size-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted-surface hover:text-foreground md:grid"
+              className="hidden size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:grid"
             >
               <PanelLeft className="size-4" />
             </button>

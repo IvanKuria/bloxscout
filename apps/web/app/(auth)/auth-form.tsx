@@ -1,8 +1,11 @@
 "use client";
 
 import { LoaderCircle } from "lucide-react";
+import Link from "next/link";
+import posthog from "posthog-js";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
+import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 import { type AuthState, signInWithDiscord } from "./actions";
 
@@ -22,7 +25,12 @@ function DiscordIcon({ className }: { className?: string }) {
 function DiscordSubmit() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" size="lg" disabled={pending} className="w-full">
+    <Button
+      type="submit"
+      size="lg"
+      disabled={pending}
+      className="h-11 w-full rounded-xl bg-[#5865F2] text-white hover:bg-[#4752c4]"
+    >
       {pending ? (
         <LoaderCircle className="size-4 animate-spin" />
       ) : (
@@ -35,36 +43,79 @@ function DiscordSubmit() {
   );
 }
 
-export function AuthForm() {
+type AuthMode = "login" | "signup";
+
+const COPY: Record<
+  AuthMode,
+  { heading: string; subheading: string; switchPrompt: string; switchCta: string; switchHref: string }
+> = {
+  login: {
+    heading: "Sign in to bloxscout",
+    subheading: "One tap, no password.",
+    switchPrompt: "New to bloxscout?",
+    switchCta: "Create an account",
+    switchHref: "/signup",
+  },
+  signup: {
+    heading: "Create your account",
+    subheading: "One tap, no password.",
+    switchPrompt: "Already have an account?",
+    switchCta: "Sign in",
+    switchHref: "/login",
+  },
+};
+
+export function AuthForm({ mode = "login" }: { mode?: AuthMode }) {
+  const copy = COPY[mode];
   const [discordState, discordAction] = useActionState<
     AuthState | undefined,
     FormData
-  >(async () => signInWithDiscord(), undefined);
+  >(async () => {
+    posthog.capture("signin_started", { method: "discord", mode });
+    return signInWithDiscord();
+  }, undefined);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 shadow-[0_1px_0_rgba(23,23,29,0.04),0_24px_60px_-28px_rgba(23,23,29,0.25)] sm:p-7">
-      <div className="mb-6 flex flex-col gap-1.5">
-        <h2 className="font-heading text-2xl leading-tight text-foreground">
-          Sign in with Discord
-        </h2>
-        <p className="text-sm leading-relaxed text-foreground/60">
-          One tap, no password. Most Roblox developers already have a Discord
-          account, so there&apos;s nothing new to set up.
+    <div className="w-full">
+      <div className="rounded-2xl border border-border bg-card p-8 sm:p-10">
+        <div className="flex flex-col items-center text-center">
+          <span className="flex size-11 items-center justify-center rounded-xl border border-border bg-muted text-foreground">
+            <BrandMark className="size-6" />
+          </span>
+          <h1 className="mt-5 text-xl font-semibold tracking-tight text-foreground">
+            {copy.heading}
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            {copy.subheading}
+          </p>
+        </div>
+
+        {/* Discord OAuth — preserves the signInWithDiscord server action flow. */}
+        <form action={discordAction} className="mt-8">
+          <DiscordSubmit />
+        </form>
+        {discordState?.error ? (
+          <p
+            role="alert"
+            className="mt-3 text-center text-sm text-destructive"
+          >
+            {discordState.error}
+          </p>
+        ) : null}
+
+        <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground">
+          By continuing you agree to the terms of service.
         </p>
       </div>
 
-      {/* Discord OAuth */}
-      <form action={discordAction}>
-        <DiscordSubmit />
-      </form>
-      {discordState?.error ? (
-        <p className="mt-2 font-mono text-xs text-negative">
-          {discordState.error}
-        </p>
-      ) : null}
-
-      <p className="mt-5 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-foreground/40">
-        Signing in means you accept the terms
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        {copy.switchPrompt}{" "}
+        <Link
+          href={copy.switchHref}
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          {copy.switchCta}
+        </Link>
       </p>
     </div>
   );

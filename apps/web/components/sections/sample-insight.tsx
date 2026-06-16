@@ -17,42 +17,43 @@ const SIGNALS = [
 
 export function SampleInsight() {
   return (
-    <Section scheme="light" id="sample" innerClassName="py-24 sm:py-32">
+    <Section tone="plain" id="sample" innerClassName="py-24 sm:py-32">
       <div className="mb-14 max-w-2xl">
         <Eyebrow>Anatomy of an answer</Eyebrow>
-        <h2 className="mt-5 text-[2rem] leading-[1.08] font-light tracking-[-0.035em] text-foreground sm:text-[2.6rem]">
+        <h2 className="mt-5 text-[2rem] leading-[1.08] font-semibold tracking-tight text-foreground sm:text-[2.6rem]">
           Every verdict shows its work.
         </h2>
-        <p className="mt-5 text-[1.0625rem] leading-[1.6] text-foreground/60">
+        <p className="mt-5 text-[1.0625rem] leading-[1.6] text-muted-foreground">
           You get the call and the evidence: the live signals it read, and the
           reasoning that turns them into a decision.
         </p>
       </div>
 
-      <FadeContent className="overflow-hidden rounded-2xl border border-foreground/12 bg-background shadow-[0_40px_80px_-60px_rgba(23,23,29,0.4)]">
+      <FadeContent className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-foreground/5">
         {/* the question */}
-        <div className="flex flex-wrap items-center gap-3 border-b border-foreground/10 px-6 py-5 sm:px-8">
-          <span className="font-mono text-[10px] tracking-[0.18em] text-foreground/45 uppercase">
+        <div className="flex flex-wrap items-center gap-3 border-b border-border px-6 py-5 sm:px-8">
+          <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
             You asked
           </span>
-          <span className="text-[15px] text-foreground/85">
+          <span className="text-[15px] text-foreground/90">
             Is tower defense saturated, or is there still room for a solo dev?
           </span>
         </div>
 
-        <div className="grid gap-px bg-foreground/10 lg:grid-cols-[1fr_1.4fr]">
+        <div className="grid lg:grid-cols-[1fr_1.4fr]">
           {/* signals it read */}
-          <div className="bg-background p-6 sm:p-8">
-            <p className="mb-4 font-mono text-[10px] tracking-[0.16em] text-foreground/45 uppercase">
+          <div className="border-b border-border p-6 sm:p-8 lg:border-r lg:border-b-0">
+            <p className="mb-4 text-[11px] font-medium tracking-wide text-muted-foreground">
               Signals it read
             </p>
-            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-foreground/10 bg-foreground/10">
+            <div className="grid grid-cols-2 gap-3">
               {SIGNALS.map((s) => (
-                <div key={s.label} className="bg-background p-4">
-                  <p className="font-mono text-[9px] tracking-[0.16em] text-foreground/45 uppercase">
-                    {s.label}
-                  </p>
-                  <p className="tabular mt-1.5 text-lg font-medium text-foreground">
+                <div
+                  key={s.label}
+                  className="rounded-xl border border-border bg-muted/50 p-4"
+                >
+                  <p className="text-[11px] text-muted-foreground">{s.label}</p>
+                  <p className="tabular mt-1.5 text-lg font-semibold text-foreground">
                     {s.value}
                   </p>
                 </div>
@@ -61,9 +62,9 @@ export function SampleInsight() {
           </div>
 
           {/* the reasoned answer */}
-          <div className="bg-background p-6 sm:p-8">
-            <p className="mb-4 inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.18em] text-accent uppercase">
-              <span className="grid size-4 place-items-center rounded-full bg-accent/10 text-accent">
+          <div className="p-6 sm:p-8">
+            <p className="mb-4 inline-flex items-center gap-2 text-[12px] font-medium text-muted-foreground">
+              <span className="grid size-4 place-items-center rounded-full bg-muted text-foreground">
                 ✦
               </span>
               bloxscout
@@ -71,7 +72,7 @@ export function SampleInsight() {
             <div className="space-y-4 text-[15px] leading-[1.6] text-foreground/80">
               <p>
                 Tower defense is{" "}
-                <span className="font-medium text-accent">
+                <span className="font-medium text-foreground">
                   contested, not locked
                 </span>
                 . Thirty live games share 274k players, but Tower Defense
@@ -82,7 +83,7 @@ export function SampleInsight() {
                 concurrents, so players are shopping the niche rather than
                 defaulting to the leader. That fragmentation is your white space.
               </p>
-              <p className="rounded-lg border-l-2 border-accent bg-accent/[0.04] py-3 pr-4 pl-5 text-foreground">
+              <p className="rounded-xl border-l-2 border-border bg-muted/60 py-3 pr-4 pl-5 text-foreground">
                 For a solo dev: don&apos;t fight TDS head-on. Ship a sharp twist
                 on the format, a fresh theme or a tighter session loop, and take
                 a slice of that tail. The demand is proven; the leader just

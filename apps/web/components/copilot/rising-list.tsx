@@ -16,14 +16,14 @@ export function RisingList({ result }: { result: RisingResult }) {
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-primary"
             aria-hidden
           />
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">
+          <span className="text-sm font-medium text-foreground">
             {result.title}
           </span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           Momentum score
         </span>
       </div>
@@ -37,9 +37,9 @@ export function RisingList({ result }: { result: RisingResult }) {
           {result.rows.map((r, i) => (
             <li
               key={r.slug}
-              className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted-surface/50"
+              className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
             >
-              <span className="tabular w-5 shrink-0 font-mono text-xs text-muted-foreground">
+              <span className="tabular w-5 shrink-0 text-xs text-muted-foreground">
                 {i + 1}
               </span>
               <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -49,9 +49,9 @@ export function RisingList({ result }: { result: RisingResult }) {
                 >
                   {r.genre}
                 </Link>
-                <div className="h-1 w-full overflow-hidden rounded-full bg-muted-surface">
+                <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full rounded-full bg-accent"
+                    className="h-full rounded-full bg-primary"
                     style={{ width: `${(r.risingScore / max) * 100}%` }}
                     aria-hidden
                   />
@@ -71,7 +71,7 @@ export function RisingList({ result }: { result: RisingResult }) {
         </ul>
       )}
 
-      <div className="border-t border-border px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+      <div className="border-t border-border px-4 py-2.5 text-xs text-muted-foreground">
         Rising = momentum × opportunity × durability
       </div>
     </div>

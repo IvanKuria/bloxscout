@@ -12,6 +12,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { tierForPriceId } from "@/lib/stripe/config";
+import {
+  captureServer,
+  captureServerException,
+  flushPostHog,
+} from "@/lib/posthog/server";
 import { getStripe, getWebhookSecret } from "@/lib/stripe/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 
@@ -34,6 +39,8 @@ export async function POST(request: NextRequest) {
       getWebhookSecret(),
     );
   } catch (e) {
+    captureServerException("stripe-webhook", e, { route: "stripe_webhook" });
+    await flushPostHog();
     const message =
       e instanceof Error ? e.message : "Signature verification failed.";
     return NextResponse.json({ error: message }, { status: 400 });
@@ -50,15 +57,36 @@ export async function POST(request: NextRequest) {
               ? session.subscription
               : session.subscription.id;
           const sub = await stripe.subscriptions.retrieve(subId);
-          await upsertSubscription(sub);
+          const resolved = await upsertSubscription(sub);
+          if (resolved) {
+            captureServer(resolved.userId, "subscription_activated", {
+              tier: resolved.tier,
+              interval: resolved.interval,
+            });
+          }
         }
         break;
       }
       case "customer.subscription.created":
-      case "customer.subscription.updated":
+      case "customer.subscription.updated": {
+        const sub = event.data.object as Stripe.Subscription;
+        const resolved = await upsertSubscription(sub);
+        if (resolved) {
+          captureServer(resolved.userId, "subscription_updated", {
+            tier: resolved.tier,
+            status: resolved.status,
+          });
+        }
+        break;
+      }
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
-        await upsertSubscription(sub);
+        const resolved = await upsertSubscription(sub);
+        if (resolved) {
+          captureServer(resolved.userId, "subscription_cancelled", {
+            tier: resolved.tier,
+          });
+        }
         break;
       }
       default:
@@ -68,17 +96,33 @@ export async function POST(request: NextRequest) {
   } catch (e) {
     // Log and return 500 so Stripe retries.
     console.error("[stripe webhook] handler error", e);
+    await flushPostHog();
     return NextResponse.json(
       { error: "Webhook handler failed." },
       { status: 500 },
     );
   }
 
+  await flushPostHog();
   return NextResponse.json({ received: true });
 }
 
-/** Map a Stripe subscription onto the `subscriptions` row for its user. */
-async function upsertSubscription(sub: Stripe.Subscription): Promise<void> {
+/** What `upsertSubscription` resolved, so the caller can emit analytics. */
+interface ResolvedSubscription {
+  userId: string;
+  tier: string;
+  status: Stripe.Subscription.Status;
+  interval: string | null;
+}
+
+/**
+ * Map a Stripe subscription onto the `subscriptions` row for its user.
+ * Returns the resolved user/tier/interval/status (or null when the user can't
+ * be resolved) so the webhook handler can emit analytics for the change.
+ */
+async function upsertSubscription(
+  sub: Stripe.Subscription,
+): Promise<ResolvedSubscription | null> {
   const admin = createServiceRoleClient();
 
   const customerId =
@@ -99,12 +143,13 @@ async function upsertSubscription(sub: Stripe.Subscription): Promise<void> {
       "[stripe webhook] could not resolve user for customer",
       customerId,
     );
-    return;
+    return null;
   }
 
   const item = sub.items.data[0];
   const priceId = item?.price?.id ?? null;
   const mapped = tierForPriceId(priceId);
+  const interval = item?.price?.recurring?.interval ?? null;
 
   // Period end now lives on the subscription item (API 2025+).
   const periodEnd = item?.current_period_end ?? null;
@@ -130,4 +175,6 @@ async function upsertSubscription(sub: Stripe.Subscription): Promise<void> {
     },
     { onConflict: "user_id" },
   );
+
+  return { userId, tier, status: sub.status, interval };
 }

@@ -14,6 +14,7 @@
  */
 import * as React from "react";
 import { CompetitorMap } from "@/components/copilot/competitor-map";
+import { GameDetails } from "@/components/copilot/game-details";
 import { IconAnalysis } from "@/components/copilot/icon-analysis";
 import { MonetizationTeardown } from "@/components/copilot/monetization-teardown";
 import { NicheCard } from "@/components/copilot/niche-card";
@@ -26,6 +27,7 @@ import { RisingList } from "@/components/copilot/rising-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import type {
   CompetitorMapResult,
+  GameDetailsResult,
   GameQualityResult,
   IconAnalysisResult,
   MonetizationResult,
@@ -76,6 +78,9 @@ export const WIDGET_BY_TOOL: Record<string, WidgetRenderer> = {
   ),
   analyze_icon: (result) => (
     <IconAnalysis result={result as IconAnalysisResult} />
+  ),
+  get_game_details: (result) => (
+    <GameDetails result={result as GameDetailsResult} />
   ),
 };
 

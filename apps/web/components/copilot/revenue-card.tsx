@@ -16,8 +16,8 @@ import { compact, genreSlug, int, usd } from "@/lib/format";
 
 function ConfidenceBand({ disclaimer }: { disclaimer: string }) {
   return (
-    <div className="flex items-start gap-2 border-t border-border bg-muted-surface/40 px-4 py-2.5">
-      <span className="mt-0.5 shrink-0 rounded-md bg-accent/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-accent">
+    <div className="flex items-start gap-2 border-t border-border bg-muted/40 px-4 py-2.5">
+      <span className="mt-0.5 shrink-0 rounded-md border border-border bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
         Low confidence
       </span>
       <p className="text-xs leading-relaxed text-muted-foreground">{disclaimer}</p>
@@ -28,7 +28,7 @@ function ConfidenceBand({ disclaimer }: { disclaimer: string }) {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+      <span className="text-xs text-muted-foreground">
         {label}
       </span>
       <span className="tabular text-sm font-medium text-foreground">{value}</span>
@@ -45,7 +45,7 @@ function GameView({ game }: { game: RevenueGame }) {
           <span className="tabular font-heading text-3xl font-semibold leading-none text-foreground">
             {usd(game.estMonthlyUsd)}
           </span>
-          <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             est. / month
           </span>
         </div>
@@ -67,16 +67,16 @@ function GenreRow({
   max: number;
 }) {
   return (
-    <li className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted-surface/50">
+    <li className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/50">
       <Link
         href={`/genre/${genreSlug(entry.genre)}`}
         className="w-36 shrink-0 truncate text-sm text-foreground underline-offset-4 hover:underline"
       >
         {entry.genre}
       </Link>
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted-surface">
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
         <div
-          className="h-full rounded-full bg-accent"
+          className="h-full rounded-full bg-primary"
           style={{ width: `${(entry.estTotalMonthlyUsd / max) * 100}%` }}
           aria-hidden
         />
@@ -99,14 +99,14 @@ export function RevenueCard({ result }: { result: RevenueResult }) {
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-primary"
             aria-hidden
           />
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">
+          <span className="text-sm font-medium text-foreground">
             {result.title}
           </span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           Est. USD / month
         </span>
       </div>
@@ -123,7 +123,7 @@ export function RevenueCard({ result }: { result: RevenueResult }) {
             </span>
             <span className="tabular font-heading text-2xl font-semibold text-foreground">
               {usd(result.genre.estTotalMonthlyUsd)}
-              <span className="ml-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              <span className="ml-1 text-xs font-normal text-muted-foreground">
                 total/mo
               </span>
             </span>

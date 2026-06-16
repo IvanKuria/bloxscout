@@ -12,7 +12,7 @@ import type { IconAnalysisResult, IconTraits } from "@/lib/agent/tools";
 
 function Chip({ children }: { children: ReactNode }) {
   return (
-    <span className="rounded-md border border-border bg-muted-surface/60 px-2 py-0.5 text-xs text-foreground">
+    <span className="rounded-md border border-border bg-muted/60 px-2 py-0.5 text-xs text-foreground">
       {children}
     </span>
   );
@@ -21,7 +21,7 @@ function Chip({ children }: { children: ReactNode }) {
 function Field({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+      <span className="text-xs text-muted-foreground">
         {label}
       </span>
       <div className="flex flex-wrap gap-1.5">{value}</div>
@@ -62,21 +62,21 @@ export function IconAnalysis({ result }: { result: IconAnalysisResult }) {
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-primary"
             aria-hidden
           />
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">
+          <span className="text-sm font-medium text-foreground">
             {result.name ?? "Game"} · icon analysis
           </span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           Vision
         </span>
       </div>
 
       {result.locked ? (
         <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
-          <span className="rounded-md bg-accent/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
+          <span className="rounded-md border border-primary/20 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
             Pro feature
           </span>
           <p className="max-w-sm text-sm text-muted-foreground">
@@ -85,7 +85,7 @@ export function IconAnalysis({ result }: { result: IconAnalysisResult }) {
           </p>
           <a
             href="/pricing"
-            className="text-sm font-medium text-accent underline-offset-4 hover:underline"
+            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
             See plans →
           </a>
@@ -100,13 +100,13 @@ export function IconAnalysis({ result }: { result: IconAnalysisResult }) {
           </div>
           {result.recommendations.length ? (
             <div className="flex flex-col gap-1.5 border-t border-border pt-3">
-              <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 Recommendations
               </span>
               <ul className="flex flex-col gap-1.5">
                 {result.recommendations.map((r) => (
                   <li key={r} className="flex gap-2 text-sm text-foreground">
-                    <span className="text-accent" aria-hidden>
+                    <span className="text-primary" aria-hidden>
                       →
                     </span>
                     <span>{r}</span>

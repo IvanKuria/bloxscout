@@ -16,6 +16,7 @@ import "server-only";
 import { cache } from "react";
 import { herfindahlIndex, topNShare } from "@bloxscout/core/concentration";
 import { RobloxClient } from "@bloxscout/core/roblox-client";
+import { enrichGames, type GameEnrichment } from "@/lib/enrich";
 import { getThumbnails } from "@/lib/thumbnails";
 
 const roblox = new RobloxClient();
@@ -32,7 +33,17 @@ export interface NicheGameRow {
   description: string;
   /** 150×150 game icon URL, or null when unavailable. */
   thumbnailUrl: string | null;
+  /**
+   * Faithful hosted signals for this game (growth windows, CCU series, age,
+   * dev cadence, favorites/visits). Present only for the top leaders we enrich
+   * to control token cost; `undefined` (and `null` inside it) means "not
+   * available yet", never zero. Added additively for the reasoning copilot.
+   */
+  enrichment?: GameEnrichment;
 }
+
+/** How many top leaders get the hosted-signal enrichment (token control). */
+const ENRICH_TOP_N = 12;
 
 /** open = room to win · contested = a few big players · locked = one game owns it · thin = no real market. */
 export type NicheVerdict = "open" | "contested" | "locked" | "thin";
@@ -180,9 +191,13 @@ export const analyzeNiche = cache(
     const whiteSpace = verdict === "open" && tailGames >= 3;
 
     const topLeaders = ranked.slice(0, 8);
-    const thumbnails = await getThumbnails(
-      topLeaders.map((g) => g.universeId),
-    );
+    const [thumbnails, enrichment] = await Promise.all([
+      getThumbnails(topLeaders.map((g) => g.universeId)),
+      enrichGames(
+        topLeaders.map((g) => g.universeId),
+        ENRICH_TOP_N,
+      ),
+    ]);
 
     return {
       ok: true,
@@ -196,7 +211,11 @@ export const analyzeNiche = cache(
       saturationScore,
       verdict,
       whiteSpace,
-      leaders: topLeaders.map((g) => toRow(g, totalPlaying, thumbnails)),
+      leaders: topLeaders.map((g) => {
+        const row = toRow(g, totalPlaying, thumbnails);
+        const e = enrichment.get(g.universeId);
+        return e ? { ...row, enrichment: e } : row;
+      }),
       tailGames,
     };
   },

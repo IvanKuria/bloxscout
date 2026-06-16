@@ -13,6 +13,7 @@
  */
 import "server-only";
 import { randomUUID } from "node:crypto";
+import type { MessagePart } from "@/lib/agent/protocol";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -27,9 +28,59 @@ export interface WidgetPayload {
 export interface StoredMessage {
   id: string;
   role: "user" | "assistant";
+  /** Flattened prose (kept for the text column / search). */
   text: string;
-  widgets: WidgetPayload[];
+  /** Ordered, interleaved parts (text + widgets) for faithful replay. */
+  parts: MessagePart[];
   createdAt: string;
+}
+
+/** Flatten the text parts into a single string for the `text` column. */
+function flattenText(parts: MessagePart[]): string {
+  return parts
+    .filter((p): p is Extract<MessagePart, { kind: "text" }> => p.kind === "text")
+    .map((p) => p.text)
+    .join("\n\n")
+    .trim();
+}
+
+/**
+ * Reconstruct ordered parts from a stored message row, handling both shapes:
+ *   - v2 (new): `widgets` JSONB is `{ parts: MessagePart[] }`.
+ *   - legacy:   `widgets` JSONB is a flat `WidgetPayload[]` → render text then
+ *               all widgets (the old behaviour, so old threads still load).
+ */
+function partsFromRow(
+  role: "user" | "assistant",
+  text: string,
+  widgets: unknown,
+): MessagePart[] {
+  if (
+    widgets &&
+    !Array.isArray(widgets) &&
+    Array.isArray((widgets as { parts?: unknown }).parts)
+  ) {
+    return (widgets as { parts: MessagePart[] }).parts;
+  }
+  // Legacy / user rows: text first, then any widgets.
+  const parts: MessagePart[] = [];
+  if (text) parts.push({ kind: "text", text });
+  if (Array.isArray(widgets)) {
+    for (const w of widgets as WidgetPayload[]) {
+      parts.push({
+        kind: "widget",
+        toolCallId: w.toolCallId,
+        toolName: w.toolName,
+        args: w.args,
+        result: w.result,
+        isError: w.isError,
+      });
+    }
+  }
+  if (role === "user" && parts.length === 0 && text) {
+    parts.push({ kind: "text", text });
+  }
+  return parts;
 }
 
 export interface StoredConversation {
@@ -102,17 +153,18 @@ export async function appendUserMessage(
 
 export async function appendAssistantMessage(
   conversationId: string,
-  text: string,
-  widgets: WidgetPayload[],
+  parts: MessagePart[],
 ): Promise<void> {
   const supabase = await db();
   if (!supabase) return;
   try {
+    // Store the ordered parts in the JSONB `widgets` column (v2 shape) and a
+    // flattened copy in `text`. No schema migration; loadMessages reads either.
     await supabase.from("messages").insert({
       conversation_id: conversationId,
       role: "assistant",
-      text,
-      widgets,
+      text: flattenText(parts),
+      widgets: { parts },
     });
     // Touch the conversation so it sorts to the top of the thread list.
     await supabase
@@ -188,13 +240,17 @@ export async function loadMessages(
       .select("id, role, text, widgets, created_at")
       .eq("conversation_id", conversationId)
       .order("created_at", { ascending: true });
-    return (data ?? []).map((r) => ({
-      id: r.id as string,
-      role: r.role as "user" | "assistant",
-      text: r.text as string,
-      widgets: (r.widgets as WidgetPayload[]) ?? [],
-      createdAt: r.created_at as string,
-    }));
+    return (data ?? []).map((r) => {
+      const role = r.role as "user" | "assistant";
+      const text = (r.text as string) ?? "";
+      return {
+        id: r.id as string,
+        role,
+        text,
+        parts: partsFromRow(role, text, r.widgets),
+        createdAt: r.created_at as string,
+      };
+    });
   } catch {
     return [];
   }

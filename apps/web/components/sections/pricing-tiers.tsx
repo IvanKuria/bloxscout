@@ -2,13 +2,16 @@
 
 /**
  * PricingTiers — monthly↔annual toggle driving the displayed price and per-tier
- * savings line. Restyled monochrome in the twenty.com idiom: mono uppercase
- * toggle, light Host Grotesk prices, hairline cards, a quietly-distinguished
- * featured tier (charcoal border + a small mono badge, no colour). CTAs route to
- * /signup. Reduced-motion safe (price swap is a short CSS transition).
+ * savings line, in the OpenAI/ChatGPT idiom: a soft pill segmented toggle, clean
+ * Geist prices, rounded neutral cards, and a quietly-distinguished featured tier
+ * (a subtle neutral ring + a small neutral badge); only the featured CTA stays
+ * green. Colour comes from semantic tokens so it reads correctly in light and
+ * dark. CTAs route to /signup. Reduced-motion
+ * safe (price swap is a short CSS transition).
  */
 import * as React from "react";
 import { Check } from "lucide-react";
+import posthog from "posthog-js";
 import { CtaLink } from "./cta-link";
 
 type Interval = "monthly" | "yearly";
@@ -21,6 +24,7 @@ type Tier = {
   cta: string;
   href: string;
   featured?: boolean;
+  comingSoon?: boolean;
   features: string[];
 };
 
@@ -33,41 +37,24 @@ const TIERS: Tier[] = [
     cta: "Start free",
     href: "/signup",
     features: [
-      "Ask the agent a few questions a day",
-      "Public trending + breakout feeds",
-      "Live data, refreshed every ~30 min",
-      "Community support",
+      "3 agent questions a day",
+      "Niche, trending & breakout scans",
+      "Revenue, competitor & monetization analysis",
+      "Live Roblox data, refreshed ~30 min",
     ],
   },
   {
     name: "Pro",
-    tagline: "The full firehose for serious solo devs.",
+    tagline: "Unlimited intel for serious solo devs.",
     monthly: 19,
     yearly: 190,
     cta: "Start Pro",
     href: "/signup",
     featured: true,
     features: [
-      "Unlimited questions to the agent",
-      "Saturation + rising-niche scans",
-      "Historical snapshots & genre momentum",
-      "CSV export of any answer",
-      "Email support",
-    ],
-  },
-  {
-    name: "Studio",
-    tagline: "Team seats and priority intel for studios.",
-    monthly: 99,
-    yearly: 990,
-    cta: "Start Studio",
-    href: "/signup",
-    features: [
-      "Everything in Pro",
-      "Up to 10 seats",
-      "Priority data refresh",
-      "Private competitor watchlists",
-      "Priority support",
+      "Unlimited agent questions",
+      "Everything in Free, no daily cap",
+      "Icon & thumbnail vision analysis",
     ],
   },
 ];
@@ -85,19 +72,24 @@ export function PricingTiers() {
     <div>
       {/* Toggle */}
       <div className="mb-14 flex flex-col items-center gap-3">
-        <div className="inline-flex items-center rounded-[4px] border border-foreground/15 p-0.5 font-mono text-[11px] tracking-[0.1em] uppercase">
+        <div className="inline-flex items-center rounded-full border border-border bg-muted p-1 text-[13px]">
           {(["monthly", "yearly"] as const).map((opt) => {
             const active = interval === opt;
             return (
               <button
                 key={opt}
                 type="button"
-                onClick={() => setInterval(opt)}
+                onClick={() => {
+                  posthog.capture("pricing_interval_toggled", {
+                    interval: opt,
+                  });
+                  setInterval(opt);
+                }}
                 aria-pressed={active}
-                className={`rounded-[2px] px-4 py-2 transition-colors ${
+                className={`rounded-full px-4 py-1.5 font-medium transition-colors ${
                   active
-                    ? "bg-foreground text-background"
-                    : "text-foreground/55 hover:text-foreground"
+                    ? "bg-background text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {opt === "monthly" ? "Monthly" : "Annual"}
@@ -106,10 +98,8 @@ export function PricingTiers() {
           })}
         </div>
         <p
-          className={`font-mono text-[10px] tracking-[0.16em] uppercase transition-opacity ${
-            interval === "yearly"
-              ? "text-foreground/55 opacity-100"
-              : "opacity-0"
+          className={`text-[12px] font-medium text-muted-foreground transition-opacity ${
+            interval === "yearly" ? "opacity-100" : "opacity-0"
           }`}
           aria-hidden={interval !== "yearly"}
         >
@@ -117,7 +107,7 @@ export function PricingTiers() {
         </p>
       </div>
 
-      <div className="grid gap-px overflow-hidden rounded-lg border border-foreground/12 bg-foreground/12 lg:grid-cols-3">
+      <div className="mx-auto grid max-w-3xl gap-4 lg:grid-cols-2">
         {TIERS.map((tier) => {
           const savings =
             tier.monthly > 0 && interval === "yearly"
@@ -126,37 +116,37 @@ export function PricingTiers() {
           return (
             <div
               key={tier.name}
-              className={`relative flex flex-col bg-background p-8 ${
+              className={`relative flex flex-col rounded-2xl border bg-card p-8 ${
                 tier.featured
-                  ? "bg-muted-surface ring-1 ring-accent/35 ring-inset"
-                  : ""
+                  ? "border-border ring-1 ring-border"
+                  : "border-border"
               }`}
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-light tracking-[-0.02em] text-foreground">
+                <h3 className="text-xl font-semibold tracking-tight text-foreground">
                   {tier.name}
                 </h3>
                 {tier.featured && (
-                  <span className="rounded-[3px] border border-accent/30 bg-accent/[0.08] px-2 py-1 font-mono text-[9px] tracking-[0.16em] text-accent uppercase">
+                  <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
                     Most picked
                   </span>
                 )}
               </div>
-              <p className="mt-2 text-[13.5px] leading-relaxed text-foreground/55">
+              <p className="mt-2 text-[13.5px] leading-relaxed text-muted-foreground">
                 {tier.tagline}
               </p>
 
               <div className="mt-7 flex items-baseline gap-1.5">
-                <span className="text-[2.75rem] leading-none font-light tracking-[-0.04em] text-foreground tabular-nums">
+                <span className="text-[2.75rem] leading-none font-semibold tracking-tight text-foreground tabular-nums">
                   {formatPrice(tier, interval)}
                 </span>
                 {tier.monthly > 0 && (
-                  <span className="font-mono text-[12px] text-foreground/45">
+                  <span className="text-[13px] text-muted-foreground">
                     {interval === "monthly" ? "/ mo" : "/ yr"}
                   </span>
                 )}
               </div>
-              <p className="mt-2 h-4 font-mono text-[11px] tracking-[0.04em] text-foreground/45">
+              <p className="mt-2 h-4 text-[12px] font-medium text-muted-foreground">
                 {savings > 0 ? `Save $${savings} a year` : ""}
               </p>
 
@@ -168,14 +158,14 @@ export function PricingTiers() {
                 {tier.cta}
               </CtaLink>
 
-              <ul className="mt-8 space-y-3 border-t border-foreground/10 pt-7">
+              <ul className="mt-8 space-y-3 border-t border-border pt-7">
                 {tier.features.map((feature) => (
                   <li
                     key={feature}
-                    className="flex items-start gap-2.5 text-[13.5px] leading-snug text-foreground/75"
+                    className="flex items-start gap-2.5 text-[13.5px] leading-snug text-foreground/80"
                   >
                     <Check
-                      className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent"
+                      className="mt-0.5 size-3.5 shrink-0 text-foreground"
                       strokeWidth={2.2}
                       aria-hidden
                     />

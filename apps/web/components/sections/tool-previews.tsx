@@ -2,12 +2,13 @@
  * Capability preview visuals — compact, FRAMELESS data snippets (the capability
  * cards in tool-catalog supply the frame + title). Each capability gets a
  * distinct chart type: momentum bars, a concentration split, breakout columns,
- * a fit meter, a percentile distribution, a trend line. Solid magenta/amber
- * only — no gradients, no blinkers.
+ * a fit meter, a percentile distribution, a trend line. Colours are wired to the
+ * neutral semantic theme tokens (foreground accent + muted neutral) so every
+ * preview reads correctly in light and dark — no hardcoded hex, no gradients.
  */
 
-const MAG = "#ff2d87";
-const AMB = "#ffab2e";
+const ACCENT = "var(--foreground)";
+const NEUTRAL = "var(--muted-foreground)";
 
 /* 1. Find emergent niches → ranked momentum bars */
 export function NichesPreview() {
@@ -21,13 +22,13 @@ export function NichesPreview() {
       {rows.map((r) => (
         <div key={r.name} className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[11px] text-foreground/75">{r.name}</span>
-            <span className="font-mono text-[11px] tabular-nums text-foreground">{r.delta}</span>
+            <span className="text-[11px] text-muted-foreground">{r.name}</span>
+            <span className="text-[11px] tabular-nums text-foreground">{r.delta}</span>
           </div>
           <span className="h-1.5 overflow-hidden rounded-full bg-foreground/[0.08]" aria-hidden>
             <span
               className="block h-full rounded-full"
-              style={{ width: `${r.pct}%`, backgroundColor: r.hot ? MAG : AMB }}
+              style={{ width: `${r.pct}%`, backgroundColor: r.hot ? ACCENT : NEUTRAL }}
             />
           </span>
         </div>
@@ -39,8 +40,8 @@ export function NichesPreview() {
 /* 2. Gauge a niche → market-concentration split */
 export function SaturationPreview() {
   const segs = [
-    { w: 44, fill: MAG, op: 1 },
-    { w: 31, fill: MAG, op: 0.4 },
+    { w: 44, fill: ACCENT, op: 1 },
+    { w: 31, fill: ACCENT, op: 0.4 },
     { w: 25, fill: "currentColor", className: "text-foreground/12", op: 1 },
   ];
   let acc = 0;
@@ -56,7 +57,7 @@ export function SaturationPreview() {
           );
         })}
       </svg>
-      <div className="flex items-center gap-4 font-mono text-[10px] text-foreground/55">
+      <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
         <span>top-1 <span className="text-foreground">44%</span></span>
         <span>top-3 <span className="text-foreground">75%</span></span>
         <span>tail <span className="text-foreground">25%</span></span>
@@ -80,8 +81,8 @@ export function BreakoutsPreview() {
         {cols.map((c) => (
           <span
             key={c.name}
-            className="flex-1 rounded-t-sm"
-            style={{ height: `${c.h}%`, backgroundColor: c.lead ? MAG : "rgba(23,23,29,0.12)" }}
+            className={`flex-1 rounded-t-sm ${c.lead ? "" : "bg-foreground/12"}`}
+            style={{ height: `${c.h}%`, backgroundColor: c.lead ? ACCENT : undefined }}
             aria-hidden
           />
         ))}
@@ -90,7 +91,7 @@ export function BreakoutsPreview() {
         {cols.map((c) => (
           <span
             key={c.name}
-            className={`flex-1 text-center font-mono text-[10px] tabular-nums ${c.lead ? "text-foreground" : "text-foreground/45"}`}
+            className={`flex-1 text-center text-[10px] tabular-nums ${c.lead ? "text-foreground" : "text-muted-foreground"}`}
           >
             {c.delta}
           </span>
@@ -109,17 +110,17 @@ export function IdeasPreview() {
         Co-op horror · short sessions
       </p>
       <div>
-        <div className="mb-1.5 flex items-center justify-between font-mono text-[9.5px] tracking-[0.12em] text-foreground/45 uppercase">
-          <span>fit for a solo dev</span>
+        <div className="mb-1.5 flex items-center justify-between text-[10px] text-muted-foreground">
+          <span>Fit for a solo dev</span>
           <span className="text-foreground">86%</span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-foreground/10">
-          <div className="h-full rounded-full" style={{ width: "86%", backgroundColor: MAG }} />
+          <div className="h-full rounded-full" style={{ width: "86%", backgroundColor: ACCENT }} />
         </div>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {chips.map((c) => (
-          <span key={c} className="rounded-full border border-foreground/12 bg-foreground/[0.03] px-2 py-0.5 font-mono text-[9.5px] text-foreground/65">
+          <span key={c} className="rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">
             {c}
           </span>
         ))}
@@ -137,12 +138,12 @@ export function IntelligencePreview() {
         <path d={`${hill} L254,76 L6,76 Z`} fill="currentColor" className="text-foreground/[0.05]" />
         <path d={hill} fill="none" stroke="currentColor" strokeWidth="1.4" className="text-foreground/25" />
         <line x1="130" y1="10" x2="130" y2="76" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" className="text-foreground/25" />
-        <line x1="206" y1="16" x2="206" y2="76" stroke={MAG} strokeWidth="2.4" />
-        <circle cx="206" cy="16" r="3.5" fill={MAG} />
-        <text x="200" y="11" fontSize="8.5" textAnchor="end" fill={MAG} style={{ fontWeight: 600 }} className="font-mono">p82</text>
+        <line x1="206" y1="16" x2="206" y2="76" stroke={ACCENT} strokeWidth="2.4" />
+        <circle cx="206" cy="16" r="3.5" fill={ACCENT} />
+        <text x="200" y="11" fontSize="8.5" textAnchor="end" fill={ACCENT} style={{ fontWeight: 600 }}>p82</text>
       </svg>
-      <p className="font-mono text-[10px] text-foreground/55">
-        top <span className="text-foreground">18%</span> of its genre
+      <p className="text-[10px] text-muted-foreground">
+        Top <span className="text-foreground">18%</span> of its genre
       </p>
     </div>
   );
@@ -154,10 +155,10 @@ export function TrendsPreview() {
   return (
     <div className="flex flex-col gap-2">
       <svg viewBox="0 0 280 56" className="h-24 w-full" aria-hidden>
-        <path d={line} fill="none" stroke={MAG} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="280" cy="4" r="3" fill={MAG} />
+        <path d={line} fill="none" stroke={ACCENT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="280" cy="4" r="3" fill={ACCENT} />
       </svg>
-      <p className="font-mono text-[10px] text-foreground/55">
+      <p className="text-[10px] text-muted-foreground">
         274,120 playing now · refreshed ~30 min
       </p>
     </div>

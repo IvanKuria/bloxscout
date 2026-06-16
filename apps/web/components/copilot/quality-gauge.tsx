@@ -3,23 +3,26 @@
 /**
  * QualityGauge · inline widget for `get_game_quality`. A radial like-ratio gauge
  * (loved → mixed → poor) with the raw up/down counts. Mirrors the NicheCard
- * gauge so the agent's widgets share a visual language. The accent flips to the
- * positive colour for a "loved" game.
+ * gauge so the agent's widgets share a visual language. The arc flips to the
+ * positive colour for a "loved" game, the negative colour for a poor one.
+ *
+ * Recharts needs real colour strings, so we resolve them from the same
+ * semantic CSS variables the rest of the UI uses (light + dark both work).
  */
 import { PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer } from "recharts";
 import { GameAvatar } from "@/components/copilot/game-avatar";
 import type { GameQualityResult, QualityBand } from "@/lib/agent/tools";
 import { compact } from "@/lib/format";
 
-const ACCENT = "#ff2d87";
-const POSITIVE = "#1faa6b";
-const NEUTRAL = "#c79a1e";
-const TRACK = "#ececec";
+const NEGATIVE = "var(--negative)";
+const POSITIVE = "var(--positive)";
+const NEUTRAL = "var(--muted-foreground)";
+const TRACK = "var(--muted)";
 
 function bandColor(band: QualityBand | null): string {
   if (band === "loved") return POSITIVE;
   if (band === "mixed") return NEUTRAL;
-  if (band === "poor") return ACCENT;
+  if (band === "poor") return NEGATIVE;
   return TRACK;
 }
 
@@ -58,7 +61,7 @@ function Gauge({ result }: { result: GameQualityResult }) {
         <span className="tabular font-heading text-3xl font-semibold leading-none text-foreground">
           {result.likeRatio === null ? "·" : `${pct}%`}
         </span>
-        <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           liked
         </span>
       </div>
@@ -69,7 +72,7 @@ function Gauge({ result }: { result: GameQualityResult }) {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+      <span className="text-xs text-muted-foreground">
         {label}
       </span>
       <span className="tabular text-sm font-medium text-foreground">{value}</span>
@@ -84,14 +87,14 @@ export function QualityGauge({ result }: { result: GameQualityResult }) {
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-primary"
             aria-hidden
           />
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">
+          <span className="text-sm font-medium text-foreground">
             {result.name ?? "Game"} · quality
           </span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           Like-ratio
         </span>
       </div>
@@ -123,7 +126,7 @@ export function QualityGauge({ result }: { result: GameQualityResult }) {
       )}
 
       {result.note && hasGauge ? (
-        <p className="border-t border-border bg-muted-surface/40 px-4 py-2.5 text-xs text-muted-foreground">
+        <p className="border-t border-border bg-muted/40 px-4 py-2.5 text-xs text-muted-foreground">
           {result.note}
         </p>
       ) : null}

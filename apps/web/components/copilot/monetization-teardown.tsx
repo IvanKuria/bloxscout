@@ -24,7 +24,7 @@ function Robux({ price }: { price: number | null }) {
   return (
     <span className="tabular">
       {int(price)}
-      <span className="ml-0.5 font-mono text-[10px] text-muted-foreground">R$</span>
+      <span className="ml-0.5 text-[10px] text-muted-foreground">R$</span>
     </span>
   );
 }
@@ -32,7 +32,7 @@ function Robux({ price }: { price: number | null }) {
 function Stat({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+      <span className="text-xs text-muted-foreground">
         {label}
       </span>
       <span className="text-sm font-medium text-foreground">{value}</span>
@@ -46,14 +46,14 @@ export function MonetizationTeardown({ result }: { result: MonetizationResult })
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className="inline-block size-1.5 rounded-full bg-accent"
+            className="inline-block size-1.5 rounded-full bg-primary"
             aria-hidden
           />
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground">
+          <span className="text-sm font-medium text-foreground">
             {result.name ?? "Game"} · monetization
           </span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           Gamepasses
         </span>
       </div>
@@ -73,7 +73,7 @@ export function MonetizationTeardown({ result }: { result: MonetizationResult })
                   ) : (
                     <span className="tabular">
                       {int(result.priceMin)}–{int(result.priceMax ?? result.priceMin)}{" "}
-                      <span className="font-mono text-[10px] text-muted-foreground">R$</span>
+                      <span className="text-[10px] text-muted-foreground">R$</span>
                     </span>
                   )
                 }
@@ -84,7 +84,7 @@ export function MonetizationTeardown({ result }: { result: MonetizationResult })
 
           {result.passes.length > 0 ? (
             <>
-              <div className="border-t border-border px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              <div className="border-t border-border px-4 py-2.5 text-xs text-muted-foreground">
                 Top passes by price
               </div>
               <ul className="flex flex-col divide-y divide-border">
@@ -112,7 +112,7 @@ export function MonetizationTeardown({ result }: { result: MonetizationResult })
       )}
 
       {result.note && result.ok ? (
-        <p className="border-t border-border bg-muted-surface/40 px-4 py-2.5 text-xs text-muted-foreground">
+        <p className="border-t border-border bg-muted/40 px-4 py-2.5 text-xs text-muted-foreground">
           {result.note}
         </p>
       ) : null}

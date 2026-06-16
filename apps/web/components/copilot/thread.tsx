@@ -1,47 +1,84 @@
 "use client";
 
 /**
- * The AI agent's chat thread · light, airy, production-grade.
+ * The AI agent's chat thread, built on the shadcn.io AI Elements.
  *
  * Owns one conversation's turns in React state and streams via
- * `lib/agent/chat-client.ts` (our NDJSON protocol over `/api/chat`). The data
- * widgets (rendered inline from the tool→widget map) are the visual texture;
- * everything else stays clean white surface + hairline borders + one red accent.
- *
- * Assistant prose renders through <Streamdown> (real markdown · no raw `**`);
- * user prose is plain. On open it hydrates a saved thread (text + widgets) from
- * `/api/conversations/[id]`, and reports a newly-created thread id + first-line
- * title up to the sidebar via callbacks.
+ * `lib/agent/chat-client.ts` (our NDJSON protocol over `/api/chat`). Assistant
+ * turns are an ordered `parts` array (text / thinking / widget) so prose and
+ * data widgets render in true production order. Presentation uses AI Elements:
+ *   - Conversation: auto-scroll viewport
+ *   - Message: user / assistant bubbles
+ *   - Reasoning: the model's live "thinking" (collapsible)
+ *   - Tool: each tool call as a card, our data widget rendered as its output
+ *   - Sources: the "data cited" provenance footer
+ *   - PromptInput / Suggestion: composer + welcome prompts
  */
-import { ArrowUp, Square } from "lucide-react";
+import posthog from "posthog-js";
 import * as React from "react";
 import { Streamdown } from "streamdown";
+import {
+  Conversation,
+  ConversationContent,
+  ConversationScrollButton,
+} from "@/components/ai/conversation";
+import { Loader } from "@/components/ai/loader";
+import { Message, MessageContent } from "@/components/ai/message";
+import {
+  PromptInput,
+  PromptInputFooter,
+  PromptInputSubmit,
+  PromptInputTextarea,
+} from "@/components/ai/prompt-input";
+import {
+  Reasoning,
+  ReasoningContent,
+  ReasoningTrigger,
+} from "@/components/ai/reasoning";
+import {
+  Source,
+  Sources,
+  SourcesContent,
+  SourcesTrigger,
+} from "@/components/ai/sources";
+import { Suggestion } from "@/components/ai/suggestion";
+import {
+  Tool,
+  ToolContent,
+  ToolHeader,
+  ToolInput,
+} from "@/components/ai/tool";
+import { renderWidget } from "@/components/copilot/widgets";
 import {
   type ChatTurn,
   type ChatWidget,
   streamChat,
 } from "@/lib/agent/chat-client";
-import type { WidgetPayload } from "@/lib/agent/store";
-import { renderWidget, WidgetRunning } from "@/components/copilot/widgets";
+import type { MessagePart } from "@/lib/agent/protocol";
 
 const SUGGESTIONS = [
-  {
-    label: "Is tower defense saturated?",
-    hint: "Live competition scan of a niche",
-  },
-  {
-    label: "What should I build right now?",
-    hint: "Rising niches grounded in momentum",
-  },
-  {
-    label: "What's breaking out this week?",
-    hint: "Fastest-accelerating games",
-  },
-  {
-    label: "Show me the top trending games",
-    hint: "Ranked by live concurrent players",
-  },
+  "Is tower defense saturated?",
+  "What should I build right now?",
+  "What's breaking out this week?",
+  "Show me the top trending games",
 ];
+
+/** Friendly title per tool for the Tool card header. */
+const TOOL_TITLE: Record<string, string> = {
+  get_trending_games: "Trending games",
+  get_breakout_games: "Breakout games",
+  get_genre_saturation: "Genre saturation",
+  get_rising_niches: "Rising niches",
+  analyze_niche: "Niche scan",
+  estimate_revenue: "Revenue estimate",
+  get_game_quality: "Game quality",
+  teardown_monetization: "Monetization teardown",
+  map_competitors: "Competitor map",
+  estimate_retention: "Retention proxy",
+  get_game_details: "Game details",
+  analyze_icon: "Icon analysis",
+};
+const toolTitle = (name: string) => TOOL_TITLE[name] ?? name;
 
 interface UserTurn {
   id: string;
@@ -49,18 +86,31 @@ interface UserTurn {
   text: string;
 }
 
+/**
+ * One ordered piece of an assistant turn. Text, thinking, and widgets interleave
+ * in production order so prose renders below/between tables, never forced above.
+ * Thinking is live-only (not persisted).
+ */
+type AssistantPart =
+  | { kind: "text"; text: string }
+  | { kind: "thinking"; text: string }
+  | { kind: "widget"; widget: ChatWidget };
+
 interface AssistantTurn {
   id: string;
   role: "assistant";
-  text: string;
-  widgets: ChatWidget[];
-  /** Tool currently executing (drives the running indicator); null when idle. */
+  parts: AssistantPart[];
+  /** Tool currently executing (drives the running card); null when idle. */
   runningTool: string | null;
+  /** True while this turn is actively streaming (drives the live thinking pulse). */
+  streaming: boolean;
   /** An error line, if the turn failed. */
   error: string | null;
+  /** Set when the free daily quota is hit — renders an upgrade prompt. */
+  upsell: string | null;
 }
 
-type Message = UserTurn | AssistantTurn;
+type Message_ = UserTurn | AssistantTurn;
 
 type Status = "idle" | "streaming";
 
@@ -70,178 +120,257 @@ function nextId(prefix: string): string {
   return `${prefix}-${idCounter}-${Date.now()}`;
 }
 
-/** Light-theme prose styling for streamed assistant markdown. */
+/** Prose styling for streamed assistant markdown (token-driven, theme-safe). */
 const PROSE = [
-  "max-w-none text-[15px] leading-relaxed text-foreground/90",
+  "max-w-none text-[15px] leading-relaxed text-foreground",
   "[&_p]:my-2 first:[&_p]:mt-0 last:[&_p]:mb-0",
   "[&_strong]:font-semibold [&_strong]:text-foreground",
-  "[&_a]:text-accent [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-accent-hover",
+  "[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2",
   "[&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5",
   "[&_li]:my-0.5 [&_li]:marker:text-muted-foreground",
-  "[&_h1]:font-heading [&_h2]:font-heading [&_h3]:font-heading",
   "[&_h1]:mt-3 [&_h1]:mb-1 [&_h1]:text-lg [&_h1]:font-semibold",
   "[&_h2]:mt-3 [&_h2]:mb-1 [&_h2]:text-base [&_h2]:font-semibold",
   "[&_h3]:mt-2 [&_h3]:mb-1 [&_h3]:text-sm [&_h3]:font-semibold",
-  "[&_code]:rounded [&_code]:bg-muted-surface [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em]",
-  "[&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-border [&_pre]:bg-muted-surface [&_pre]:p-3",
+  "[&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em]",
+  "[&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-border [&_pre]:bg-muted [&_pre]:p-3",
   "[&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-3 [&_blockquote]:text-muted-foreground",
 ].join(" ");
 
-function AssistantProse({ text }: { text: string }) {
-  return (
-    <div className={PROSE}>
-      <Streamdown>{text}</Streamdown>
-    </div>
-  );
+/** Relative "Xm ago" label from an ISO string (for citations). */
+function timeAgo(iso?: string): string {
+  if (!iso) return "";
+  const ms = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(ms) || ms < 0) return "";
+  const m = Math.floor(ms / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
 }
 
-function UserBubble({ text }: { text: string }) {
-  return (
-    <div className="ml-auto flex max-w-[85%] justify-end motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1">
-      <div className="rounded-2xl rounded-br-md bg-foreground px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-wrap text-background">
-        {text}
-      </div>
-    </div>
-  );
+/** A short query label from a tool call's args (query / gameName / genre). */
+function citeQuery(args: unknown): string | null {
+  if (!args || typeof args !== "object") return null;
+  const a = args as Record<string, unknown>;
+  const v = a.query ?? a.gameName ?? a.genre ?? a.niche;
+  return typeof v === "string" && v.trim() ? v.trim() : null;
 }
 
-function AssistantBubble({ turn }: { turn: AssistantTurn }) {
-  return (
-    <div className="flex w-full max-w-full flex-col gap-3 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1">
-      <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-        <span
-          className="inline-block size-1.5 rounded-full bg-accent"
-          aria-hidden
-        />
-        bloxscout agent
-      </span>
-      <div className="flex flex-col gap-4">
-        {turn.text ? <AssistantProse text={turn.text} /> : null}
+/** Dedup citations (source + query) across a turn's widget parts. */
+function citationsOf(widgets: ChatWidget[]): { label: string; when: string }[] {
+  const seen = new Set<string>();
+  const out: { label: string; when: string }[] = [];
+  for (const w of widgets) {
+    const q = citeQuery(w.args);
+    const label = w.source ? (q ? `${w.source}: ${q}` : w.source) : w.toolName;
+    if (seen.has(label)) continue;
+    seen.add(label);
+    out.push({ label, when: timeAgo(w.fetchedAt) });
+  }
+  return out;
+}
 
-        {turn.widgets.map((w) => {
+function AssistantTurnView({ turn }: { turn: AssistantTurn }) {
+  const widgets = turn.parts.flatMap((p) =>
+    p.kind === "widget" ? [p.widget] : [],
+  );
+  const cites = citationsOf(widgets);
+  const lastIndex = turn.parts.length - 1;
+  const showInitialLoader =
+    turn.streaming && turn.parts.length === 0 && !turn.runningTool;
+
+  return (
+    <Message from="assistant">
+      <MessageContent>
+        {turn.parts.map((p, i) => {
+          if (p.kind === "text") {
+            return p.text ? (
+              <Streamdown key={`t-${i}`} className={PROSE}>
+                {p.text}
+              </Streamdown>
+            ) : null;
+          }
+          if (p.kind === "thinking") {
+            return (
+              <Reasoning
+                key={`k-${i}`}
+                isStreaming={turn.streaming && i === lastIndex}
+              >
+                <ReasoningTrigger />
+                <ReasoningContent>{p.text}</ReasoningContent>
+              </Reasoning>
+            );
+          }
+          const w = p.widget;
           const node = renderWidget(w.toolName, w.result);
-          return node ? <div key={w.toolCallId}>{node}</div> : null;
+          return (
+            <Tool key={w.toolCallId} defaultOpen>
+              <ToolHeader
+                className="group"
+                title={toolTitle(w.toolName)}
+                type={`tool-${w.toolName}`}
+                state={w.isError ? "output-error" : "output-available"}
+              />
+              <ToolContent>
+                {w.args && Object.keys(w.args as object).length > 0 ? (
+                  <ToolInput input={w.args} />
+                ) : null}
+                {node ? (
+                  <div className="p-3 pt-0">{node}</div>
+                ) : w.isError ? (
+                  <div className="px-4 pb-3 text-sm text-destructive">
+                    This tool hit an error.
+                  </div>
+                ) : null}
+              </ToolContent>
+            </Tool>
+          );
         })}
 
         {turn.runningTool ? (
-          <WidgetRunning toolName={turn.runningTool} />
+          <Tool defaultOpen>
+            <ToolHeader
+              className="group"
+              title={toolTitle(turn.runningTool)}
+              type={`tool-${turn.runningTool}`}
+              state="input-available"
+            />
+          </Tool>
+        ) : null}
+
+        {showInitialLoader ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader size={16} />
+            Thinking…
+          </div>
         ) : null}
 
         {turn.error ? (
-          <p className="flex items-start gap-2 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2 text-sm text-accent">
+          <p className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             <span aria-hidden>⚠</span>
             {turn.error}
           </p>
         ) : null}
-      </div>
-    </div>
+
+        {turn.upsell ? (
+          <div className="flex flex-col items-start gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3.5">
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-medium text-foreground">
+                Daily limit reached
+              </span>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {turn.upsell}
+              </p>
+            </div>
+            <a
+              href="/app"
+              onClick={() => posthog.capture("quota_upsell_clicked")}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Upgrade to Pro
+            </a>
+          </div>
+        ) : null}
+
+        {!turn.streaming && cites.length > 0 ? (
+          <Sources>
+            <SourcesTrigger count={cites.length}>
+              <span className="font-medium">Data cited ({cites.length})</span>
+            </SourcesTrigger>
+            <SourcesContent>
+              {cites.map((c) => (
+                <Source key={c.label} href="#">
+                  <span className="text-muted-foreground">
+                    {c.label}
+                    {c.when ? ` · ${c.when}` : ""}
+                  </span>
+                </Source>
+              ))}
+            </SourcesContent>
+          </Sources>
+        ) : null}
+      </MessageContent>
+    </Message>
   );
 }
 
 function ThreadWelcome({ onPick }: { onPick: (text: string) => void }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-8 py-10 text-center">
+    <div className="flex flex-1 flex-col items-center justify-center gap-8 px-4 py-10 text-center">
       <div className="flex flex-col items-center gap-3">
-        <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground shadow-xs">
-          <span
-            className="inline-block size-1.5 rounded-full bg-accent"
-            aria-hidden
-          />
-          bloxscout agent
-        </span>
-        <h1 className="font-heading text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-4xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           What are we building today?
         </h1>
         <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
           Ask in plain language. The agent reads bloxscout&apos;s live Roblox
-          data and renders the answer as interactive widgets, inline.
+          data and answers with grounded, interactive widgets.
         </p>
       </div>
-      <div className="grid w-full max-w-xl grid-cols-1 gap-2.5 sm:grid-cols-2">
+      <div className="flex max-w-xl flex-wrap items-center justify-center gap-2">
         {SUGGESTIONS.map((s) => (
-          <button
-            key={s.label}
-            type="button"
-            onClick={() => onPick(s.label)}
-            className="group flex flex-col gap-1 rounded-xl border border-border bg-card px-4 py-3 text-left shadow-xs transition-all hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-sm"
-          >
-            <span className="text-sm font-medium text-foreground">
-              {s.label}
-            </span>
-            <span className="text-xs text-muted-foreground">{s.hint}</span>
-          </button>
+          <Suggestion
+            key={s}
+            suggestion={s}
+            onClick={(text) => {
+              posthog.capture("chat_suggestion_clicked", { suggestion: text });
+              onPick(text);
+            }}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function Composer({
-  value,
-  onChange,
-  onSend,
-  onStop,
-  status,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  onSend: () => void;
-  onStop: () => void;
-  status: Status;
-}) {
-  const streaming = status === "streaming";
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      if (!streaming) onSend();
-    }
-  };
-
-  return (
-    <div className="relative flex items-end gap-2 rounded-2xl border border-border bg-card px-3 py-2 shadow-sm transition-colors focus-within:border-accent/50 focus-within:ring-2 focus-within:ring-accent/10">
-      <textarea
-        // biome-ignore lint/a11y/noAutofocus: focal point of the chat surface
-        autoFocus
-        rows={1}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Ask about a niche, a genre, what to build…"
-        className="max-h-40 min-h-9 flex-1 resize-none bg-transparent py-1.5 text-[15px] text-foreground outline-none placeholder:text-muted-foreground field-sizing-content"
-      />
-      {streaming ? (
-        <button
-          type="button"
-          onClick={onStop}
-          aria-label="Stop"
-          className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-foreground transition-colors hover:bg-muted-surface"
-        >
-          <Square className="size-3.5 fill-current" />
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={onSend}
-          disabled={value.trim().length === 0}
-          aria-label="Send"
-          className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground transition-all hover:bg-accent-hover disabled:opacity-40"
-        >
-          <ArrowUp className="size-4" />
-        </button>
-      )}
-    </div>
+/** Map persisted/hydrated MessageParts to the client's ordered AssistantParts. */
+function partsToClient(parts: MessagePart[]): AssistantPart[] {
+  return parts.map((p) =>
+    p.kind === "text"
+      ? { kind: "text", text: p.text }
+      : {
+          kind: "widget",
+          widget: {
+            toolCallId: p.toolCallId,
+            toolName: p.toolName,
+            result: p.result,
+            isError: p.isError,
+            args: p.args,
+            source: p.source,
+            fetchedAt: p.fetchedAt,
+          },
+        },
   );
 }
 
-/** Adapt a stored widget payload to the inline `ChatWidget` shape. */
-function toChatWidget(w: WidgetPayload): ChatWidget {
-  return {
-    toolCallId: w.toolCallId,
-    toolName: w.toolName,
-    result: w.result,
-    isError: w.isError,
-  };
+/** Flatten a message's prose (for the text-only history sent for context). */
+function messageText(m: Message_): string {
+  if (m.role === "user") return m.text;
+  return m.parts
+    .filter((p): p is { kind: "text"; text: string } => p.kind === "text")
+    .map((p) => p.text)
+    .join("\n\n");
+}
+
+/** Append a streaming text/thinking delta to the trailing same-kind part. */
+function appendStreamText(
+  parts: AssistantPart[],
+  kind: "text" | "thinking",
+  delta: string,
+): AssistantPart[] {
+  const last = parts[parts.length - 1];
+  if (last && last.kind !== "widget" && last.kind === kind) {
+    const merged: AssistantPart =
+      kind === "text"
+        ? { kind: "text", text: last.text + delta }
+        : { kind: "thinking", text: last.text + delta };
+    return [...parts.slice(0, -1), merged];
+  }
+  const fresh: AssistantPart =
+    kind === "text"
+      ? { kind: "text", text: delta }
+      : { kind: "thinking", text: delta };
+  return [...parts, fresh];
 }
 
 export function CopilotThread({
@@ -259,20 +388,17 @@ export function CopilotThread({
   /** Fired when the very first user message is sent (for optimistic sidebar). */
   onFirstMessage?: (text: string) => void;
 }) {
-  const [messages, setMessages] = React.useState<Message[]>([]);
+  const [messages, setMessages] = React.useState<Message_[]>([]);
   const [status, setStatus] = React.useState<Status>("idle");
-  const [input, setInput] = React.useState("");
   const [hydrating, setHydrating] = React.useState<boolean>(
     Boolean(conversationId),
   );
 
   const conversationIdRef = React.useRef<string | null>(conversationId);
   const abortRef = React.useRef<AbortController | null>(null);
-  const viewportRef = React.useRef<HTMLDivElement>(null);
 
-  // Hydrate a saved thread (text + widgets) on open / when the id changes.
-  // The component is keyed by conversationId upstream, so a fresh chat mounts
-  // with empty state and never enters the fetch path below.
+  // Hydrate a saved thread on open / when the id changes. Keyed upstream, so a
+  // fresh chat mounts empty and never enters the fetch path below.
   React.useEffect(() => {
     conversationIdRef.current = conversationId;
     if (!conversationId) return;
@@ -288,20 +414,21 @@ export function CopilotThread({
             id: string;
             role: "user" | "assistant";
             text: string;
-            widgets: WidgetPayload[];
+            parts: MessagePart[];
           }>;
         };
         if (cancelled) return;
-        const hydrated: Message[] = data.messages.map((m) =>
+        const hydrated: Message_[] = data.messages.map((m) =>
           m.role === "user"
             ? { id: m.id, role: "user", text: m.text }
             : {
                 id: m.id,
                 role: "assistant",
-                text: m.text,
-                widgets: (m.widgets ?? []).map(toChatWidget),
+                parts: partsToClient(m.parts ?? []),
                 runningTool: null,
+                streaming: false,
                 error: null,
+                upsell: null,
               },
         );
         setMessages(hydrated);
@@ -315,12 +442,6 @@ export function CopilotThread({
       cancelled = true;
     };
   }, [conversationId]);
-
-  // Keep the latest turn in view as content streams in.
-  React.useEffect(() => {
-    const el = viewportRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [messages]);
 
   // Abort any in-flight stream on unmount.
   React.useEffect(() => () => abortRef.current?.abort(), []);
@@ -341,12 +462,16 @@ export function CopilotThread({
       const trimmed = text.trim();
       if (!trimmed || status === "streaming") return;
 
+      posthog.capture("chat_message_sent", {
+        length: trimmed.length,
+        conversationId: conversationIdRef.current,
+      });
+
       const wasFresh = conversationIdRef.current === null;
 
-      // Snapshot the prior turns for context BEFORE appending the new ones.
       const history: ChatTurn[] = messages.map((m) => ({
         role: m.role,
-        text: m.text,
+        text: messageText(m),
       }));
 
       const userTurn: UserTurn = {
@@ -358,14 +483,14 @@ export function CopilotThread({
       const assistantTurn: AssistantTurn = {
         id: assistantId,
         role: "assistant",
-        text: "",
-        widgets: [],
+        parts: [],
         runningTool: null,
+        streaming: true,
         error: null,
+        upsell: null,
       };
 
       setMessages((prev) => [...prev, userTurn, assistantTurn]);
-      setInput("");
       setStatus("streaming");
       if (wasFresh) onFirstMessage?.(trimmed);
 
@@ -391,7 +516,12 @@ export function CopilotThread({
             onTextDelta: (delta) =>
               updateAssistant(assistantId, (t) => ({
                 ...t,
-                text: t.text + delta,
+                parts: appendStreamText(t.parts, "text", delta),
+              })),
+            onThinkingDelta: (delta) =>
+              updateAssistant(assistantId, (t) => ({
+                ...t,
+                parts: appendStreamText(t.parts, "thinking", delta),
               })),
             onToolCall: (_id, toolName) =>
               updateAssistant(assistantId, (t) => ({
@@ -402,34 +532,54 @@ export function CopilotThread({
               updateAssistant(assistantId, (t) => ({
                 ...t,
                 runningTool: null,
-                widgets: [...t.widgets, widget],
+                parts: [...t.parts, { kind: "widget", widget }],
               })),
             onError: (message) =>
               updateAssistant(assistantId, (t) => ({
                 ...t,
                 runningTool: null,
+                streaming: false,
                 error: message,
+              })),
+            onQuotaExceeded: (info) =>
+              updateAssistant(assistantId, (t) => ({
+                ...t,
+                runningTool: null,
+                streaming: false,
+                upsell: info.message,
               })),
             onDone: () =>
               updateAssistant(assistantId, (t) => ({
                 ...t,
                 runningTool: null,
+                streaming: false,
               })),
           },
           controller.signal,
         );
       } catch {
-        // AbortError (Stop pressed) · clear the running indicator, keep partials.
-        updateAssistant(assistantId, (t) => ({ ...t, runningTool: null }));
+        updateAssistant(assistantId, (t) => ({
+          ...t,
+          runningTool: null,
+          streaming: false,
+        }));
       } finally {
         if (abortRef.current === controller) abortRef.current = null;
         setStatus("idle");
       }
     },
-    [messages, status, updateAssistant, onConversationCreated, onTitle, onFirstMessage],
+    [
+      messages,
+      status,
+      updateAssistant,
+      onConversationCreated,
+      onTitle,
+      onFirstMessage,
+    ],
   );
 
   const stop = React.useCallback(() => {
+    posthog.capture("chat_stopped");
     abortRef.current?.abort();
   }, []);
 
@@ -437,42 +587,57 @@ export function CopilotThread({
 
   return (
     <div className="flex h-full flex-col bg-background">
-      <div ref={viewportRef} className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col gap-8 px-4 py-8">
-          {hydrating ? (
-            <div className="flex flex-col gap-6">
-              {[0, 1].map((i) => (
-                <div key={i} className="flex flex-col gap-3">
-                  <div className="h-3 w-32 animate-pulse rounded bg-muted-surface" />
-                  <div className="h-20 w-full animate-pulse rounded-xl bg-muted-surface" />
-                </div>
-              ))}
-            </div>
-          ) : isEmpty ? (
-            <ThreadWelcome onPick={(s) => void send(s)} />
-          ) : (
-            messages.map((m) =>
-              m.role === "user" ? (
-                <UserBubble key={m.id} text={m.text} />
-              ) : (
-                <AssistantBubble key={m.id} turn={m} />
-              ),
-            )
-          )}
+      {isEmpty && !hydrating ? (
+        <div className="flex flex-1 flex-col overflow-y-auto">
+          <ThreadWelcome onPick={(s) => void send(s)} />
         </div>
-      </div>
+      ) : (
+        <Conversation className="flex-1">
+          <ConversationContent className="mx-auto w-full max-w-3xl">
+            {hydrating
+              ? [0, 1].map((i) => (
+                  <div key={i} className="flex flex-col gap-3">
+                    <div className="h-3 w-32 animate-pulse rounded bg-muted" />
+                    <div className="h-20 w-full animate-pulse rounded-xl bg-muted" />
+                  </div>
+                ))
+              : messages.map((m) =>
+                  m.role === "user" ? (
+                    <Message key={m.id} from="user">
+                      <MessageContent>
+                        <span className="whitespace-pre-wrap">{m.text}</span>
+                      </MessageContent>
+                    </Message>
+                  ) : (
+                    <AssistantTurnView key={m.id} turn={m} />
+                  ),
+                )}
+          </ConversationContent>
+          <ConversationScrollButton />
+        </Conversation>
+      )}
 
       <div className="border-t border-border bg-background/85 backdrop-blur-sm">
         <div className="mx-auto w-full max-w-3xl px-4 py-3">
-          <Composer
-            value={input}
-            onChange={setInput}
-            onSend={() => void send(input)}
-            onStop={stop}
-            status={status}
-          />
+          <PromptInput
+            onSubmit={(msg) => {
+              if (status === "streaming") {
+                stop();
+                return;
+              }
+              const t = (msg.text ?? "").trim();
+              if (t) void send(t);
+            }}
+          >
+            <PromptInputTextarea placeholder="Ask about a niche, a genre, what to build…" />
+            <PromptInputFooter className="justify-end">
+              <PromptInputSubmit
+                status={status === "streaming" ? "streaming" : "ready"}
+              />
+            </PromptInputFooter>
+          </PromptInput>
           <p className="mt-2 text-center text-[11px] text-muted-foreground">
-            Every figure traces to live bloxscout data · refreshed every 30 min
+            Every figure traces to live bloxscout data, refreshed every 30 min
           </p>
         </div>
       </div>

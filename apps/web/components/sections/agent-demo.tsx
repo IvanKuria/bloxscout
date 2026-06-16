@@ -211,16 +211,16 @@ export function AgentDemo() {
   const showWidget = phase === "answering" || phase === "done";
 
   return (
-    <div className="relative overflow-hidden rounded-lg border border-foreground/12 bg-background shadow-[0_1px_0_0_rgba(28,28,28,0.03),0_30px_70px_-40px_rgba(28,28,28,0.3)]">
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-background shadow-xl shadow-foreground/5">
       {/* window chrome + scene tabs */}
-      <div className="flex items-center justify-between border-b border-foreground/10 bg-muted-surface px-4 py-2.5">
+      <div className="flex items-center justify-between border-b border-border bg-muted px-4 py-2.5">
         <div className="flex items-center gap-2.5">
           <span className="flex gap-1.5" aria-hidden>
-            <span className="h-2.5 w-2.5 rounded-full border border-foreground/15" />
-            <span className="h-2.5 w-2.5 rounded-full border border-foreground/15" />
-            <span className="h-2.5 w-2.5 rounded-full border border-foreground/15" />
+            <span className="size-2.5 rounded-full bg-foreground/15" />
+            <span className="size-2.5 rounded-full bg-foreground/15" />
+            <span className="size-2.5 rounded-full bg-foreground/15" />
           </span>
-          <span className="font-mono text-[10px] tracking-[0.14em] text-foreground/45 uppercase">
+          <span className="text-[11px] font-medium text-muted-foreground">
             bloxscout agent
           </span>
         </div>
@@ -230,19 +230,13 @@ export function AgentDemo() {
               key={s.tab}
               type="button"
               onClick={() => jumpTo(i)}
-              className={`relative rounded-md px-2 py-1 font-mono text-[10px] tracking-[0.08em] uppercase transition-colors ${
+              className={`relative rounded-full px-2.5 py-1 text-[12px] transition-colors ${
                 i === scene
-                  ? "text-foreground"
-                  : "text-foreground/35 hover:text-foreground/60"
+                  ? "bg-muted font-medium text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {s.tab}
-              {i === scene ? (
-                <span
-                  className="absolute inset-x-2 -bottom-px h-px bg-accent"
-                  aria-hidden
-                />
-              ) : null}
             </button>
           ))}
         </div>
@@ -251,8 +245,8 @@ export function AgentDemo() {
       <div className="flex min-h-[26rem] flex-col gap-4 px-4 py-5 sm:px-5">
         {/* user prompt */}
         <div className="flex justify-end">
-          <div className="max-w-[85%] rounded-md border border-foreground/10 bg-muted-surface px-3.5 py-2 text-[13px] text-foreground">
-            <span className="font-mono">{typed}</span>
+          <div className="max-w-[85%] rounded-2xl rounded-br-md bg-muted px-3.5 py-2 text-[13px] text-foreground">
+            <span>{typed}</span>
             {phase === "typing" && (
               <span className="ml-px inline-block h-3.5 w-px translate-y-0.5 animate-pulse bg-foreground/70" />
             )}
@@ -261,7 +255,7 @@ export function AgentDemo() {
 
         <div className="flex flex-col gap-3">
           {phase === "thinking" && (
-            <div className="flex items-center gap-2 font-mono text-[11px] text-foreground/55">
+            <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
               <span className="flex gap-1" aria-hidden>
                 <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-foreground/40 [animation-delay:-0.2s]" />
                 <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-foreground/40 [animation-delay:-0.1s]" />
@@ -285,16 +279,16 @@ export function AgentDemo() {
       </div>
 
       {/* faux composer */}
-      <div className="border-t border-foreground/10 bg-muted-surface px-4 py-3 sm:px-5">
-        <div className="flex items-center gap-2 rounded-md border border-foreground/10 bg-background px-3 py-2">
-          <span className="flex-1 font-mono text-[12px] text-foreground/40 select-none">
+      <div className="border-t border-border bg-muted px-4 py-3 sm:px-5">
+        <div className="flex items-center gap-2 rounded-full border border-border bg-background px-3 py-2">
+          <span className="flex-1 text-[12px] text-muted-foreground select-none">
             Ask about any niche, game, or trend…
           </span>
           <span
-            className="inline-flex h-7 w-7 items-center justify-center rounded bg-foreground text-background"
+            className="inline-flex size-7 items-center justify-center rounded-full bg-muted text-foreground"
             aria-hidden
           >
-            <ArrowUp className="h-4 w-4" strokeWidth={2.2} />
+            <ArrowUp className="size-4" strokeWidth={2.2} />
           </span>
         </div>
       </div>

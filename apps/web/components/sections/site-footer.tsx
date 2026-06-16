@@ -10,10 +10,10 @@ import { CtaLink } from "./cta-link";
 export function SiteFooter() {
   return (
     <footer>
-      {/* Closing CTA band — dark scheme */}
-      <div data-scheme="dark" className="border-t border-border">
+      {/* Closing CTA band */}
+      <div className="border-t border-border bg-background">
         <div className="mx-auto flex max-w-6xl flex-col items-start gap-8 px-6 py-20 sm:flex-row sm:items-center sm:justify-between sm:py-24">
-          <h2 className="max-w-md text-[1.9rem] leading-[1.1] font-light tracking-[-0.04em] text-foreground sm:text-[2.5rem]">
+          <h2 className="max-w-md text-[1.9rem] leading-[1.1] font-semibold tracking-tight text-foreground sm:text-[2.5rem]">
             Find your next winning idea.
           </h2>
           <CtaLink href="/signup" size="lg">
@@ -22,14 +22,14 @@ export function SiteFooter() {
         </div>
       </div>
 
-      {/* Footer columns — muted scheme */}
-      <div data-scheme="muted" className="border-t border-border">
+      {/* Footer columns */}
+      <div className="border-t border-border bg-muted">
         <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-14 sm:flex-row sm:items-start sm:justify-between">
           <div className="max-w-sm">
-            <p className="mb-3 font-mono text-[15px] font-medium tracking-[-0.01em] text-foreground">
+            <p className="mb-3 text-[15px] font-medium tracking-[-0.01em] text-foreground">
               {site.name}
             </p>
-            <p className="text-[13px] leading-relaxed text-foreground/55">
+            <p className="text-[13px] leading-relaxed text-muted-foreground">
               An independent AI agent for Roblox developers. Not affiliated
               with, endorsed by, or sponsored by Roblox Corporation. Answers are
               grounded in Roblox&apos;s public player data.
@@ -38,7 +38,7 @@ export function SiteFooter() {
 
           <div className="grid grid-cols-2 gap-x-14 gap-y-3">
             <div className="flex flex-col gap-3">
-              <span className="font-mono text-[10px] tracking-[0.16em] text-foreground/40 uppercase">
+              <span className="text-[11px] font-medium text-muted-foreground">
                 Product
               </span>
               {[
@@ -50,14 +50,14 @@ export function SiteFooter() {
                 <Link
                   key={href}
                   href={href}
-                  className="text-[13px] text-foreground/60 transition-colors hover:text-foreground"
+                  className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {label}
                 </Link>
               ))}
             </div>
             <div className="flex flex-col gap-3">
-              <span className="font-mono text-[10px] tracking-[0.16em] text-foreground/40 uppercase">
+              <span className="text-[11px] font-medium text-muted-foreground">
                 Company
               </span>
               {[
@@ -68,7 +68,7 @@ export function SiteFooter() {
                 <Link
                   key={href}
                   href={href}
-                  className="text-[13px] text-foreground/60 transition-colors hover:text-foreground"
+                  className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {label}
                 </Link>

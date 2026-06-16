@@ -1,21 +1,20 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Section — the twenty.com rhythm primitive. Each section declares a
- * `data-scheme` (light / muted / dark) which swaps the background + ink tokens
- * (defined in globals.css). Alternating schemes — not horizontal rules — give
- * the page its structure. A hairline top divider separates same-direction
- * neighbours; turn it off with `divider={false}`.
+ * Section — the marketing layout primitive in the OpenAI/ChatGPT idiom. Sections
+ * read cleanly on the global theme: pass `tone="muted"` to sit on `bg-muted`
+ * for quiet alternation, or the default `tone="plain"` to sit on `bg-background`.
+ * A hairline top divider separates neighbours; turn it off with `divider={false}`.
  */
 export function Section({
-  scheme = "light",
+  tone = "plain",
   id,
   className,
   innerClassName,
   divider = true,
   children,
 }: {
-  scheme?: "light" | "muted" | "dark";
+  tone?: "plain" | "muted";
   id?: string;
   className?: string;
   innerClassName?: string;
@@ -25,9 +24,9 @@ export function Section({
   return (
     <section
       id={id}
-      data-scheme={scheme}
       className={cn(
         "scroll-mt-16",
+        tone === "muted" ? "bg-muted" : "bg-background",
         divider && "border-t border-border",
         className,
       )}
@@ -39,7 +38,10 @@ export function Section({
   );
 }
 
-/** Small uppercase mono eyebrow used above section headings. */
+/**
+ * Eyebrow — a small, calm green pill that labels a section. Sentence case, no
+ * mono, no uppercase tracking; reads quietly in both light and dark.
+ */
 export function Eyebrow({
   children,
   className,
@@ -48,14 +50,14 @@ export function Eyebrow({
   className?: string;
 }) {
   return (
-    <p
+    <span
       className={cn(
-        "inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-accent uppercase",
+        "inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-[13px] font-medium text-muted-foreground",
         className,
       )}
     >
-      <span className="h-px w-6 bg-accent" aria-hidden />
+      <span className="size-1.5 rounded-full bg-muted-foreground" aria-hidden />
       {children}
-    </p>
+    </span>
   );
 }

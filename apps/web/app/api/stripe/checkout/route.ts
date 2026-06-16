@@ -6,12 +6,18 @@
 import { type NextRequest, NextResponse } from "next/server";
 import {
   type BillingInterval,
+  isPurchasableTier,
   PAID_TIERS,
   priceIdFor,
   type Tier,
 } from "@/lib/stripe/config";
 import { getOrCreateCustomer } from "@/lib/stripe/customer";
 import { getStripe } from "@/lib/stripe/server";
+import {
+  captureServer,
+  distinctIdFrom,
+  flushPostHog,
+} from "@/lib/posthog/server";
 import { createClient } from "@/lib/supabase/server";
 
 function siteUrl(request: NextRequest): string {
@@ -51,6 +57,14 @@ export async function POST(request: NextRequest) {
   if (!PAID_TIERS.includes(tier as Exclude<Tier, "free">)) {
     return NextResponse.json({ error: "Invalid tier." }, { status: 400 });
   }
+  // Defense in depth: refuse checkout for tiers that aren't purchasable yet
+  // (e.g. Studio is "coming soon"), even if a stale client posts it.
+  if (!isPurchasableTier(tier)) {
+    return NextResponse.json(
+      { error: `${tier} is coming soon and can't be purchased yet.` },
+      { status: 400 },
+    );
+  }
   if (interval !== "monthly" && interval !== "yearly") {
     return NextResponse.json({ error: "Invalid interval." }, { status: 400 });
   }
@@ -79,6 +93,15 @@ export async function POST(request: NextRequest) {
         { status: 502 },
       );
     }
+
+    const distinctId = distinctIdFrom(request, userId);
+    captureServer(distinctId, "checkout_started", {
+      tier,
+      interval,
+      sessionId: session.id,
+    });
+    await flushPostHog();
+
     return NextResponse.json({ url: session.url });
   } catch (e) {
     const message =

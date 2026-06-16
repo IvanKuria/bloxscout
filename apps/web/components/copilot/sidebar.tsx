@@ -14,10 +14,10 @@
  */
 import {
   Check,
-  MessageSquarePlus,
   MoreHorizontal,
   PanelLeftClose,
   Pencil,
+  Plus,
   Trash2,
   X,
 } from "lucide-react";
@@ -85,7 +85,7 @@ function ConversationRow({
 
   if (editing) {
     return (
-      <div className="flex items-center gap-1 rounded-lg border border-accent/40 bg-card px-2 py-1.5">
+      <div className="flex items-center gap-1 rounded-lg border border-primary/40 bg-background px-2 py-1.5">
         <input
           ref={inputRef}
           value={draft}
@@ -103,7 +103,7 @@ function ConversationRow({
           type="button"
           onClick={commit}
           aria-label="Save"
-          className="grid size-6 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="grid size-6 shrink-0 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <Check className="size-3.5" />
         </button>
@@ -114,7 +114,7 @@ function ConversationRow({
             setEditing(false);
           }}
           aria-label="Cancel"
-          className="grid size-6 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="grid size-6 shrink-0 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <X className="size-3.5" />
         </button>
@@ -126,7 +126,7 @@ function ConversationRow({
     <div
       className={cn(
         "group/row relative flex items-center rounded-lg transition-colors",
-        active ? "bg-muted-surface" : "hover:bg-muted-surface/60",
+        active ? "bg-muted" : "hover:bg-muted/60",
       )}
     >
       <button
@@ -150,8 +150,8 @@ function ConversationRow({
         <DropdownMenuTrigger
           aria-label="Thread options"
           className={cn(
-            "mr-1 grid size-7 shrink-0 place-items-center rounded-md text-muted-foreground outline-none transition-opacity",
-            "hover:bg-muted hover:text-foreground focus-visible:opacity-100 aria-expanded:opacity-100",
+            "mr-1 grid size-7 shrink-0 place-items-center rounded-md text-muted-foreground outline-none transition",
+            "hover:bg-background hover:text-foreground focus-visible:opacity-100 aria-expanded:opacity-100",
             "opacity-0 group-hover/row:opacity-100",
           )}
         >
@@ -195,46 +195,46 @@ export function ConversationSidebar({
   variant?: "panel" | "sheet";
 }) {
   return (
-    <div className="flex h-full flex-col bg-muted-surface/40">
+    <div className="flex h-full flex-col bg-muted/30">
       <div className="flex items-center justify-between gap-2 px-3 pt-4 pb-2">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-          Conversations
+        <span className="text-sm font-medium text-foreground">
+          Chats
         </span>
         {variant === "panel" && onCollapse ? (
           <button
             type="button"
             onClick={onCollapse}
             aria-label="Collapse sidebar"
-            className="grid size-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="grid size-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
           >
             <PanelLeftClose className="size-4" />
           </button>
         ) : null}
       </div>
 
-      <div className="px-3 pb-2">
+      <div className="px-3 pb-3">
         <button
           type="button"
           onClick={onNewChat}
-          className="flex w-full items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-xs transition-colors hover:border-accent/40 hover:bg-card"
+          className="flex w-full items-center gap-2 rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
-          <MessageSquarePlus className="size-4 text-accent" />
+          <Plus className="size-4" />
           New chat
         </button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
+      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         {loading ? (
-          <ul className="flex flex-col gap-1">
+          <ul className="flex flex-col gap-1 px-1">
             {[0, 1, 2, 3].map((i) => (
               <li
                 key={i}
-                className="h-11 animate-pulse rounded-lg bg-muted-surface"
+                className="h-11 animate-pulse rounded-lg bg-muted"
               />
             ))}
           </ul>
         ) : conversations.length === 0 ? (
-          <p className="px-3 py-6 text-center text-xs leading-relaxed text-muted-foreground">
+          <p className="px-4 py-6 text-center text-xs leading-relaxed text-muted-foreground">
             No conversations yet. Start one to see it saved here.
           </p>
         ) : (
