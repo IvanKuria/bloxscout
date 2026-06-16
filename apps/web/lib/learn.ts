@@ -250,6 +250,25 @@ export const LEARN_ENTRIES: LearnEntry[] = [
     ],
     seeAlso: ["genre-saturation", "roblox-genre"],
   },
+  {
+    slug: "rotrends-api",
+    type: "qa",
+    label: "Rotrends API",
+    question: "Does Rotrends have an API?",
+    short:
+      "No — Rotrends doesn't offer a public or developer API. It's a web dashboard plus a Discord bot for Roblox stats, with no documented endpoints to pull data programmatically. To get Roblox trend and game data in a queryable form, use bloxscout's live pages and AI copilot instead.",
+    body: [
+      "Rotrends is a website for browsing Roblox trends, keywords, and game stats, alongside a Discord bot that surfaces those stats in a server. There's no public API, developer docs, or supported endpoint to call its data from your own code. People assume an API exists because the numbers look structured — but there's no official way to pull them out.",
+      "Most people searching for a \"Rotrends API\" actually want one thing: to pull Roblox trend, CCU, and game data into their own tool, bot, or spreadsheet. The reality is that no off-platform Roblox-analytics site publishes a documented public API. The underlying numbers all come from Roblox's own web endpoints, which is what tools like this sit on top of and re-present.",
+      "If you need that data in a queryable form, bloxscout is the closest thing without writing API calls. The live pages — trending, top games, and per-genre views — are the structured data itself, refreshed continuously. And the AI copilot answers questions about it in plain English (\"which simulation games broke out this week?\"), which is effectively querying the dataset without an endpoint.",
+    ],
+    related: [
+      { href: "/trending", label: "Roblox trends & breakouts (live)" },
+      { href: "/", label: "bloxscout — Roblox data + AI copilot" },
+      { href: "/games", label: "Top games by live players" },
+    ],
+    seeAlso: ["breakout-game", "ccu", "how-to-find-a-roblox-game-idea"],
+  },
 ];
 
 const BY_SLUG = new Map(LEARN_ENTRIES.map((e) => [e.slug, e]));
