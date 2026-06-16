@@ -30,14 +30,18 @@
 - [x] `apps/web/app/steam-games-to-clone-on-roblox/page.tsx` — ISR (1800s), answer-first + FAQs + ranked table (game→Steam, niche→/genre), `<ComputingState>` fallback. **next build prerenders it (exit 0)**. (Cross-links from rising/best pages + hub→/roblox-version-of land in Phase 4.)
 
 ### Phase 4 — Programmatic AEO pages
-- [ ] `apps/web/app/roblox-version-of/[slug]/page.tsx` (generateStaticParams from catalog)
-- [ ] `app/sitemap.ts` extension (hub + roblox-version pages)
+- [x] `apps/web/app/roblox-version-of/[slug]/page.tsx` — `generateStaticParams` from catalog (top 50 prebuilt, rest dynamic+ISR), answer-first "Is there a Roblox version of X?", **live Roblox matches via `analyzeNiche`** (unique per page), FAQ + Breadcrumb JSON-LD, build/copilot CTAs. `getSteamCatalogEntryBySlug` added to data.ts.
+- [x] `app/sitemap.ts` extension — hub + `robloxVersionPages` from catalog; **hub rows now link to `/roblox-version-of/<slug>`** (cluster internal-linking)
+- [ ] reverse cross-links from rising-roblox-niches / best-roblox-games (minor polish; detail pages already link back to hub)
+
+**✅ Phase 4 core COMPLETE** — `next build` exit 0 (0 pages prebuilt until catalog publishes; renders on-demand after).
 
 ### Wrap
 - [ ] full green gate (build/typecheck/lint/test + next build), draft PR
 
 ## Iteration log
 - **Iter 1:** branch created; read existing patterns (`concentration.ts`, `growth.ts`, test style). Implemented pure virality scoring `steam-virality.ts` (review-velocity 0.45 / player-velocity 0.25 / recency 0.20 / reception 0.10; reuses `logistic`). 15 unit tests pass incl. a MECCHA-CHAMELEON-like case scoring >80. Committed `5fdfd43`.
+- **Iter 11 (Phase 4):** programmatic `/roblox-version-of/[slug]` AEO pages — catalog-driven `generateStaticParams` (top 50 prebuilt + dynamicParams/ISR), answer-first H1, unique per-page live Roblox matches via `analyzeNiche`, FAQ + Breadcrumb JSON-LD, "build it" guidance + copilot CTA. Extended `sitemap.ts` (hub + catalog pages) and made hub rows link into the cluster. `getSteamCatalogEntryBySlug` added. eslint clean; `next build` exit 0 (0 prebuilt until catalog publishes — correct). Committed.
 - **Iter 10 (Phase 3):** built `/steam-games-to-clone-on-roblox` hub page from the rising-niches ISR template — trend-chasing answer/intro, 3 AEO FAQs, ranked virality table (game→Steam store, niche→/genre or /rising), first-seen honesty note, `<ComputingState>` fallback. eslint clean; `next build` prerenders the route (exit 0). Phase 3 done. Committed.
 - **Iter 9:** added the radar/brief tool-selection paragraph to `SYSTEM_PROMPT` (trend-chasing framing + caveats; YOU narrate the brief over briefSections). Found server-side PostHog already covered by the route's generic `copilot_tool_invoked`; added client `replication_target_opened` capture on both widgets' Steam-store links. eslint clean, `next build` exit 0. Phase 2 done. Committed.
 - **Iter 8:** built `replication-radar.tsx` (ranked clone-candidate list: header image, virality bar, review velocity, niche chip→/genre) + `replication-brief.tsx` (single-game facts grid + tags + adaptation-brief section scaffold the agent narrates). Registered both in `widgets.tsx` (WIDGET_BY_TOOL + RUNNING_LABEL) and `protocol.ts` (CITATION_SOURCE "Steam store + reviews"). Swapped biome-ignore→eslint-disable for the external `<img>`. **`next build` exit 0**, web tsc + eslint clean. Committed.

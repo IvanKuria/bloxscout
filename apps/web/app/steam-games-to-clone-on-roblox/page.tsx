@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { candidateRobloxNiche } from "@/lib/cross-platform";
-import { getFreshness, getSteamBreakouts } from "@/lib/data";
+import { getFreshness, getSteamBreakouts, getSteamCatalog } from "@/lib/data";
 import { utcStamp } from "@/lib/format";
 import { site } from "@/lib/site";
 import {
@@ -39,7 +39,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SteamCloneRadarPage() {
   const { date, iso } = await getFreshness();
   const stamp = utcStamp(date);
-  const view = await getSteamBreakouts();
+  const [view, catalog] = await Promise.all([getSteamBreakouts(), getSteamCatalog()]);
+  const slugByAppId = new Map((catalog?.entries ?? []).map((e) => [e.appId, e.slug]));
 
   const ranked = (view?.entries ?? [])
     .slice()
@@ -131,13 +132,20 @@ export default async function SteamCloneRadarPage() {
                 <tbody className="divide-y divide-border">
                   {ranked.map((e, i) => {
                     const hint = candidateRobloxNiche(e.tags, e.genres);
+                    const detailSlug = slugByAppId.get(e.appId);
                     return (
                       <tr key={e.appId} className="bg-card transition-colors hover:bg-secondary">
                         <td className="tabular px-4 py-3 font-mono text-xs text-muted-foreground">{i + 1}</td>
                         <th scope="row" className="px-4 py-3 text-left font-normal">
-                          <a href={e.storeUrl} target="_blank" rel="noreferrer" className="font-medium text-foreground underline-offset-4 hover:underline">
-                            {e.name}
-                          </a>
+                          {detailSlug ? (
+                            <Link href={`/roblox-version-of/${detailSlug}`} className="font-medium text-foreground underline-offset-4 hover:underline">
+                              {e.name}
+                            </Link>
+                          ) : (
+                            <a href={e.storeUrl} target="_blank" rel="noreferrer" className="font-medium text-foreground underline-offset-4 hover:underline">
+                              {e.name}
+                            </a>
+                          )}
                         </th>
                         <td className="tabular px-4 py-3 text-right font-mono text-foreground">{Math.round(e.viralityScore)}/100</td>
                         <td className="tabular hidden px-4 py-3 text-right font-mono text-muted-foreground sm:table-cell">

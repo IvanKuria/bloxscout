@@ -100,6 +100,14 @@ export const getSteamCatalog = cache((): Promise<SteamCatalogFile | null> =>
   client.getSteamCatalog(),
 );
 
+/** One durable catalog entry by its URL slug. `null` when the catalog or slug is absent. */
+export const getSteamCatalogEntryBySlug = cache(
+  async (slug: string): Promise<SteamCatalogFile["entries"][number] | null> => {
+    const catalog = await getSteamCatalog();
+    return catalog?.entries.find((e) => e.slug === slug) ?? null;
+  },
+);
+
 /**
  * Resolve a single genre's saturation entry by URL slug. Returns the canonical
  * genre label even when the saturation view itself is missing (so the page can
