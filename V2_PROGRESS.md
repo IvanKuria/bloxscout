@@ -19,8 +19,8 @@
 ### Phase 2 — Agent tools + widgets
 - [x] `apps/web/lib/cross-platform.ts` (tag→niche heuristic + `matchExternalGame` resolver) — **8 tests green** (via root vitest, relative import)
 - [x] `apps/web/lib/data.ts` getters (`getSteamBreakouts`, `getSteamCatalog`) — web tsc clean
-- [x] tools `get_replication_radar`, `analyze_replication_target` (`lib/agent/tools.ts`) — web tsc + eslint clean; **[ ] `protocol.ts` citations still pending**
-- [ ] widgets `replication-radar.tsx`, `replication-brief.tsx` + `widgets.tsx`
+- [x] tools `get_replication_radar`, `analyze_replication_target` (`lib/agent/tools.ts`) + `protocol.ts` citations
+- [x] widgets `replication-radar.tsx`, `replication-brief.tsx` + `widgets.tsx` registration — **next build green (exit 0)**
 - [ ] system prompt paragraph (`lib/agent/anthropic.ts`)
 - [ ] PostHog events (server tool dispatch + client CTA)
 
@@ -36,6 +36,8 @@
 
 ## Iteration log
 - **Iter 1:** branch created; read existing patterns (`concentration.ts`, `growth.ts`, test style). Implemented pure virality scoring `steam-virality.ts` (review-velocity 0.45 / player-velocity 0.25 / recency 0.20 / reception 0.10; reuses `logistic`). 15 unit tests pass incl. a MECCHA-CHAMELEON-like case scoring >80. Committed `5fdfd43`.
+- **Iter 8:** built `replication-radar.tsx` (ranked clone-candidate list: header image, virality bar, review velocity, niche chip→/genre) + `replication-brief.tsx` (single-game facts grid + tags + adaptation-brief section scaffold the agent narrates). Registered both in `widgets.tsx` (WIDGET_BY_TOOL + RUNNING_LABEL) and `protocol.ts` (CITATION_SOURCE "Steam store + reviews"). Swapped biome-ignore→eslint-disable for the external `<img>`. **`next build` exit 0**, web tsc + eslint clean. Committed.
+- **Iter 7:** added the two agent tools to `tools.ts` (see 2.2a).
 - **Iter 6 (Phase 2 start):** web read-side getters (`getSteamBreakouts`/`getSteamCatalog` in `lib/data.ts`) + pure `lib/cross-platform.ts` (tag/genre→Roblox-niche hint with `/genre` slug links, ordered rules; `matchExternalGame` resolver by appId/name). 8 tests green (run from root vitest via relative import since apps/web has no test runner). Root typecheck + web tsc + eslint all clean. Committed.
 - **Iter 4:** `external-sources.ts` (`ExternalSource` iface + `SteamSource` adapter, best-effort sub-signals, skips non-`game` types) + `pipeline/steam-breakouts.ts` (`computeSteamBreakouts`: candidates→enrich→velocity vs prior state→virality→ranked view + next state + accumulating catalog with slugs/prune). 11 new tests (8 stage incl. first-seen vs two-snapshot, ranking, catalog merge, prune; 3 adapter via MockAgent). Full repo typecheck clean. 35 Steam tests green total. Committed.
 - **Iter 3:** added `SteamApiError` (errors.ts) + `steam-client.ts` mirroring `roblox-client` transport (injectable dispatcher/cache/sleep, backoff, Retry-After). Methods: `getFeaturedApps`, `getAppDetails`, `getReviewSummary`, `getSteamSpy`, `getCurrentPlayers` + `parseOwnersBand`. 9 MockAgent tests green (incl. MECCHA fixtures, 5xx-retry). Core builds clean. Committed.

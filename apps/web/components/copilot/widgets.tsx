@@ -21,6 +21,8 @@ import { NicheCard } from "@/components/copilot/niche-card";
 import { NicheScan } from "@/components/copilot/niche-scan";
 import { QualityGauge } from "@/components/copilot/quality-gauge";
 import { RankingWidget } from "@/components/copilot/ranking-widget";
+import { ReplicationBrief } from "@/components/copilot/replication-brief";
+import { ReplicationRadar } from "@/components/copilot/replication-radar";
 import { RetentionFunnel } from "@/components/copilot/retention-funnel";
 import { RevenueCard } from "@/components/copilot/revenue-card";
 import { RisingList } from "@/components/copilot/rising-list";
@@ -32,7 +34,9 @@ import type {
   IconAnalysisResult,
   MonetizationResult,
   NicheAnalysisResult,
+  RadarResult,
   RankingResult,
+  ReplicationBriefResult,
   RetentionResult,
   RevenueResult,
   RisingResult,
@@ -82,6 +86,12 @@ export const WIDGET_BY_TOOL: Record<string, WidgetRenderer> = {
   get_game_details: (result) => (
     <GameDetails result={result as GameDetailsResult} />
   ),
+  get_replication_radar: (result) => (
+    <ReplicationRadar result={result as RadarResult} />
+  ),
+  analyze_replication_target: (result) => (
+    <ReplicationBrief result={result as ReplicationBriefResult} />
+  ),
 };
 
 /** Human label for the running-tool indicator, keyed by tool name. */
@@ -97,6 +107,8 @@ const RUNNING_LABEL: Record<string, string> = {
   map_competitors: "Mapping competitors",
   estimate_retention: "Reading the badge funnel",
   analyze_icon: "Looking at the icon",
+  get_replication_radar: "Scanning off-platform breakouts",
+  analyze_replication_target: "Drafting the adaptation brief",
 };
 
 /**

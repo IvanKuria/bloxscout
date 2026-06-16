@@ -76,6 +76,8 @@ const CITATION_SOURCE: Record<string, string> = {
   estimate_retention: "Roblox badge data",
   get_game_details: "Live Roblox + bloxscout history",
   analyze_icon: "Vision analysis",
+  get_replication_radar: "Steam store + reviews",
+  analyze_replication_target: "Steam store + reviews",
 };
 
 /** Resolve a tool's citation source label (falls back to a generic). */
