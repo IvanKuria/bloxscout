@@ -83,7 +83,14 @@ export default async function RisingNichesPage() {
         <strong className="text-foreground">Bloxscout estimate</strong> from
         live, timestamped Roblox data &mdash; momentum &times; opportunity
         &times; durability. Pair it with each genre&rsquo;s saturation page
-        before you commit.
+        before you commit. Chasing a proven hit from elsewhere?{" "}
+        <Link
+          href="/steam-games-to-clone-on-roblox"
+          className="underline underline-offset-4 hover:text-foreground"
+        >
+          See Steam games going viral now
+        </Link>
+        .
       </p>
     </>
   );

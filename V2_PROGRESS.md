@@ -32,12 +32,16 @@
 ### Phase 4 — Programmatic AEO pages
 - [x] `apps/web/app/roblox-version-of/[slug]/page.tsx` — `generateStaticParams` from catalog (top 50 prebuilt, rest dynamic+ISR), answer-first "Is there a Roblox version of X?", **live Roblox matches via `analyzeNiche`** (unique per page), FAQ + Breadcrumb JSON-LD, build/copilot CTAs. `getSteamCatalogEntryBySlug` added to data.ts.
 - [x] `app/sitemap.ts` extension — hub + `robloxVersionPages` from catalog; **hub rows now link to `/roblox-version-of/<slug>`** (cluster internal-linking)
-- [ ] reverse cross-links from rising-roblox-niches / best-roblox-games (minor polish; detail pages already link back to hub)
+- [x] reverse cross-link from rising-roblox-niches → hub (best-page link skipped as optional; detail pages + sitemap already interlink the cluster)
 
 **✅ Phase 4 core COMPLETE** — `next build` exit 0 (0 pages prebuilt until catalog publishes; renders on-demand after).
 
 ### Wrap
-- [ ] full green gate (build/typecheck/lint/test + next build), draft PR
+- [x] full green gate — root **352 tests** pass (44 files), typecheck clean (both tsconfigs), web eslint clean, **`next build` exit 0**
+- [x] draft PR opened
+
+## ✅ BUILD COMPLETE — all 4 phases shipped on `feat/v2-replication-radar`
+Phase 1 (Steam ingest→scoring→view/state/catalog) · Phase 2 (copilot tools+widgets+prompt+analytics) · Phase 3 (hub SEO page) · Phase 4 (programmatic AEO pages+sitemap). 12 green-gated commits. New tests: steam-virality (15), steam-client (9), external-sources (3), steam-breakouts (8), cross-platform (8) = 43 added; 352 total.
 
 ## Iteration log
 - **Iter 1:** branch created; read existing patterns (`concentration.ts`, `growth.ts`, test style). Implemented pure virality scoring `steam-virality.ts` (review-velocity 0.45 / player-velocity 0.25 / recency 0.20 / reception 0.10; reuses `logistic`). 15 unit tests pass incl. a MECCHA-CHAMELEON-like case scoring >80. Committed `5fdfd43`.
