@@ -31,10 +31,10 @@ jobs:
     timeout-minutes: 25
     steps:
       - name: Checkout bloxscout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Checkout bloxscout-data
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: IvanKuria/bloxscout-data
           token: ${{ secrets.DATA_REPO_TOKEN }}
@@ -140,7 +140,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout bloxscout-data (full)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: IvanKuria/bloxscout-data
           token: ${{ secrets.DATA_REPO_TOKEN }}
